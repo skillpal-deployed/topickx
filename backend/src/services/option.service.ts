@@ -221,3 +221,104 @@ export const deleteOption = async (
 
     return { message: 'Option deleted' };
 };
+
+// ==================== Property-Unit Type Mapping ====================
+
+/**
+ * Update the allowed unit types for a property type
+ */
+export const updatePropertyUnitTypeMapping = async (
+    propertyTypeId: string,
+    unitTypeIds: string[],
+    currentUserId: string,
+    currentUserRole: AdminRole
+) => {
+    // Verify this is a property type option
+    const propertyType = await prisma.option.findFirst({
+        where: {
+            id: propertyTypeId,
+            optionType: OptionType.PROPERTY_TYPE,
+        },
+    });
+
+    if (!propertyType) {
+        throw new Error('Property type not found');
+    }
+
+    // Verify all unit type IDs are valid
+    const unitTypes = await prisma.option.findMany({
+        where: {
+            id: { in: unitTypeIds },
+            optionType: OptionType.UNIT_TYPE,
+        },
+    });
+
+    if (unitTypes.length !== unitTypeIds.length) {
+        throw new Error('Some unit type IDs are invalid');
+    }
+
+    // Update the mapping
+    await (prisma.option as any).update({
+        where: { id: propertyTypeId },
+        data: {
+            allowedUnitTypes: {
+                set: unitTypeIds.map(id => ({ id })),
+            },
+        },
+    });
+
+    await logAudit('property_unit_mapping_updated', currentUserId, currentUserRole, {
+        propertyTypeId,
+        propertyTypeName: propertyType.name,
+        unitTypeIds,
+    });
+
+    return { message: 'Mapping updated successfully' };
+};
+
+/**
+ * Get property types with their allowed unit types (for admin UI)
+ */
+export const getPropertyTypesWithMappings = async () => {
+    return (prisma.option as any).findMany({
+        where: {
+            optionType: OptionType.PROPERTY_TYPE,
+            isActive: true,
+        },
+        include: {
+            allowedUnitTypes: {
+                where: { isActive: true },
+                orderBy: { name: 'asc' },
+            },
+        } as any,
+        orderBy: { name: 'asc' },
+    });
+};
+
+/**
+ * Get property-unit type mappings in a format suitable for frontend
+ * Returns: { "Apartment": ["1 BHK", "2 BHK", ...], "Villa": [...], ... }
+ */
+export const getPropertyUnitTypeMappings = async () => {
+    const propertyTypes = await (prisma.option as any).findMany({
+        where: {
+            optionType: OptionType.PROPERTY_TYPE,
+            isActive: true,
+        },
+        include: {
+            allowedUnitTypes: {
+                where: { isActive: true },
+                select: { name: true },
+                orderBy: { name: 'asc' },
+            },
+        } as any,
+    });
+
+    const mappings: Record<string, string[]> = {};
+    propertyTypes.forEach((pt: any) => {
+        mappings[pt.name] = (pt.allowedUnitTypes || []).map((ut: any) => ut.name);
+    });
+
+    return mappings;
+};
+

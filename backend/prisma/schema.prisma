@@ -291,6 +291,11 @@ model Option {
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
 
+  // For property types: which unit types are allowed for this property type
+  allowedUnitTypes       Option[] @relation("PropertyToUnitMapping")
+  // For unit types: which property types this unit type is valid for
+  validForPropertyTypes  Option[] @relation("PropertyToUnitMapping")
+
   @@unique([optionType, name, parentId])
   @@map("options")
 }

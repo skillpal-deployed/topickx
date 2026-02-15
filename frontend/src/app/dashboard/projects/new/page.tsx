@@ -57,6 +57,7 @@ export default function AddProjectPage() {
     const [uploadingProjectLogo, setUploadingProjectLogo] = useState(false);
     const [uploadingBuilderLogo, setUploadingBuilderLogo] = useState(false);
     const [activeTab, setActiveTab] = useState("basic");
+    const [propertyUnitMappings, setPropertyUnitMappings] = useState<Record<string, string[]>>({});
 
     const [formData, setFormData] = useState({
         package_id: "",
@@ -89,11 +90,16 @@ export default function AddProjectPage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [packagesRes, optionsRes] = await Promise.all([
+                const [packagesRes, optionsRes, mappingsRes] = await Promise.all([
                     advertiserAPI.getAvailablePackages(),
                     publicAPI.getOptions(),
+                    publicAPI.getPropertyUnitMappings().catch(err => {
+                        console.error('Failed to load property-unit mappings, using fallback', err);
+                        return { data: UNIT_TYPES_BY_PROPERTY };
+                    })
                 ]);
                 setAvailablePackages(packagesRes.data || []);
+                setPropertyUnitMappings(mappingsRes.data || UNIT_TYPES_BY_PROPERTY);
                 setOptions(optionsRes.data || {
                     amenities: [],
                     unit_types: [],
@@ -639,9 +645,12 @@ export default function AddProjectPage() {
                                         <Label>Property Type *</Label>
                                         <Select
                                             value={formData.property_type}
-                                            onValueChange={(value) =>
-                                                setFormData({ ...formData, property_type: value })
-                                            }
+                                            onValueChange={(value) => {
+                                                // Clear selections that might be invalid for the new property type
+                                                // (Though they stay in formData until next save, it's better to reset if UX requires)
+                                                // To keep it simple but safe: we reset unit_types on property type change
+                                                setFormData({ ...formData, property_type: value, unit_types: [] });
+                                            }}
                                         >
                                             <SelectTrigger className="h-12">
                                                 <SelectValue placeholder="Select type" />
@@ -714,28 +723,35 @@ export default function AddProjectPage() {
                             </CardHeader>
                             <CardContent>
                                 <div className="flex flex-wrap gap-3">
-                                    {(formData.property_type && UNIT_TYPES_BY_PROPERTY[formData.property_type]
-                                        ? UNIT_TYPES_BY_PROPERTY[formData.property_type]
-                                        : options.unit_types.map(u => u.name)
-                                    ).map((unit) => (
-                                        <label
-                                            key={unit}
-                                            className={`flex items-center gap-2 px-4 py-2 rounded-full border cursor-pointer transition-colors ${formData.unit_types.includes(unit)
-                                                ? "bg-primary text-white border-primary"
-                                                : "bg-white border-slate-200 hover:border-primary"
-                                                }`}
-                                        >
-                                            <Checkbox
-                                                checked={formData.unit_types.includes(unit)}
-                                                onCheckedChange={() => handleUnitTypeToggle(unit)}
-                                                className="hidden"
-                                            />
-                                            {unit}
-                                        </label>
-                                    ))}
-                                    {formData.property_type && !UNIT_TYPES_BY_PROPERTY[formData.property_type] && (
+                                    {(() => {
+                                        const allowedUnitTypeNames = formData.property_type ? (propertyUnitMappings[formData.property_type] || []) : [];
+
+                                        // If property type is selected but no mappings found, show a message
+                                        // (Fallback for backward compatibility: if mappings are empty but property_type is set, it might be a new property type without mapping yet)
+                                        const unitsToShow = allowedUnitTypeNames.length > 0
+                                            ? allowedUnitTypeNames
+                                            : options.unit_types.map(u => u.name);
+
+                                        return unitsToShow.map((unit) => (
+                                            <label
+                                                key={unit}
+                                                className={`flex items-center gap-2 px-4 py-2 rounded-full border cursor-pointer transition-colors ${formData.unit_types.includes(unit)
+                                                    ? "bg-primary text-white border-primary"
+                                                    : "bg-white border-slate-200 hover:border-primary"
+                                                    }`}
+                                            >
+                                                <Checkbox
+                                                    checked={formData.unit_types.includes(unit)}
+                                                    onCheckedChange={() => handleUnitTypeToggle(unit)}
+                                                    className="hidden"
+                                                />
+                                                {unit}
+                                            </label>
+                                        ));
+                                    })()}
+                                    {formData.property_type && propertyUnitMappings[formData.property_type] && propertyUnitMappings[formData.property_type].length === 0 && (
                                         <p className="text-sm text-yellow-600 w-full">
-                                            Unknown property type. Showing all units.
+                                            No unit types configured for this property type. Showing all units.
                                             (Type: {formData.property_type})
                                         </p>
                                     )}

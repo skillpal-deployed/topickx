@@ -2,7 +2,7 @@ import axios from "axios";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
-const api = axios.create({
+export const api = axios.create({
     baseURL: API_URL,
     headers: {
         "Content-Type": "application/json",
@@ -138,6 +138,11 @@ export const adminAPI = {
     createRole: (data: any) => api.post("/admin/roles", data),
     updateRole: (id: string, data: any) => api.put(`/admin/roles/${id}`, data),
     deleteRole: (id: string) => api.delete(`/admin/roles/${id}`),
+
+    // Options Mapping
+    getPropertyUnitMappings: () => api.get('/admin/options/property-types/mappings'),
+    updatePropertyUnitMapping: (id: string, unitTypeIds: string[]) =>
+        api.put(`/admin/options/${id}/unit-type-mapping`, { unitTypeIds }),
 
 
     // Salespeople
@@ -346,6 +351,8 @@ export const publicAPI = {
 
     recordVisit: (data: { landingPageId?: string; projectId?: string }) =>
         api.post("/analytics/visit", data),
+
+    getPropertyUnitMappings: () => api.get("/options/property-unit-mappings"),
 };
 
 export const analyticsAPI = {

@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import {
     Settings,
     Plus,
@@ -31,6 +32,7 @@ import {
     Home,
     Tag,
     Check,
+    Link,
 } from "lucide-react";
 
 interface Option {
@@ -61,6 +63,13 @@ export default function OptionsPage() {
     const [parentOptions, setParentOptions] = useState<Option[]>([]);
     const [parentId, setParentId] = useState<string>("");
 
+    // Property-Unit Type Mapping state
+    const [showMappingDialog, setShowMappingDialog] = useState(false);
+    const [mappingPropertyType, setMappingPropertyType] = useState<Option | null>(null);
+    const [allUnitTypes, setAllUnitTypes] = useState<Option[]>([]);
+    const [selectedUnitTypes, setSelectedUnitTypes] = useState<string[]>([]);
+    const [savingMapping, setSavingMapping] = useState(false);
+
     useEffect(() => {
         if (activeCategory === 'location') {
             // Fetch cities for parent dropdown
@@ -82,6 +91,59 @@ export default function OptionsPage() {
         } finally {
             setLoading(false);
         }
+    };
+
+    // Load unit types for mapping dialog
+    useEffect(() => {
+        if (activeCategory === 'propertyType') {
+            adminAPI.getOptions('unitType').then(res => setAllUnitTypes(res.data));
+        }
+    }, [activeCategory]);
+
+    const openMappingDialog = async (propertyType: Option) => {
+        setMappingPropertyType(propertyType);
+
+        // Fetch current mappings for this property type
+        try {
+            const response = await adminAPI.getPropertyUnitMappings();
+            const propertyWithMapping = response.data.find((pt: any) => pt.id === propertyType.id);
+
+            if (propertyWithMapping && propertyWithMapping.allowedUnitTypes) {
+                const unitTypeIds = propertyWithMapping.allowedUnitTypes.map((ut: any) => ut.id);
+                setSelectedUnitTypes(unitTypeIds);
+            } else {
+                setSelectedUnitTypes([]);
+            }
+        } catch (error) {
+            console.error('Error fetching mappings', error);
+            setSelectedUnitTypes([]);
+        }
+
+        setShowMappingDialog(true);
+    };
+
+    const saveMappings = async () => {
+        if (!mappingPropertyType) return;
+
+        setSavingMapping(true);
+        try {
+            await adminAPI.updatePropertyUnitMapping(mappingPropertyType.id, selectedUnitTypes);
+            setShowMappingDialog(false);
+            alert('Unit type mapping updated successfully!');
+        } catch (error) {
+            console.error('Error saving mappings', error);
+            alert('Failed to save mappings');
+        } finally {
+            setSavingMapping(false);
+        }
+    };
+
+    const toggleUnitType = (unitTypeId: string) => {
+        setSelectedUnitTypes(prev =>
+            prev.includes(unitTypeId)
+                ? prev.filter(id => id !== unitTypeId)
+                : [...prev, unitTypeId]
+        );
     };
 
     const handleAdd = async () => {
@@ -317,6 +379,19 @@ export default function OptionsPage() {
                                                     >
                                                         <Trash2 className="h-4 w-4" />
                                                     </Button>
+
+                                                    {/* Property-Unit Type Mapping Button */}
+                                                    {activeCategory === 'propertyType' && (
+                                                        <Button
+                                                            size="icon"
+                                                            variant="ghost"
+                                                            className="text-blue-600 hover:text-blue-600"
+                                                            onClick={() => openMappingDialog(option)}
+                                                            title="Configure unit types"
+                                                        >
+                                                            <Link className="h-4 w-4" />
+                                                        </Button>
+                                                    )}
                                                 </div>
                                             </>
                                         )}
@@ -340,6 +415,46 @@ export default function OptionsPage() {
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Property-Unit Type Mapping Dialog */}
+            {showMappingDialog && mappingPropertyType && (
+                <Dialog open={showMappingDialog} onOpenChange={setShowMappingDialog}>
+                    <DialogContent className="max-w-md">
+                        <DialogHeader>
+                            <DialogTitle>Configure Unit Types</DialogTitle>
+                            <DialogDescription>
+                                Select which unit types are valid for {mappingPropertyType.label}
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <div className="max-h-[400px] overflow-y-auto space-y-2 py-4">
+                            {allUnitTypes.map(unitType => (
+                                <label
+                                    key={unitType.id}
+                                    className="flex items-center gap-3 p-3 rounded-lg border hover:bg-slate-50 cursor-pointer transition-colors"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedUnitTypes.includes(unitType.id)}
+                                        onChange={() => toggleUnitType(unitType.id)}
+                                        className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                    />
+                                    <span className="font-medium">{unitType.label}</span>
+                                </label>
+                            ))}
+                        </div>
+
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setShowMappingDialog(false)}>
+                                Cancel
+                            </Button>
+                            <Button onClick={saveMappings} disabled={savingMapping}>
+                                {savingMapping ? 'Saving...' : 'Save Mapping'}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            )}
         </div>
     );
 }

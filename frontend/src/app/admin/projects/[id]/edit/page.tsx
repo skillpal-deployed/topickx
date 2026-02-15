@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { publicAPI } from "@/lib/api";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { adminAPI, uploadAPI } from "@/lib/api";
@@ -37,6 +38,7 @@ export default function EditProjectPage() {
     const [propertyTypeOptions, setPropertyTypeOptions] = useState<any[]>([]);
     const [unitTypeOptions, setUnitTypeOptions] = useState<any[]>([]);
     const [possessionStatusOptions, setPossessionStatusOptions] = useState<any[]>([]);
+    const [propertyUnitMappings, setPropertyUnitMappings] = useState<Record<string, string[]>>({});
 
     const [formData, setFormData] = useState({
         name: "",
@@ -48,6 +50,7 @@ export default function EditProjectPage() {
         priceDetails: "",
         reraId: "",
         possessionStatus: "",
+        estimatedPossessionDate: "",
         aboutProject: "",
         builderDescription: "",
         amenities: [] as string[],
@@ -76,7 +79,7 @@ export default function EditProjectPage() {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const [projectRes, amenityRes, cityRes, localityRes, propTypeRes, unitTypeRes, possessionRes] = await Promise.all([
+                const [projectRes, amenityRes, cityRes, localityRes, propTypeRes, unitTypeRes, possessionRes, mappingsRes] = await Promise.all([
                     adminAPI.getProject(projectId),
                     adminAPI.getOptions('amenity', { include_inactive: true }),
                     adminAPI.getOptions('city', { include_inactive: true }),
@@ -84,7 +87,13 @@ export default function EditProjectPage() {
                     adminAPI.getOptions('property_type', { include_inactive: true }),
                     adminAPI.getOptions('unit_type', { include_inactive: true }),
                     adminAPI.getOptions('possession_status', { include_inactive: true }),
+                    publicAPI.getPropertyUnitMappings().catch((err: any) => {
+                        console.error('Failed to load property-unit mappings, using fallback', err);
+                        return { data: UNIT_TYPES_BY_PROPERTY };
+                    })
                 ]);
+
+                setPropertyUnitMappings(mappingsRes.data || UNIT_TYPES_BY_PROPERTY);
 
                 // Helper to map values (names or IDs) to IDs based on available options
                 const mapToIds = (values: string[] | string | undefined, options: any[]) => {
@@ -118,6 +127,17 @@ export default function EditProjectPage() {
                     priceDetails: p.priceDetails || "",
                     reraId: p.reraId || "",
                     possessionStatus: mapToIds(p.possessionStatus, possOpts)[0] || p.possessionStatus || "",
+                    estimatedPossessionDate: (() => {
+                        const date = p.estimatedPossessionDate;
+                        if (!date) return "";
+                        try {
+                            const dateStr = typeof date === 'string' ? date : new Date(date).toISOString();
+                            return dateStr.substring(0, 7);
+                        } catch (error) {
+                            console.warn('Invalid estimated possession date:', date);
+                            return "";
+                        }
+                    })(),
                     aboutProject: p.aboutProject || "",
                     builderDescription: p.builderDescription || "",
                     amenities: mapToIds(p.amenities, amOpts),
@@ -161,6 +181,14 @@ export default function EditProjectPage() {
             loadData();
         }
     }, [projectId, router]);
+
+    // Auto-clear estimated possession date when possession status changes from "Under Construction"
+    useEffect(() => {
+        const possessionLabel = possessionStatusOptions.find(opt => opt.id === formData.possessionStatus)?.name || "";
+        if (!possessionLabel.toLowerCase().includes("under construction") && formData.estimatedPossessionDate) {
+            setFormData(prev => ({ ...prev, estimatedPossessionDate: "" }));
+        }
+    }, [formData.possessionStatus, formData.estimatedPossessionDate, possessionStatusOptions]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -421,20 +449,64 @@ export default function EditProjectPage() {
                                 </Select>
                             </div>
 
+                            {/* Conditional: Estimated Possession Date (shown only for Under Construction) */}
+                            {(() => {
+                                const possessionLabel = possessionStatusOptions.find(opt => opt.id === formData.possessionStatus)?.name || "";
+                                return possessionLabel.toLowerCase().includes("under construction");
+                            })() && (
+                                    <div className="space-y-2">
+                                        <Label htmlFor="estimatedPossessionDate">Estimated Completion Date</Label>
+                                        <Input
+                                            id="estimatedPossessionDate"
+                                            name="estimatedPossessionDate"
+                                            type="month"
+                                            value={formData.estimatedPossessionDate}
+                                            onChange={handleChange}
+                                        />
+                                        <p className="text-xs text-muted-foreground">Select the expected month and year of completion</p>
+                                    </div>
+                                )}
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label>Property Type</Label>
                                     <MultiSelect
                                         options={propertyTypeOptions.map(o => ({ label: o.name, value: o.id }))}
                                         selected={formData.propertyType || []}
-                                        onChange={(v) => setFormData(prev => ({ ...prev, propertyType: v }))}
+                                        onChange={(v) => setFormData(prev => ({ ...prev, propertyType: v, unitTypes: [] }))}
                                         placeholder="Select property types"
                                     />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Unit Types</Label>
                                     <MultiSelect
-                                        options={unitTypeOptions.map(o => ({ label: o.name, value: o.id }))}
+                                        options={(() => {
+                                            // Get all selected property type names
+                                            const selectedPropTypeNames = (formData.propertyType || [])
+                                                .map(id => propertyTypeOptions.find(o => o.id === id)?.name)
+                                                .filter(Boolean) as string[];
+
+                                            if (selectedPropTypeNames.length === 0) {
+                                                // If no property type selected, show all unit types
+                                                return unitTypeOptions.map(o => ({ label: o.name, value: o.id }));
+                                            }
+
+                                            // Get union of allowed unit types for all selected property types
+                                            const allowedUnitNames = new Set<string>();
+                                            selectedPropTypeNames.forEach(propName => {
+                                                const mappings = propertyUnitMappings[propName] || [];
+                                                mappings.forEach(unitName => allowedUnitNames.add(unitName));
+                                            });
+
+                                            // If no specific mappings found, show all (fallback)
+                                            if (allowedUnitNames.size === 0) {
+                                                return unitTypeOptions.map(o => ({ label: o.name, value: o.id }));
+                                            }
+
+                                            return unitTypeOptions
+                                                .filter(o => allowedUnitNames.has(o.name))
+                                                .map(o => ({ label: o.name, value: o.id }));
+                                        })()}
                                         selected={formData.unitTypes || []}
                                         onChange={(v) => setFormData(prev => ({ ...prev, unitTypes: v }))}
                                         placeholder="Select unit types"

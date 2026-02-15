@@ -97,6 +97,10 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
     const [leadSubmitted, setLeadSubmitted] = useState(false);
     const [advertiserContact, setAdvertiserContact] = useState<any>(null);
 
+    // Dynamic property-unit type mappings
+    const [propertyUnitMappings, setPropertyUnitMappings] = useState<Record<string, string[]>>({});
+    const [mappingsLoaded, setMappingsLoaded] = useState(false);
+
     // Filters
     const [propertyTypeFilter, setPropertyTypeFilter] = useState("all");
     const [unitTypeFilter, setUnitTypeFilter] = useState("all");
@@ -360,8 +364,25 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
         };
     }, [landingPage]);
 
+    // Fetch property-unit type mappings on mount
+    useEffect(() => {
+        publicAPI.getPropertyUnitMappings()
+            .then((res: any) => {
+                setPropertyUnitMappings(res.data);
+                setMappingsLoaded(true);
+            })
+            .catch((err: any) => {
+                console.error('Failed to load property-unit mappings, using fallback', err);
+                // Fallback to hardcoded constants if API fails
+                setPropertyUnitMappings(UNIT_TYPES_BY_PROPERTY);
+                setMappingsLoaded(true);
+            });
+    }, []);
+
     // Get available unit types based on selected property type
     const availableUnitTypes = useMemo(() => {
+        if (!mappingsLoaded) return []; // Wait for mappings to load
+
         if (propertyTypeFilter === "all") {
             // Show all unit types from all projects
             const allUnits = new Set<string>();
@@ -371,9 +392,9 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
             return Array.from(allUnits).sort();
         }
 
-        // Show only unit types valid for the selected property type
-        return UNIT_TYPES_BY_PROPERTY[propertyTypeFilter] || [];
-    }, [propertyTypeFilter, landingPage]);
+        // Use dynamic mapping, fallback to empty if not found
+        return propertyUnitMappings[propertyTypeFilter] || [];
+    }, [propertyTypeFilter, landingPage, propertyUnitMappings, mappingsLoaded]);
 
     // Reset unit type filter if it becomes invalid
     useEffect(() => {

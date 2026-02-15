@@ -1243,5 +1243,42 @@ router.delete('/options/:id', requirePermissions(['all']) as any, async (req: Au
     }
 });
 
+// PUT /admin/options/:id/unit-type-mapping - Update property type's unit type mapping
+router.put('/options/:id/unit-type-mapping', requirePermissions(['all']) as any, async (req: AuthenticatedRequest, res, next) => {
+    try {
+        const { unitTypeIds } = req.body;
+
+        if (!Array.isArray(unitTypeIds)) {
+            res.status(400).json({ error: 'unitTypeIds must be an array' });
+            return;
+        }
+
+        await optionService.updatePropertyUnitTypeMapping(
+            getParam(req.params.id),
+            unitTypeIds,
+            req.user!.id,
+            req.user!.role
+        );
+
+        res.json({ message: 'Unit type mapping updated successfully' });
+    } catch (error) {
+        if (error instanceof Error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        next(error);
+    }
+});
+
+// GET /admin/options/property-types/mappings - Get all property types with their unit type mappings
+router.get('/options/property-types/mappings', async (req: AuthenticatedRequest, res, next) => {
+    try {
+        const mappings = await optionService.getPropertyTypesWithMappings();
+        res.json(mappings);
+    } catch (error) {
+        next(error);
+    }
+});
+
 export default router;
 

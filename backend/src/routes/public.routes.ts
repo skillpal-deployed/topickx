@@ -83,6 +83,9 @@ router.get('/projects/:id', async (req, res, next) => {
                 aboutProject: true,
                 disclaimer: true,
                 locationHighlights: true,
+                usp1: true,
+                usp2: true,
+                estimatedPossessionDate: true,
                 advertiser: {
                     select: {
                         companyName: true,
@@ -90,7 +93,7 @@ router.get('/projects/:id', async (req, res, next) => {
                         ownerName: true,
                     },
                 },
-            },
+            } as any,
         });
 
         if (!project) {
@@ -343,6 +346,16 @@ router.get('/budget-ranges', (req, res) => {
         { label: '₹2 Cr', min: 10000000, max: 20000000 },
         { label: '₹5 Cr+', min: 20000000, max: null },
     ]);
+});
+
+// GET /api/options/property-unit-mappings - Get property type to unit type mappings (public)
+router.get('/options/property-unit-mappings', async (req, res, next) => {
+    try {
+        const mappings = await optionService.getPropertyUnitTypeMappings();
+        res.json(mappings);
+    } catch (error) {
+        next(error);
+    }
 });
 
 export default router;

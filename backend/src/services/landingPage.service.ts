@@ -179,7 +179,10 @@ export const getLandingPageBySlug = async (slug: string) => {
                                 },
                             },
                             cardImage: true, // Ensure cardImage is selected
-                        },
+                            usp1: true,
+                            usp2: true,
+                            estimatedPossessionDate: true,
+                        } as any,
                     },
                 },
                 orderBy: { position: 'asc' },
@@ -192,9 +195,9 @@ export const getLandingPageBySlug = async (slug: string) => {
     }
 
     // Filter only live projects
-    const liveProjects = page.slots
-        .filter((slot) => slot.project.status === ProjectStatus.LIVE)
-        .map((slot) => slot.project);
+    const liveProjects = (page.slots as any[])
+        .filter((slot: any) => slot.project.status === ProjectStatus.LIVE)
+        .map((slot: any) => slot.project);
 
     // Resolve UUIDs to names using shared helper
     const resolvedProjects = await resolveProjectsData(liveProjects);

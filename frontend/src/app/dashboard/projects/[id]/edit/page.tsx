@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { advertiserAPI, uploadAPI } from "@/lib/api";
+import { advertiserAPI, publicAPI, uploadAPI } from "@/lib/api";
 import { getImageUrl } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -81,6 +81,8 @@ export default function EditProjectPage({
     const [uploadingImages, setUploadingImages] = useState(false);
     const [uploadingFloorPlans, setUploadingFloorPlans] = useState(false);
     const [activeTab, setActiveTab] = useState("basic");
+    const [propertyUnitMappings, setPropertyUnitMappings] = useState<Record<string, string[]>>({});
+    const [unitTypes, setUnitTypes] = useState<any[]>([]);
 
     const [formData, setFormData] = useState({
         name: "",
@@ -112,8 +114,18 @@ export default function EditProjectPage({
     useEffect(() => {
         const fetchProject = async () => {
             try {
-                const res = await advertiserAPI.getProject(id);
-                const data = res.data;
+                const [projectRes, optionsRes, mappingsRes] = await Promise.all([
+                    advertiserAPI.getProject(id),
+                    publicAPI.getOptions(),
+                    publicAPI.getPropertyUnitMappings().catch((err: any) => {
+                        console.error('Failed to load property-unit mappings, using fallback', err);
+                        return { data: UNIT_TYPES_BY_PROPERTY };
+                    })
+                ]);
+
+                const data = projectRes.data;
+                setUnitTypes(optionsRes.data?.unit_types || []);
+                setPropertyUnitMappings(mappingsRes.data || UNIT_TYPES_BY_PROPERTY);
                 setProject(data);
                 setFormData({
                     name: data.name || "",
@@ -542,7 +554,7 @@ export default function EditProjectPage({
                                     <Select
                                         value={formData.property_type}
                                         onValueChange={(v) =>
-                                            setFormData({ ...formData, property_type: v })
+                                            setFormData({ ...formData, property_type: v, unit_types: [] })
                                         }
                                         disabled={!canEdit}
                                     >
@@ -627,21 +639,44 @@ export default function EditProjectPage({
                         </CardHeader>
                         <CardContent>
                             <div className="flex flex-wrap gap-3">
-                                {(UNIT_TYPES_BY_PROPERTY[formData.property_type as string] || []).map((unit) => (
-                                    <label
-                                        key={unit}
-                                        className="flex items-center gap-2 cursor-pointer"
-                                    >
-                                        <Checkbox
-                                            checked={formData.unit_types.includes(unit)}
-                                            onCheckedChange={() =>
-                                                canEdit && handleUnitTypeToggle(unit)
-                                            }
-                                            disabled={!canEdit}
-                                        />
-                                        <span className="text-sm">{unit}</span>
-                                    </label>
-                                ))}
+                                {(() => {
+                                    const allowedUnitTypeNames = formData.property_type ? (propertyUnitMappings[formData.property_type] || []) : [];
+
+                                    // If property type is selected but no mappings found, show all units as fallback
+                                    const unitsToShow = allowedUnitTypeNames.length > 0
+                                        ? allowedUnitTypeNames
+                                        : unitTypes.map(u => u.name);
+
+                                    if (unitsToShow.length === 0 && unitTypes.length > 0) {
+                                        // If still 0, maybe the names are differently stored (fallback to all)
+                                        return unitTypes.map(u => u.name).map(unitName => (
+                                            <label key={unitName} className="flex items-center gap-2 cursor-pointer">
+                                                <Checkbox
+                                                    checked={formData.unit_types.includes(unitName)}
+                                                    onCheckedChange={() => canEdit && handleUnitTypeToggle(unitName)}
+                                                    disabled={!canEdit}
+                                                />
+                                                <span className="text-sm">{unitName}</span>
+                                            </label>
+                                        ));
+                                    }
+
+                                    return unitsToShow.map((unit) => (
+                                        <label
+                                            key={unit}
+                                            className="flex items-center gap-2 cursor-pointer"
+                                        >
+                                            <Checkbox
+                                                checked={formData.unit_types.includes(unit)}
+                                                onCheckedChange={() =>
+                                                    canEdit && handleUnitTypeToggle(unit)
+                                                }
+                                                disabled={!canEdit}
+                                            />
+                                            <span className="text-sm">{unit}</span>
+                                        </label>
+                                    ));
+                                })()}
                             </div>
                         </CardContent>
                     </Card>
