@@ -129,12 +129,7 @@ export default function ViewProjectPage({
                             {project.status === 'LIVE' ? 'View Live Page' : 'Preview'}
                         </Button>
                     </Link>
-                    <Link href={`/dashboard/projects/${id}/edit`}>
-                        <Button className="gap-2">
-                            <Edit className="w-4 h-4" />
-                            Edit Project
-                        </Button>
-                    </Link>
+                    {/* Edit Project button removed - Advertisers cannot edit after creation */}
                 </div>
             </div>
 

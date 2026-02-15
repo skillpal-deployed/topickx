@@ -373,19 +373,8 @@ export default function EditProjectPage({
         }
     };
 
-    // Determine editability - allow editing for all active statuses
-    const canEdit =
-        project &&
-        (project.status === "DRAFT" ||
-            project.status === "draft" ||
-            project.status === "NEEDS_CHANGES" ||
-            project.status === "needs_changes" ||
-            project.status === "SUBMITTED_FOR_REVIEW" ||
-            project.status === "submitted_for_review" ||
-            project.status === "LIVE" ||
-            project.status === "live" ||
-            project.status === "APPROVED_AWAITING_PLACEMENT" ||
-            project.status === "approved_awaiting_placement");
+    // Determine editability - Advertisers can no longer edit after creation
+    const canEdit = false;
 
     if (loading) {
         return (
@@ -465,8 +454,7 @@ export default function EditProjectPage({
             {!canEdit && (
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
                     <p className="text-amber-800">
-                        <strong>Note:</strong> This project cannot be edited in its current
-                        status ({project.status}).
+                        <strong>Edit Restricted:</strong> This project is created and can only be modified by an Administrator.
                     </p>
                 </div>
             )}

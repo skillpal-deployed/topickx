@@ -279,12 +279,7 @@ export default function ProjectsPage() {
                                             Preview
                                         </Button>
                                     </Link>
-                                    <Link href={`/dashboard/projects/${project.id}/edit`} className="flex-1">
-                                        <Button variant="outline" size="sm" className="w-full">
-                                            <Edit className="h-4 w-4 mr-1" />
-                                            Edit
-                                        </Button>
-                                    </Link>
+                                    {/* Edit button removed - Advertisers cannot edit after creation */}
                                 </div>
                             </CardContent>
                         </Card>
