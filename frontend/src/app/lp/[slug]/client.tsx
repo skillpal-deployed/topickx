@@ -83,6 +83,8 @@ export interface LandingPageData {
     pageType?: string;
     seoTitle?: string;
     seoDescription?: string;
+    fbPixelId?: string;
+    googleAnalyticsId?: string;
 }
 
 export default function PublicLandingPage({ initialData }: { initialData: LandingPageData | null }) {

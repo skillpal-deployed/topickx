@@ -161,7 +161,7 @@
 [id*="spline-watermark"],
 [class*="spline-watermark"],
 a[href*="spline.design"],
-div[style*="position: absolute"] > a[target="_blank"],
+div[style*="position: absolute"]>a[target="_blank"],
 div[style*="bottom: 10px"][style*="right: 16px"],
 div[style*="bottom: 16px"][style*="right: 16px"] {
   display: none !important;

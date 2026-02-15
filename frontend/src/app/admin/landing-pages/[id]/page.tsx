@@ -24,6 +24,7 @@ import {
     Copy,
     Plus,
     Globe,
+    TrendingUp,
     ArrowUp,
     ArrowDown,
 } from "lucide-react";
@@ -59,6 +60,8 @@ interface LandingPageDetail {
     fbForms?: Array<{ id: string; name: string }>;
     seoTitle?: string;
     seoDescription?: string;
+    fbPixelId?: string;
+    googleAnalyticsId?: string;
 }
 
 export default function LandingPageDetailPage() {
@@ -433,6 +436,48 @@ export default function LandingPageDetailPage() {
                                 No Facebook forms linked to this landing page.
                             </p>
                         )}
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Remarketing Scripts Section */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <TrendingUp className="w-5 h-5 text-primary" />
+                        Remarketing Scripts
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Facebook Pixel ID</label>
+                            <Input
+                                placeholder="xxxxxxxxx"
+                                defaultValue={landingPage.fbPixelId || ""}
+                                onBlur={(e) => {
+                                    if (e.target.value !== (landingPage.fbPixelId || "")) {
+                                        adminAPI.updateLandingPage(landingPage.id, { fbPixelId: e.target.value })
+                                            .then(() => toast.success("Facebook Pixel ID updated"));
+                                    }
+                                }}
+                            />
+                            <p className="text-xs text-muted-foreground">Enter only the ID (e.g., 1234567890)</p>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Google Analytics ID (G-XXXXX)</label>
+                            <Input
+                                placeholder="G-XXXXXXXXXX"
+                                defaultValue={landingPage.googleAnalyticsId || ""}
+                                onBlur={(e) => {
+                                    if (e.target.value !== (landingPage.googleAnalyticsId || "")) {
+                                        adminAPI.updateLandingPage(landingPage.id, { googleAnalyticsId: e.target.value })
+                                            .then(() => toast.success("Google Analytics ID updated"));
+                                    }
+                                }}
+                            />
+                            <p className="text-xs text-muted-foreground">Enter the full Measurement ID (including G-)</p>
+                        </div>
                     </div>
                 </CardContent>
             </Card>
