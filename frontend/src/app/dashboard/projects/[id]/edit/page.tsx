@@ -630,6 +630,35 @@ export default function EditProjectPage({
                                     />
                                 </div>
                             </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="usp_1">Premium USP 1</Label>
+                                    <Input
+                                        id="usp_1"
+                                        name="usp_1"
+                                        value={formData.usp_1}
+                                        onChange={handleInputChange}
+                                        disabled={!canEdit}
+                                        maxLength={50}
+                                        className="h-11"
+                                        placeholder="e.g. Waterfront View"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="usp_2">Premium USP 2</Label>
+                                    <Input
+                                        id="usp_2"
+                                        name="usp_2"
+                                        value={formData.usp_2}
+                                        onChange={handleInputChange}
+                                        disabled={!canEdit}
+                                        maxLength={50}
+                                        className="h-11"
+                                        placeholder="e.g. 5 mins to Airport"
+                                    />
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
 

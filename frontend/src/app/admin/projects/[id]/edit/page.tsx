@@ -745,11 +745,11 @@ export default function EditProjectPage() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label>USP 1</Label>
-                                    <Input name="usp1" value={formData.usp1} onChange={handleChange} placeholder="e.g. Waterfront View" />
+                                    <Input name="usp1" value={formData.usp1} onChange={handleChange} placeholder="e.g. Waterfront View" maxLength={50} />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>USP 2</Label>
-                                    <Input name="usp2" value={formData.usp2} onChange={handleChange} placeholder="e.g. 5 mins to Airport" />
+                                    <Input name="usp2" value={formData.usp2} onChange={handleChange} placeholder="e.g. 5 mins to Airport" maxLength={50} />
                                 </div>
                             </div>
                         </CardContent>

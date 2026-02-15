@@ -82,6 +82,8 @@ export default function AddProjectPage() {
         possession_status: "",
         estimated_possession_date: "",
         rera_id: "",
+        usp_1: "",
+        usp_2: "",
         project_logo: "",
         advertiser_logo: "",
     });
@@ -712,6 +714,33 @@ export default function AddProjectPage() {
                                         onChange={handleInputChange}
                                         className="h-12"
                                     />
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="usp_1">Premium USP 1</Label>
+                                        <Input
+                                            id="usp_1"
+                                            name="usp_1"
+                                            value={formData.usp_1}
+                                            onChange={handleInputChange}
+                                            maxLength={50}
+                                            placeholder="e.g. Waterfront View"
+                                            className="h-12"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="usp_2">Premium USP 2</Label>
+                                        <Input
+                                            id="usp_2"
+                                            name="usp_2"
+                                            value={formData.usp_2}
+                                            onChange={handleInputChange}
+                                            maxLength={50}
+                                            placeholder="e.g. 5 mins to Airport"
+                                            className="h-12"
+                                        />
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>

@@ -645,7 +645,7 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                                 </div>
                                 <div>
                                     <p className="text-xs font-bold text-amber-600 uppercase tracking-widest">Premium USP</p>
-                                    <p className="text-lg font-bold text-slate-800">{project.usp1}</p>
+                                    <p className="text-lg font-bold text-slate-800">{project.usp1?.substring(0, 50)}</p>
                                 </div>
                             </div>
                         )}
@@ -655,8 +655,8 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                                     <Verified className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Key Feature</p>
-                                    <p className="text-lg font-bold text-slate-800">{project.usp2}</p>
+                                    <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Premium USP</p>
+                                    <p className="text-lg font-bold text-slate-800">{project.usp2?.substring(0, 50)}</p>
                                 </div>
                             </div>
                         )}

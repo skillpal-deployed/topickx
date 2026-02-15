@@ -769,13 +769,13 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                                                         {project.usp1 && (
                                                             <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-[9px] font-bold border border-amber-100 uppercase tracking-tight">
                                                                 <Star className="w-2.5 h-2.5 mr-1 fill-current" />
-                                                                {project.usp1}
+                                                                {project.usp1?.substring(0, 50)}
                                                             </span>
                                                         )}
                                                         {project.usp2 && (
                                                             <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[9px] font-bold border border-emerald-100 uppercase tracking-tight">
                                                                 <Verified className="w-2.5 h-2.5 mr-1" />
-                                                                {project.usp2}
+                                                                {project.usp2?.substring(0, 50)}
                                                             </span>
                                                         )}
                                                     </div>
