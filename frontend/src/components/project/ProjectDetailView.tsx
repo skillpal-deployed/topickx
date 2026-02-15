@@ -487,23 +487,8 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                         </div>
 
 
-                        {/* USPs - Mobile Only (Hidden on Desktop) */}
-                        {(project.usp1 || project.usp2) && (
-                            <div className="lg:hidden mb-6 space-y-3">
-                                {project.usp1 && (
-                                    <Badge className="w-full justify-center py-2 text-sm bg-gradient-to-r from-amber-500 to-amber-600 text-white border-none shadow-md">
-                                        <Star className="w-4 h-4 mr-2 fill-current" />
-                                        {project.usp1}
-                                    </Badge>
-                                )}
-                                {project.usp2 && (
-                                    <Badge className="w-full justify-center py-2 text-sm bg-gradient-to-r from-emerald-600 to-emerald-700 text-white border-none shadow-md">
-                                        <Verified className="w-4 h-4 mr-2" />
-                                        {project.usp2}
-                                    </Badge>
-                                )}
-                            </div>
-                        )}
+                        {/* USPs - Removed from here, moved to content below */}
+
 
                         {/* Enquiry Form - Right Side */}
                         <div className="lg:col-span-2" id="enquiry-form">
@@ -516,21 +501,8 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                                         Fill your details to receive more information
                                     </p>
 
-                                    {/* Desktop USPs */}
-                                    <div className="hidden lg:flex flex-col gap-2 mt-4">
-                                        {project.usp1 && (
-                                            <div className="bg-amber-50 text-amber-800 px-3 py-2 rounded-lg text-sm font-medium border border-amber-100 flex items-center justify-center">
-                                                <Star className="w-4 h-4 mr-2 text-amber-600 fill-amber-600" />
-                                                {project.usp1}
-                                            </div>
-                                        )}
-                                        {project.usp2 && (
-                                            <div className="bg-emerald-50 text-emerald-800 px-3 py-2 rounded-lg text-sm font-medium border border-emerald-100 flex items-center justify-center">
-                                                <Verified className="w-4 h-4 mr-2 text-emerald-600" />
-                                                {project.usp2}
-                                            </div>
-                                        )}
-                                    </div>
+                                    {/* USPs - Removed from Form Header */}
+
                                 </div>
 
                                 {submitted ? (
@@ -662,6 +634,35 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
 
             {/* Main Content */}
             <div className="container mx-auto px-4 py-8 md:py-12 space-y-8 md:space-y-10 relative z-10">
+
+                {/* USP Section - New Location */}
+                {(project.usp1 || project.usp2) && (
+                    <div className="grid sm:grid-cols-2 gap-4 max-w-4xl mx-auto">
+                        {project.usp1 && (
+                            <div className="bg-white/70 backdrop-blur-md rounded-2xl p-5 border-2 border-amber-100/50 shadow-sm flex items-center gap-4 group hover:border-amber-400 transition-all">
+                                <div className="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+                                    <Star className="w-6 h-6 fill-current" />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-bold text-amber-600 uppercase tracking-widest">Premium USP</p>
+                                    <p className="text-lg font-bold text-slate-800">{project.usp1}</p>
+                                </div>
+                            </div>
+                        )}
+                        {project.usp2 && (
+                            <div className="bg-white/70 backdrop-blur-md rounded-2xl p-5 border-2 border-emerald-100/50 shadow-sm flex items-center gap-4 group hover:border-emerald-400 transition-all">
+                                <div className="w-12 h-12 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-600/20">
+                                    <Verified className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Key Feature</p>
+                                    <p className="text-lg font-bold text-slate-800">{project.usp2}</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
 
                 {/* About Project */}
                 {project.aboutProject && (

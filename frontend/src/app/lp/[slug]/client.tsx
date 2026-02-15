@@ -22,7 +22,8 @@ import {
     CheckCircle,
     Clock,
     TrendingUp,
-    Timer
+    Timer,
+    Verified
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -720,19 +721,8 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                                                     Featured Project
                                                 </div>
                                             )}
-                                            {/* USP Badges */}
-                                            <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 items-end">
-                                                {project.usp1 && (
-                                                    <Badge className="bg-amber-500/95 hover:bg-amber-600 text-white border-none shadow-lg backdrop-blur-md text-[10px] font-bold px-2.5 py-1">
-                                                        {project.usp1}
-                                                    </Badge>
-                                                )}
-                                                {project.usp2 && (
-                                                    <Badge className="bg-emerald-600/95 hover:bg-emerald-700 text-white border-none shadow-lg backdrop-blur-md text-[10px] font-bold px-2.5 py-1">
-                                                        {project.usp2}
-                                                    </Badge>
-                                                )}
-                                            </div>
+                                            {/* USP Badges - Moved to content below */}
+
                                             {(project.cardImage || project.featuredImage) ? (
                                                 <img
                                                     src={getImageUrl(project.cardImage || project.featuredImage)}
@@ -772,6 +762,24 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                                                         {project.locality}, {project.city}
                                                     </span>
                                                 </div>
+
+                                                {/* Relocated USPs */}
+                                                {(project.usp1 || project.usp2) && (
+                                                    <div className="flex flex-wrap gap-1.5 mt-2.5">
+                                                        {project.usp1 && (
+                                                            <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-[9px] font-bold border border-amber-100 uppercase tracking-tight">
+                                                                <Star className="w-2.5 h-2.5 mr-1 fill-current" />
+                                                                {project.usp1}
+                                                            </span>
+                                                        )}
+                                                        {project.usp2 && (
+                                                            <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[9px] font-bold border border-emerald-100 uppercase tracking-tight">
+                                                                <Verified className="w-2.5 h-2.5 mr-1" />
+                                                                {project.usp2}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div className="flex items-center gap-3 py-3 border-t border-slate-50 text-xs text-slate-600">
