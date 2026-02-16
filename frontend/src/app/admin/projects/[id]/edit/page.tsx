@@ -696,16 +696,51 @@ export default function EditProjectPage() {
 
                             <div className="space-y-2">
                                 <Label>Project Highlights (Key Features)</Label>
-                                <p className="text-sm text-muted-foreground">Enter each highlight on a new line</p>
-                                <Textarea
-                                    value={formData.highlights?.join("\n") || ""}
-                                    onChange={(e) => setFormData(prev => ({
-                                        ...prev,
-                                        highlights: e.target.value.split("\n").filter(line => line.trim())
-                                    }))}
-                                    className="min-h-[100px]"
-                                    placeholder="Premium 2, 3 & 4 BHK luxury apartments&#10;Exclusive elite penthouses&#10;RERA-approved gated community"
-                                />
+                                <div className="space-y-3">
+                                    {formData.highlights.map((highlight, index) => (
+                                        <div key={index} className="flex gap-2">
+                                            <Input
+                                                placeholder="e.g., Premium 3 BHK Apartments"
+                                                value={highlight}
+                                                onChange={(e) => {
+                                                    const newHighlights = [...formData.highlights];
+                                                    newHighlights[index] = e.target.value;
+                                                    setFormData({ ...formData, highlights: newHighlights });
+                                                }}
+                                                className="h-10"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        highlights: prev.highlights.filter((_, i) => i !== index)
+                                                    }));
+                                                }}
+                                                className="text-muted-foreground hover:text-red-500"
+                                            >
+                                                <Trash className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    ))}
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                highlights: [...prev.highlights, ""]
+                                            }));
+                                        }}
+                                        className="gap-2"
+                                    >
+                                        <Plus className="w-4 h-4" />
+                                        Add Highlight
+                                    </Button>
+                                </div>
                             </div>
 
                             <div className="space-y-2">

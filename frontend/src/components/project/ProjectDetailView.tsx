@@ -618,7 +618,7 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                                             size="lg"
                                             disabled={submitting || !otpVerified}
                                         >
-                                            {submitting ? "Submitting..." : "Get Exclusive Details"}
+                                            {submitting ? "Submitting..." : "Get Exclusive Deals"}
                                         </Button>
 
                                         <p className="text-xs text-center text-slate-400">

@@ -190,6 +190,8 @@ export interface LandingPageCreateRequest {
     seoTitle?: string;
     seoDescription?: string;
     heroImage?: string;
+    fbPixelId?: string;
+    googleAnalyticsId?: string;
 }
 
 export interface LandingPageUpdateRequest {
@@ -203,6 +205,8 @@ export interface LandingPageUpdateRequest {
     seoDescription?: string;
     heroImage?: string;
     isActive?: boolean;
+    fbPixelId?: string;
+    googleAnalyticsId?: string;
 }
 
 export interface PlacementRequest {

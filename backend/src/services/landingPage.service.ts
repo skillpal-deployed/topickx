@@ -233,6 +233,8 @@ export const createLandingPage = async (
             seoTitle: data.seoTitle,
             seoDescription: data.seoDescription,
             heroImage: data.heroImage,
+            fbPixelId: data.fbPixelId,
+            googleAnalyticsId: data.googleAnalyticsId,
         },
     });
 
@@ -273,6 +275,7 @@ export const updateLandingPage = async (
     const fields = [
         'name', 'slug', 'pageType', 'city', 'locality', 'description',
         'seoTitle', 'seoDescription', 'heroImage', 'isActive',
+        'fbPixelId', 'googleAnalyticsId',
     ];
 
     fields.forEach((field) => {

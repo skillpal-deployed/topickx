@@ -194,6 +194,8 @@ model LandingPage {
   fbAccessToken  String?
   fbAdAccountId  String?
   fbPageId       String?
+  fbPixelId      String?
+  googleAnalyticsId String?
   fbForms        FacebookLeadForm[]
   slots          LandingPageSlot[]
   leads          Lead[]
