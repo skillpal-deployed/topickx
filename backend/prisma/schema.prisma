@@ -5,6 +5,8 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // Connection pooling for better performance
+  relationMode = "prisma"
 }
 
 model User {
@@ -172,6 +174,16 @@ model Project {
   advertiser         User              @relation(fields: [advertiserId], references: [id], onDelete: Cascade)
   package            PackagePurchase   @relation(fields: [packageId], references: [id])
 
+  // Performance indexes for frequently queried fields
+  @@index([advertiserId])
+  @@index([status])
+  @@index([city])
+  @@index([locality])
+  @@index([budgetMin, budgetMax])
+  @@index([createdAt])
+  @@index([advertiserId, status])
+  @@index([city, locality])
+  @@index([slug])
   @@map("projects")
 }
 
@@ -201,6 +213,11 @@ model LandingPage {
   leads          Lead[]
   pageVisits     PageVisit[]
 
+  // Performance indexes
+  @@index([slug])
+  @@index([city, locality])
+  @@index([isActive])
+  @@index([city, isActive])
   @@map("landing_pages")
 }
 
@@ -243,6 +260,15 @@ model Lead {
   landingPage   LandingPage? @relation(fields: [landingPageId], references: [id], onDelete: Cascade)
   project       Project?     @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
+  // Performance indexes
+  @@index([projectId])
+  @@index([landingPageId])
+  @@index([assignedToId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([assignedToId, status])
+  @@index([projectId, status])
+  @@index([source])
   @@map("leads")
 }
 

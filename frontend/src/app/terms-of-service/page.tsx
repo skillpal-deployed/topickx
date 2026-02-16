@@ -1,4 +1,4 @@
-"use client";
+// Converted to Server Component for better performance
 
 import LegalLayout from "@/components/LegalLayout";
 

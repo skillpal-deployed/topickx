@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
+import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
     MapPin,
@@ -748,10 +748,13 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                                             {/* USP Badges - Moved to content below */}
 
                                             {(project.cardImage || project.featuredImage) ? (
-                                                <img
+                                                <Image
                                                     src={getImageUrl(project.cardImage || project.featuredImage)}
                                                     alt={project.name}
-                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                                    fill
+                                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                                    className="object-cover group-hover:scale-110 transition-transform duration-700"
+                                                    loading="lazy"
                                                 />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center">

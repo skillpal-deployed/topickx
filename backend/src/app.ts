@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
 import dotenv from 'dotenv';
+import compression from 'compression';
 
 // Load environment variables
 dotenv.config();
@@ -33,6 +34,9 @@ app.use(helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
     contentSecurityPolicy: false, // Next.js manages its own CSP
 }));
+
+// GZIP Compression for better performance (reduces payload by 60-70%)
+app.use(compression());
 
 // CORS configuration
 const allowedOrigins = [
