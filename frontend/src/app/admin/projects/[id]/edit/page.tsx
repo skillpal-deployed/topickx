@@ -100,11 +100,13 @@ export default function EditProjectPage() {
                     if (!values) return [];
                     const arr = Array.isArray(values) ? values : [values];
                     return arr.map(val => {
+                        // Convert to string to handle any type safely
+                        const valStr = String(val);
                         // Check if val is already an ID (exact match)
                         const idMatch = options.find(o => o.id === val);
                         if (idMatch) return val;
                         // Check if val is a Name (legacy data)
-                        const nameMatch = options.find(o => o.name.toLowerCase() === val.toLowerCase() || (o.label && o.label.toLowerCase() === val.toLowerCase()));
+                        const nameMatch = options.find(o => o.name.toLowerCase() === valStr.toLowerCase() || (o.label && o.label.toLowerCase() === valStr.toLowerCase()));
                         return nameMatch ? nameMatch.id : val;
                     }).filter(Boolean); // Filter out nulls if any
                 };
