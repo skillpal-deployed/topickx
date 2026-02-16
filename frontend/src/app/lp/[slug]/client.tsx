@@ -511,7 +511,7 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
             </header>
 
             {/* Hero Section */}
-            <section className="relative bg-emerald-900 overflow-hidden min-h-[auto] md:min-h-[600px] flex flex-col items-center justify-center pt-24 pb-24 md:pt-20 md:pb-32">
+            <section className="relative bg-slate-900 overflow-hidden min-h-[auto] md:min-h-[600px] flex flex-col items-center justify-center pt-16 pb-12 md:pt-20 md:pb-32">
                 {/* Background Image */}
                 <div className="absolute inset-0">
                     <img
@@ -519,68 +519,71 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                         alt="Green Living Room"
                         className="w-full h-full object-cover blur-[1px] scale-105"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-950/90 via-emerald-900/80 to-emerald-900/60"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-900/80 to-slate-800/60"></div>
                 </div>
 
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full z-10 flex flex-col items-center text-center">
                     <div className="max-w-4xl mx-auto">
                         {/* Location Badge */}
-                        <div className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-emerald-950/40 backdrop-blur-md border border-emerald-500/30 text-emerald-50 text-sm font-medium mb-8 shadow-lg">
-                            <MapPin className="w-4 h-4 text-emerald-400" />
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 md:px-6 md:py-2.5 rounded-full bg-slate-950/40 backdrop-blur-md border border-slate-500/30 text-slate-50 text-xs md:text-sm font-medium mb-3 md:mb-8 shadow-lg">
+                            <MapPin className="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-400" />
                             {landingPage.city}
                             {landingPage.locality && ` • ${landingPage.locality}`}
                         </div>
 
-                        <h1 className="text-3xl sm:text-5xl lg:text-7xl font-bold text-white mb-8 leading-tight drop-shadow-2xl shadow-black tracking-tight">
+                        <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-white mb-3 md:mb-8 leading-tight drop-shadow-2xl shadow-black tracking-tight">
                             {landingPage.name}
                         </h1>
 
                         {landingPage.description && (
-                            <p className="text-xl text-emerald-50 max-w-3xl mx-auto mb-12 leading-relaxed font-normal drop-shadow-md text-balance">
+                            <p className="text-sm sm:text-base md:text-xl text-emerald-50 max-w-2xl md:max-w-3xl mx-auto mb-4 md:mb-12 leading-relaxed font-normal drop-shadow-md text-balance">
                                 {landingPage.description}
                             </p>
                         )}
 
                         {/* Stats */}
-                        <div className="grid grid-cols-2 md:flex md:flex-wrap items-center justify-center gap-4 md:gap-8 text-white mb-16 px-4">
-                            <div className="flex items-center gap-3 bg-emerald-950/30 px-5 py-3 rounded-2xl backdrop-blur-sm border border-emerald-500/10">
-                                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                                    <Building2 className="w-5 h-5 text-emerald-100" />
+                        <div className="flex items-center justify-center gap-3 md:gap-8 text-white mb-6 md:mb-16 px-4">
+                            <div className="flex items-center gap-2 md:gap-3 bg-slate-950/30 px-3 py-2 md:px-5 md:py-3 rounded-xl md:rounded-2xl backdrop-blur-sm border border-slate-500/10">
+                                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-amber-500/20 flex items-center justify-center">
+                                    <Building2 className="w-4 h-4 md:w-5 md:h-5 text-amber-100" />
                                 </div>
                                 <div className="text-left">
-                                    <p className="text-xl font-bold leading-none">{landingPage.projects?.length || 0}</p>
-                                    <p className="text-xs text-emerald-100/90 font-medium">Projects</p>
+                                    <p className="text-base md:text-xl font-bold leading-none">{landingPage.projects?.length || 0}</p>
+                                    <p className="text-[10px] md:text-xs text-slate-100/90 font-medium">Projects</p>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-3 bg-emerald-950/30 px-5 py-3 rounded-2xl backdrop-blur-sm border border-emerald-500/10">
-                                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                                    <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+                            <div className="flex items-center gap-2 md:gap-3 bg-slate-950/30 px-3 py-2 md:px-5 md:py-3 rounded-xl md:rounded-2xl backdrop-blur-sm border border-slate-500/10">
+                                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-amber-500/20 flex items-center justify-center">
+                                    <Star className="w-4 h-4 md:w-5 md:h-5 text-yellow-400 fill-yellow-400" />
                                 </div>
                                 <div className="text-left">
-                                    <p className="text-xl font-bold leading-none">Top</p>
-                                    <p className="text-xs text-emerald-100/90 font-medium">Builders</p>
+                                    <p className="text-base md:text-xl font-bold leading-none">Top</p>
+                                    <p className="text-[10px] md:text-xs text-slate-100/90 font-medium">Builders</p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Filter Bar Inside Hero */}
-                        <div className="bg-white rounded-[2rem] shadow-2xl shadow-emerald-950/20 p-3 sm:p-5 border border-white/20 mx-auto w-full max-w-5xl backdrop-blur-sm bg-white/95 transition-all duration-300">
+                        <div className="bg-white rounded-2xl shadow-xl shadow-emerald-950/20 p-3 sm:p-4 border border-white/20 mx-auto w-full max-w-5xl backdrop-blur-sm bg-white/95 transition-all duration-300">
                             {/* Mobile Filter Toggle */}
-                            <div className="lg:hidden flex items-center justify-between pb-2 mb-2 border-b border-slate-100" onClick={() => setShowMobileFilters(!showMobileFilters)}>
-                                <div className="flex items-center gap-2 font-bold text-slate-700">
-                                    <Filter className="w-4 h-4 text-emerald-600" />
-                                    <span>Search Filters</span>
-                                    {hasActiveFilters && (
-                                        <Badge variant="secondary" className="h-5 px-1.5 text-[10px] bg-emerald-100 text-emerald-700">
-                                            Active
-                                        </Badge>
-                                    )}
+                            <button
+                                onClick={() => setShowMobileFilters(!showMobileFilters)}
+                                className="lg:hidden flex items-center justify-between w-full px-3 py-2.5 rounded-xl hover:bg-slate-50 transition-colors group"
+                            >
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
+                                        <Filter className="w-4 h-4 text-emerald-600" />
+                                    </div>
+                                    <div className="text-left">
+                                        <span className="text-sm font-semibold text-slate-800 block">Search Filters</span>
+                                        {hasActiveFilters && (
+                                            <span className="text-[10px] text-emerald-600 font-medium">Filters Active</span>
+                                        )}
+                                    </div>
                                 </div>
-                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full hover:bg-slate-100">
-                                    <ChevronRight className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${showMobileFilters ? 'rotate-90' : ''}`} />
-                                </Button>
-                            </div>
+                                <ChevronRight className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${showMobileFilters ? 'rotate-90' : ''}`} />
+                            </button>
 
                             <div className={`${showMobileFilters ? 'grid' : 'hidden'} lg:grid grid-cols-1 sm:grid-cols-2 ${showLocationFilter ? 'lg:grid-cols-6' : 'lg:grid-cols-5'} gap-3 items-end text-left animate-in slide-in-from-top-2 lg:animate-none`}>
                                 {/* Location Filter */}
@@ -735,10 +738,10 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                                             }`}
                                     >
                                         {/* Image */}
-                                        <div className="aspect-[4/3] relative overflow-hidden bg-slate-100">
+                                        <div className="aspect-[4/3] md:aspect-[4/3] relative overflow-hidden bg-slate-100">
                                             {isFeatured && (
-                                                <div className="absolute top-4 left-4 z-20 flex items-center gap-2 px-3.5 py-1.5 bg-black/80 text-white text-[10px] font-bold rounded-full shadow-2xl border border-white/10 uppercase tracking-[0.12em] backdrop-blur-md">
-                                                    <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
+                                                <div className="absolute top-2 left-2 md:top-4 md:left-4 z-20 flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3.5 py-1 md:py-1.5 bg-black/80 text-white text-[9px] md:text-[10px] font-bold rounded-full shadow-2xl border border-white/10 uppercase tracking-[0.12em] backdrop-blur-md">
+                                                    <Star className="w-3 h-3 md:w-3.5 md:h-3.5 text-yellow-400 fill-yellow-400" />
                                                     Featured Project
                                                 </div>
                                             )}
@@ -766,8 +769,8 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                                         </div>
 
                                         {/* Content */}
-                                        <div className="p-5 flex flex-col flex-1">
-                                            <div className="mb-3">
+                                        <div className="p-4 md:p-5 flex flex-col flex-1">
+                                            <div className="mb-2 md:mb-3">
                                                 <div className="flex justify-between items-start mb-1.5">
                                                     <h3 className="font-bold text-lg text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-1">
                                                         {project.name}
@@ -803,7 +806,7 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                                                 )}
                                             </div>
 
-                                            <div className="flex items-center gap-3 py-3 border-t border-slate-50 text-xs text-slate-600">
+                                            <div className="flex items-center gap-2 md:gap-3 py-2 md:py-3 border-t border-slate-50 text-xs text-slate-600">
                                                 <div className="flex items-center gap-1.5">
                                                     <BedDouble className="w-3.5 h-3.5 text-emerald-500" />
                                                     <span className="font-medium">{project.unitTypes.join(", ")}</span>
@@ -815,9 +818,9 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                                                 </div>
                                             </div>
 
-                                            <div className="mt-auto pt-3 flex gap-2">
+                                            <div className="mt-auto pt-2 md:pt-3 flex gap-2">
                                                 <Button
-                                                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg h-9 text-sm"
+                                                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg h-8 md:h-9 text-xs md:text-sm"
                                                     onClick={(e) => {
                                                         e.preventDefault();
                                                         e.stopPropagation();
@@ -828,7 +831,7 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                                                 </Button>
                                                 <Button
                                                     variant="outline"
-                                                    className="flex-1 rounded-lg h-9 border-slate-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 text-sm"
+                                                    className="flex-1 rounded-lg h-8 md:h-9 border-slate-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 text-xs md:text-sm"
                                                 >
                                                     Details
                                                 </Button>

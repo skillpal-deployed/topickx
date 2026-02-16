@@ -396,27 +396,27 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                 <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/95 via-emerald-900/70 to-emerald-900/30" />
 
 
-                {/* Project Logo Overlay */}
-                {project.projectLogo && (
-                    <div className="absolute top-4 left-4 md:top-8 md:left-8 z-50 bg-white/95 p-2 rounded-lg shadow-lg backdrop-blur-sm">
-                        <div className="relative h-12 w-12 md:h-16 md:w-16">
-                            <Image
-                                src={getImageUrl(project.projectLogo)}
-                                alt={`${project.name} Logo`}
-                                fill
-                                className="object-contain"
-                            />
-                        </div>
-                    </div>
-                )}
-
                 {/* Hero Content */}
                 <div className="relative container mx-auto px-4 py-12 md:py-20">
                     <div className="grid lg:grid-cols-5 gap-8 items-end">
                         {/* Project Info - Left Side */}
                         <div className="lg:col-span-3 text-white flex flex-col justify-center items-center text-center">
+                            {/* Project Logo - Centered */}
+                            {project.projectLogo && (
+                                <div className="bg-white/95 p-3 rounded-2xl shadow-lg backdrop-blur-md mb-6 animate-in fade-in zoom-in duration-500">
+                                    <div className="relative h-16 w-16 md:h-20 md:w-20">
+                                        <Image
+                                            src={getImageUrl(project.projectLogo)}
+                                            alt={`${project.name} Logo`}
+                                            fill
+                                            className="object-contain"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Badges */}
-                            <div className="flex flex-wrap gap-2 mb-6">
+                            <div className="flex flex-wrap justify-center gap-2 mb-6">
                                 <Badge className="bg-amber-500/90 text-amber-950 border border-amber-400/30 px-4 py-1.5 text-sm font-semibold shadow-lg backdrop-blur-md">
                                     {Array.isArray(project.propertyType) ? project.propertyType.join(', ') : project.propertyType}
                                 </Badge>
@@ -728,6 +728,7 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                     </section>
                 )}
 
+
                 {/* Amenities */}
                 {project.amenities?.length > 0 && (
                     <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
@@ -736,17 +737,43 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                             Premium Amenities
                         </h2>
                         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                            {project.amenities.map((amenity, idx) => {
-                                const Icon = getAmenityIcon(amenity);
+                            {project.amenities.map((amenity: any, idx: number) => {
+                                const amenityName = typeof amenity === 'string' ? amenity : amenity.name;
+                                const iconUrl = typeof amenity === 'object' ? amenity.iconUrl : null;
+                                const Icon = getAmenityIcon(amenityName);
+
                                 return (
                                     <div key={idx} className="flex flex-col items-center text-center gap-3 p-4 rounded-2xl hover:bg-slate-50 transition-colors group">
                                         <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                                            <Icon className="h-8 w-8" />
+                                            {iconUrl ? (
+                                                <img src={iconUrl} alt={amenityName} className="h-8 w-8 object-contain" />
+                                            ) : (
+                                                <Icon className="h-8 w-8" />
+                                            )}
                                         </div>
-                                        <span className="font-semibold text-slate-700 text-sm">{amenity}</span>
+                                        <span className="font-semibold text-slate-700 text-sm">{amenityName}</span>
                                     </div>
                                 );
                             })}
+                        </div>
+                    </section>
+                )}
+
+                {/* Video Tour */}
+                {project.videoUrl && (
+                    <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
+                        <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-8 flex items-center gap-3">
+                            <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><Play className="h-6 w-6" /></span>
+                            Project Video Tour
+                        </h2>
+                        <div className="aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-2xl ring-4 ring-slate-100">
+                            <iframe
+                                src={project.videoUrl.replace("watch?v=", "embed/")}
+                                title="Project Video Tour"
+                                className="w-full h-full"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                            />
                         </div>
                     </section>
                 )}
@@ -809,75 +836,73 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                             <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><Ruler className="h-6 w-6" /></span>
                             Floor Plans & Configuration
                         </h2>
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {floorPlans.map((fp, idx) => (
-                                <div
-                                    key={idx}
-                                    className="group border border-slate-200 rounded-xl overflow-hidden cursor-pointer"
-                                    onClick={() => {
-                                        const images = floorPlans.map(p => getImageUrl(typeof p === 'string' ? p : p.url));
-                                        openLightbox(idx, images);
-                                    }}
-                                >
-                                    <div className="aspect-[4/3] bg-slate-50 relative overflow-hidden">
-                                        <img
-                                            src={getImageUrl(typeof fp === 'string' ? fp : fp.url)}
-                                            alt={typeof fp === 'string' ? `Floor Plan ${idx + 1}` : (fp.description || `Floor Plan ${idx + 1}`)}
-                                            className="w-full h-full object-contain"
-                                        />
-                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                                            <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-sm font-medium bg-black/50 px-3 py-1 rounded-full">
-                                                Click to expand
-                                            </span>
+                        <div className="relative group">
+                            {/* Left Arrow */}
+                            <button
+                                onClick={() => {
+                                    const container = document.getElementById('floorplans-scroll');
+                                    if (container) container.scrollBy({ left: -300, behavior: 'smooth' });
+                                }}
+                                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 -translate-x-1/2 hover:scale-110"
+                            >
+                                <ChevronLeft className="w-6 h-6 text-slate-700" />
+                            </button>
+
+                            {/* Floor Plans Container */}
+                            <div
+                                id="floorplans-scroll"
+                                className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-2 snap-x snap-mandatory px-4 md:px-0"
+                                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                            >
+                                {floorPlans.map((fp, idx) => (
+                                    <div
+                                        key={idx}
+                                        className="flex-shrink-0 w-72 md:w-80 group/item border border-slate-200 rounded-xl overflow-hidden cursor-pointer snap-center"
+                                        onClick={() => {
+                                            const images = floorPlans.map(p => getImageUrl(typeof p === 'string' ? p : p.url));
+                                            openLightbox(idx, images);
+                                        }}
+                                    >
+                                        <div className="aspect-[4/3] bg-slate-50 relative overflow-hidden">
+                                            <img
+                                                src={getImageUrl(typeof fp === 'string' ? fp : fp.url)}
+                                                alt={typeof fp === 'string' ? `Floor Plan ${idx + 1}` : (fp.description || `Floor Plan ${idx + 1}`)}
+                                                className="w-full h-full object-contain"
+                                            />
+                                            <div className="absolute inset-0 bg-black/0 group-hover/item:bg-black/20 transition-colors flex items-center justify-center">
+                                                <span className="opacity-0 group-hover/item:opacity-100 transition-opacity text-white text-sm font-medium bg-black/50 px-3 py-1 rounded-full">
+                                                    Click to expand
+                                                </span>
+                                            </div>
                                         </div>
+                                        {typeof fp !== 'string' && (fp.description || fp.price) && (
+                                            <div className="p-4 bg-white">
+                                                {fp.description && (
+                                                    <p className="font-semibold text-slate-900">{fp.description}</p>
+                                                )}
+                                                {fp.price && (
+                                                    <p className="text-primary font-bold text-lg flex items-center gap-1 mt-1">
+                                                        <IndianRupee className="h-4 w-4" />
+                                                        {fp.price}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
-                                    {typeof fp !== 'string' && (fp.description || fp.price) && (
-                                        <div className="p-4 bg-white">
-                                            {fp.description && (
-                                                <p className="font-semibold text-slate-900">{fp.description}</p>
-                                            )}
-                                            {fp.price && (
-                                                <p className="text-primary font-bold text-lg flex items-center gap-1 mt-1">
-                                                    <IndianRupee className="h-4 w-4" />
-                                                    {fp.price}
-                                                </p>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                )}
+                                ))}
+                            </div>
 
-                {/* Video Tour */}
-                {project.videoUrl && (
-                    <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
-                        <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-8 flex items-center gap-3">
-                            <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><Play className="h-6 w-6" /></span>
-                            Project Video Tour
-                        </h2>
-                        <div className="aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-2xl ring-4 ring-slate-100">
-                            <iframe
-                                src={project.videoUrl.replace("watch?v=", "embed/")}
-                                title="Project Video Tour"
-                                className="w-full h-full"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                            />
+                            {/* Right Arrow */}
+                            <button
+                                onClick={() => {
+                                    const container = document.getElementById('floorplans-scroll');
+                                    if (container) container.scrollBy({ left: 300, behavior: 'smooth' });
+                                }}
+                                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 translate-x-1/2 hover:scale-110"
+                            >
+                                <ChevronRight className="w-6 h-6 text-slate-700" />
+                            </button>
                         </div>
-                    </section>
-                )}
-
-                {/* Location */}
-                {project.address && (
-                    <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
-                        <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-6 flex items-center gap-3">
-                            <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><MapPin className="h-6 w-6" /></span>
-                            Address
-                        </h2>
-                        <p className="text-slate-600 text-lg">{project.address}</p>
-                        <p className="text-slate-500 mt-2">{project.locality}, {project.city}</p>
                     </section>
                 )}
 
@@ -902,15 +927,39 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                     </section>
                 )}
 
+                {/* Location */}
+                {project.address && (
+                    <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
+                        <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-6 flex items-center gap-3">
+                            <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><MapPin className="h-6 w-6" /></span>
+                            Address
+                        </h2>
+                        <p className="text-slate-600 text-lg">{project.address}</p>
+                        <p className="text-slate-500 mt-2">{project.locality}, {project.city}</p>
+                    </section>
+                )}
+
                 {/* Builder Description */}
                 {project.builderDescription && (
                     <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
                         <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-6 flex items-center gap-3">
                             <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><Building className="h-6 w-6" /></span>
-                            About Builder
+                            About Advertiser
                         </h2>
                         <div className="bg-stone-50 p-6 rounded-2xl border border-stone-100">
-                            <h3 className="text-xl font-bold text-emerald-900 mb-2">{project.builderName}</h3>
+                            <div className="flex items-center gap-4 mb-4">
+                                {project.advertiserLogo && (
+                                    <div className="relative h-16 w-16 flex-shrink-0 bg-white rounded-xl p-2 shadow-sm border border-stone-200">
+                                        <Image
+                                            src={getImageUrl(project.advertiserLogo)}
+                                            alt={`${project.builderName} Logo`}
+                                            fill
+                                            className="object-contain"
+                                        />
+                                    </div>
+                                )}
+                                <h3 className="text-xl font-bold text-emerald-900">{project.builderName}</h3>
+                            </div>
                             <p className="text-slate-600 leading-relaxed whitespace-pre-line">{project.builderDescription}</p>
                         </div>
                     </section>
@@ -971,30 +1020,22 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                 </div>
             )}
             {/* Sticky Bottom Action Bar (Mobile Only) */}
-            <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 p-3 flex gap-3 md:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.1)] pb-safe-area">
-                {project.advertiser?.phone ? (
-                    <>
-                        <a href={`tel:${project.advertiser.phone}`} className="flex-1">
-                            <Button variant="outline" className="w-full h-12 rounded-xl border-emerald-600 text-emerald-700 font-bold bg-emerald-50 hover:bg-emerald-100">
-                                <Phone className="w-5 h-5 mr-2" />
-                                Call
-                            </Button>
-                        </a>
-                        <Button
-                            onClick={scrollToEnquiry}
-                            className="flex-1 h-12 rounded-xl bg-emerald-950 text-white font-bold shadow-lg shadow-emerald-900/20"
-                        >
-                            Enquire
-                        </Button>
-                    </>
-                ) : (
-                    <Button
-                        onClick={scrollToEnquiry}
-                        className="w-full h-12 rounded-xl bg-emerald-950 text-white font-bold shadow-lg shadow-emerald-900/20"
-                    >
-                        Enquire Now
-                    </Button>
-                )}
+            <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 p-3 flex gap-3 items-center md:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.1)] pb-safe-area">
+                {/* Starting Price */}
+                <div className="flex-1 flex flex-col">
+                    <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">Starting Price</span>
+                    <div className="text-lg font-bold text-emerald-950 flex items-center gap-1">
+                        <IndianRupee className="h-4 w-4" />
+                        {formatBudgetRange(project.budgetMin, project.budgetMax)}
+                    </div>
+                </div>
+                {/* Enquire Button */}
+                <Button
+                    onClick={scrollToEnquiry}
+                    className="flex-1 h-12 rounded-xl bg-emerald-950 text-white font-bold shadow-lg shadow-emerald-900/20"
+                >
+                    Enquire
+                </Button>
             </div>
         </div>
     );

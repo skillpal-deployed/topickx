@@ -33,6 +33,8 @@ import {
     Tag,
     Check,
     Link,
+    Upload,
+    Image as ImageIcon,
 } from "lucide-react";
 
 interface Option {
@@ -41,6 +43,7 @@ interface Option {
     value: string;
     label: string;
     isActive: boolean;
+    iconUrl?: string | null;
 }
 
 const CATEGORIES = [
@@ -58,8 +61,9 @@ export default function OptionsPage() {
     const [activeCategory, setActiveCategory] = useState("city");
     const [isAdding, setIsAdding] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
-    const [newOption, setNewOption] = useState({ value: "", label: "" });
-    const [editOption, setEditOption] = useState({ value: "", label: "" });
+    const [newOption, setNewOption] = useState({ value: "", label: "", iconUrl: "" });
+    const [editOption, setEditOption] = useState({ value: "", label: "", iconUrl: "" });
+    const [uploadingIcon, setUploadingIcon] = useState(false);
     const [parentOptions, setParentOptions] = useState<Option[]>([]);
     const [parentId, setParentId] = useState<string>("");
 
@@ -146,6 +150,42 @@ export default function OptionsPage() {
         );
     };
 
+    const handleIconUpload = async (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean = false) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            alert('Please upload an image file (SVG, PNG, or WEBP recommended)');
+            return;
+        }
+
+        setUploadingIcon(true);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) throw new Error('Upload failed');
+
+            const data = await response.json();
+            if (isEdit) {
+                setEditOption({ ...editOption, iconUrl: data.url });
+            } else {
+                setNewOption({ ...newOption, iconUrl: data.url });
+            }
+        } catch (error) {
+            console.error('Error uploading icon:', error);
+            alert('Failed to upload icon');
+        } finally {
+            setUploadingIcon(false);
+        }
+    };
+
     const handleAdd = async () => {
         if (!newOption.value || !newOption.label) return;
         try {
@@ -154,8 +194,9 @@ export default function OptionsPage() {
                 value: newOption.value,
                 label: newOption.label,
                 parentId: activeCategory === 'location' ? parentId : undefined,
+                iconUrl: activeCategory === 'amenity' ? newOption.iconUrl : undefined,
             });
-            setNewOption({ value: "", label: "" });
+            setNewOption({ value: "", label: "", iconUrl: "" });
             setIsAdding(false);
             fetchOptions();
         } catch (error) {
@@ -165,7 +206,10 @@ export default function OptionsPage() {
 
     const handleUpdate = async (id: string) => {
         try {
-            await adminAPI.updateOption(id, editOption);
+            await adminAPI.updateOption(id, {
+                ...editOption,
+                iconUrl: activeCategory === 'amenity' ? editOption.iconUrl : undefined,
+            });
             setEditingId(null);
             fetchOptions();
         } catch (error) {
@@ -185,7 +229,7 @@ export default function OptionsPage() {
 
     const startEdit = (option: Option) => {
         setEditingId(option.id);
-        setEditOption({ value: option.value, label: option.label });
+        setEditOption({ value: option.value, label: option.label, iconUrl: option.iconUrl || "" });
     };
 
     return (
@@ -284,6 +328,34 @@ export default function OptionsPage() {
                                         />
                                     </div>
                                 </div>
+                                {/* Icon Upload for Amenities */}
+                                {activeCategory === 'amenity' && (
+                                    <div className="mb-4">
+                                        <Label>Icon (Optional)</Label>
+                                        <p className="text-xs text-slate-500 mb-2">SVG recommended (128x128px viewBox)</p>
+                                        <div className="flex items-center gap-3">
+                                            <Input
+                                                type="file"
+                                                accept="image/svg+xml,image/png,image/webp"
+                                                onChange={(e) => handleIconUpload(e, false)}
+                                                disabled={uploadingIcon}
+                                                className="flex-1"
+                                            />
+                                            {newOption.iconUrl && (
+                                                <div className="flex items-center gap-2">
+                                                    <img src={newOption.iconUrl} alt="Icon preview" className="h-8 w-8 object-contain" />
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => setNewOption({ ...newOption, iconUrl: "" })}
+                                                    >
+                                                        <X className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                                 <div className="flex gap-2">
                                     <Button onClick={handleAdd}>
                                         <Save className="h-4 w-4 mr-2" />
@@ -293,7 +365,7 @@ export default function OptionsPage() {
                                         variant="outline"
                                         onClick={() => {
                                             setIsAdding(false);
-                                            setNewOption({ value: "", label: "" });
+                                            setNewOption({ value: "", label: "", iconUrl: "" });
                                         }}
                                     >
                                         Cancel
@@ -337,6 +409,21 @@ export default function OptionsPage() {
                                                         }
                                                         className="max-w-[200px]"
                                                     />
+                                                    {/* Icon Upload for Amenities in Edit Mode */}
+                                                    {activeCategory === 'amenity' && (
+                                                        <div className="flex items-center gap-2">
+                                                            <Input
+                                                                type="file"
+                                                                accept="image/svg+xml,image/png,image/webp"
+                                                                onChange={(e) => handleIconUpload(e, true)}
+                                                                disabled={uploadingIcon}
+                                                                className="max-w-[150px]"
+                                                            />
+                                                            {editOption.iconUrl && (
+                                                                <img src={editOption.iconUrl} alt="Icon" className="h-6 w-6 object-contain" />
+                                                            )}
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <Button
@@ -357,6 +444,9 @@ export default function OptionsPage() {
                                         ) : (
                                             <>
                                                 <div className="flex items-center gap-4">
+                                                    {activeCategory === 'amenity' && option.iconUrl && (
+                                                        <img src={option.iconUrl} alt={option.label} className="h-6 w-6 object-contain" />
+                                                    )}
                                                     <Badge variant="outline">{option.value}</Badge>
                                                     <span className="font-medium">{option.label}</span>
                                                     {!option.isActive && (

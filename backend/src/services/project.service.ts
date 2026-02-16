@@ -86,17 +86,30 @@ export const resolveProjectsData = async (projects: any[]) => {
 
     const options = await prisma.option.findMany({
         where: { id: { in: Array.from(optionIds) } },
-        select: { id: true, name: true }
+        select: { id: true, name: true, iconUrl: true }
     });
 
-    const optionMap = new Map(options.map(o => [o.id, o.name]));
+    const optionMap = new Map(options.map(o => [o.id, { name: o.name, iconUrl: o.iconUrl }]));
 
-    const resolve = (id: string | null | undefined) => (id && optionMap.has(id) ? optionMap.get(id)! : id || "");
+    const resolve = (id: string | null | undefined) => (id && optionMap.has(id) ? optionMap.get(id)!.name : id || "");
 
     const resolveArray = (ids: any) => {
         if (!ids) return [];
-        if (Array.isArray(ids)) return ids.map(id => optionMap.get(id) || id);
-        return [optionMap.get(ids) || ids];
+        if (Array.isArray(ids)) return ids.map(id => optionMap.get(id)?.name || id);
+        return [optionMap.get(ids)?.name || ids];
+    };
+
+    // Special resolver for amenities that keeps iconUrl
+    const resolveAmenitiesArray = (ids: any) => {
+        if (!ids) return [];
+        if (Array.isArray(ids)) {
+            return ids.map(id => {
+                const option = optionMap.get(id);
+                return option ? { name: option.name, iconUrl: option.iconUrl } : { name: id, iconUrl: null };
+            });
+        }
+        const option = optionMap.get(ids);
+        return [option ? { name: option.name, iconUrl: option.iconUrl } : { name: ids, iconUrl: null }];
     };
 
     return projects.map(p => ({
@@ -106,7 +119,7 @@ export const resolveProjectsData = async (projects: any[]) => {
         possessionStatus: resolve(p.possessionStatus),
         propertyType: resolveArray(p.propertyType),
         unitTypes: resolveArray(p.unitTypes),
-        amenities: resolveArray(p.amenities),
+        amenities: resolveAmenitiesArray(p.amenities),
     }));
 };
 
@@ -315,6 +328,22 @@ export const updateProject = async (
             if (['propertyType', 'unitTypes', 'amenities', 'highlights', 'images', 'locationHighlights'].includes(field)) {
                 if (value && !Array.isArray(value)) {
                     value = [value];
+                }
+            }
+
+            // Convert estimatedPossessionDate to proper ISO-8601 format
+            if (field === 'estimatedPossessionDate' && value) {
+                // If value is in "YYYY-MM" format, convert to "YYYY-MM-01T00:00:00.000Z"
+                if (typeof value === 'string') {
+                    // Check if it's a partial date (YYYY-MM or similar)
+                    if (/^\d{4}-\d{2}$/.test(value)) {
+                        // Add -01 for the first day of the month and make it a full ISO date
+                        value = new Date(`${value}-01T00:00:00.000Z`).toISOString();
+                    } else if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+                        // If it's YYYY-MM-DD, convert to full ISO
+                        value = new Date(`${value}T00:00:00.000Z`).toISOString();
+                    }
+                    // Otherwise, assume it's already a valid ISO string
                 }
             }
 

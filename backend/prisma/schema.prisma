@@ -288,6 +288,7 @@ model Option {
   id         String     @id @default(uuid())
   optionType OptionType
   name       String
+  iconUrl    String?    // Custom icon URL for amenities (SVG recommended: 128x128px)
   parentId   String?
   isActive   Boolean    @default(true)
   createdAt  DateTime   @default(now())
