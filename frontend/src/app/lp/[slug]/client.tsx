@@ -511,7 +511,7 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
             </header>
 
             {/* Hero Section */}
-            <section className="relative bg-slate-900 overflow-hidden min-h-[auto] md:min-h-[600px] flex flex-col items-center justify-center pt-16 pb-12 md:pt-20 md:pb-32">
+            <section className="relative bg-[#022c22] overflow-hidden min-h-[auto] md:min-h-[600px] flex flex-col items-center justify-center pt-16 pb-12 md:pt-20 md:pb-32">
                 {/* Background Image */}
                 <div className="absolute inset-0">
                     <img
@@ -519,14 +519,14 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                         alt="Green Living Room"
                         className="w-full h-full object-cover blur-[1px] scale-105"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-900/80 to-slate-800/60"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#022c22]/95 via-[#064e3b]/85 to-[#022c22]/60"></div>
                 </div>
 
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full z-10 flex flex-col items-center text-center">
                     <div className="max-w-4xl mx-auto">
                         {/* Location Badge */}
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 md:px-6 md:py-2.5 rounded-full bg-slate-950/40 backdrop-blur-md border border-slate-500/30 text-slate-50 text-xs md:text-sm font-medium mb-3 md:mb-8 shadow-lg">
-                            <MapPin className="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-400" />
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 md:px-6 md:py-2.5 rounded-full bg-[#022c22]/60 backdrop-blur-md border border-teal-500/30 text-teal-50 text-xs md:text-sm font-medium mb-3 md:mb-8 shadow-xl">
+                            <MapPin className="w-3.5 h-3.5 md:w-4 md:h-4 text-teal-300" />
                             {landingPage.city}
                             {landingPage.locality && ` • ${landingPage.locality}`}
                         </div>
@@ -543,23 +543,23 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
 
                         {/* Stats */}
                         <div className="flex items-center justify-center gap-3 md:gap-8 text-white mb-6 md:mb-16 px-4">
-                            <div className="flex items-center gap-2 md:gap-3 bg-slate-950/30 px-3 py-2 md:px-5 md:py-3 rounded-xl md:rounded-2xl backdrop-blur-sm border border-slate-500/10">
-                                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-amber-500/20 flex items-center justify-center">
-                                    <Building2 className="w-4 h-4 md:w-5 md:h-5 text-amber-100" />
+                            <div className="flex items-center gap-2 md:gap-3 bg-[#022c22]/40 px-3 py-2 md:px-5 md:py-3 rounded-xl md:rounded-2xl backdrop-blur-sm border border-teal-500/20">
+                                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-teal-500/20 flex items-center justify-center">
+                                    <Building2 className="w-4 h-4 md:w-5 md:h-5 text-teal-100" />
                                 </div>
                                 <div className="text-left">
                                     <p className="text-base md:text-xl font-bold leading-none">{landingPage.projects?.length || 0}</p>
-                                    <p className="text-[10px] md:text-xs text-slate-100/90 font-medium">Projects</p>
+                                    <p className="text-[10px] md:text-xs text-teal-100/90 font-medium">Projects</p>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-2 md:gap-3 bg-slate-950/30 px-3 py-2 md:px-5 md:py-3 rounded-xl md:rounded-2xl backdrop-blur-sm border border-slate-500/10">
-                                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-amber-500/20 flex items-center justify-center">
-                                    <Star className="w-4 h-4 md:w-5 md:h-5 text-yellow-400 fill-yellow-400" />
+                            <div className="flex items-center gap-2 md:gap-3 bg-[#022c22]/40 px-3 py-2 md:px-5 md:py-3 rounded-xl md:rounded-2xl backdrop-blur-sm border border-teal-500/20">
+                                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-teal-500/20 flex items-center justify-center">
+                                    <Star className="w-4 h-4 md:w-5 md:h-5 text-amber-400 fill-amber-400" />
                                 </div>
                                 <div className="text-left">
                                     <p className="text-base md:text-xl font-bold leading-none">Top</p>
-                                    <p className="text-[10px] md:text-xs text-slate-100/90 font-medium">Builders</p>
+                                    <p className="text-[10px] md:text-xs text-teal-100/90 font-medium">Builders</p>
                                 </div>
                             </div>
                         </div>

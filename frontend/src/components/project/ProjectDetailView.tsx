@@ -373,7 +373,7 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                         </span>
                     </Link>
                     <div className="flex items-center gap-4">
-                        <Button onClick={scrollToEnquiry} className="bg-emerald-950 hover:bg-emerald-900 text-amber-50 font-semibold shadow-md border border-white/10 rounded-full px-6">
+                        <Button onClick={scrollToEnquiry} className="bg-slate-900 hover:bg-slate-800 text-amber-50 font-semibold shadow-md border border-white/10 rounded-full px-6 transition-all active:scale-95">
                             Enquire
                         </Button>
                     </div>
@@ -381,7 +381,7 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
             </header>
 
             {/* Hero Section */}
-            <section className="relative min-h-[50vh] md:min-h-[80vh] flex items-end overflow-hidden bg-emerald-900">
+            <section className="relative min-h-[50vh] md:min-h-[80vh] flex items-end overflow-hidden bg-slate-900">
                 {/* Background Image */}
                 <div
                     className="absolute inset-0 bg-cover bg-center blur-[2px] scale-105"
@@ -392,8 +392,8 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                     }}
                 />
 
-                {/* Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/95 via-emerald-900/70 to-emerald-900/30" />
+                {/* Premium Charcoal Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-900/80 to-slate-900/30" />
 
 
                 {/* Hero Content */}
@@ -421,13 +421,13 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                                     {Array.isArray(project.propertyType) ? project.propertyType.join(', ') : project.propertyType}
                                 </Badge>
                                 {project.reraId && (
-                                    <Badge variant="outline" className="bg-white/10 text-white border-white/30">
-                                        <Verified className="h-3 w-3 mr-1" />
+                                    <Badge variant="outline" className="bg-slate-950/30 text-white border-slate-500/20 backdrop-blur-sm">
+                                        <Verified className="h-3 w-3 mr-1 text-amber-400" />
                                         RERA Approved
                                     </Badge>
                                 )}
-                                <Badge variant="outline" className="bg-white/10 text-white border-white/30">
-                                    <Calendar className="h-3 w-3 mr-1" />
+                                <Badge variant="outline" className="bg-slate-950/30 text-white border-slate-500/20 backdrop-blur-sm">
+                                    <Calendar className="h-3 w-3 mr-1 text-amber-400" />
                                     {project.possessionStatus}
                                 </Badge>
                                 {project.possessionStatus?.toLowerCase().includes("under construction") && project.estimatedPossessionDate && (() => {
@@ -439,8 +439,8 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                                             return null;
                                         }
                                         return (
-                                            <Badge variant="outline" className="bg-emerald-500/20 text-emerald-100 border-emerald-400/30">
-                                                <Timer className="h-3 w-3 mr-1" />
+                                            <Badge variant="outline" className="bg-amber-500/20 text-amber-100 border-amber-400/30 backdrop-blur-sm">
+                                                <Timer className="h-3 w-3 mr-1 text-amber-400" />
                                                 Expected: {date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                                             </Badge>
                                         );
@@ -762,7 +762,7 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                 {/* Video Tour */}
                 {project.videoUrl && (
                     <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
-                        <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-8 flex items-center gap-3">
+                        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-8 flex items-center gap-3">
                             <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><Play className="h-6 w-6" /></span>
                             Project Video Tour
                         </h2>
@@ -832,7 +832,7 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                 {/* Floor Plans */}
                 {floorPlans.length > 0 && (
                     <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
-                        <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-8 flex items-center gap-3">
+                        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-8 flex items-center gap-3">
                             <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><Ruler className="h-6 w-6" /></span>
                             Floor Plans & Configuration
                         </h2>
