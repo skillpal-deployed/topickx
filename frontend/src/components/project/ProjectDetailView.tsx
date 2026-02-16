@@ -693,9 +693,9 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                                 if (cleanH.includes('\n')) {
                                     return cleanH.split('\n').filter(s => s.trim());
                                 }
-                                // Split by sentences if no newlines (matches periods followed by whitespace and capital letter)
-                                const sentences = cleanH.match(/[^.!?]+[.!?]+(?=\s*[A-Z]|$)|[^.!?]+[.!?]*$/g);
-                                return sentences ? sentences.map(s => s.trim()).filter(s => s.length > 5) : [cleanH];
+
+                                // Return as is (trusted input from new admin UI)
+                                return [cleanH];
                             }).map((highlight, idx) => (
                                 <div key={idx} className="flex items-start gap-4 p-5 bg-stone-50 rounded-2xl border border-stone-100">
                                     <div className="w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
