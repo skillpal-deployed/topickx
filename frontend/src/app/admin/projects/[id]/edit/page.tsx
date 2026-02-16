@@ -514,19 +514,7 @@ export default function EditProjectPage() {
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <Label>Project Highlights</Label>
-                                <p className="text-sm text-muted-foreground">Enter each highlight on a new line</p>
-                                <Textarea
-                                    value={formData.highlights.join("\n")}
-                                    onChange={(e) => setFormData(prev => ({
-                                        ...prev,
-                                        highlights: e.target.value.split("\n").filter(line => line.trim())
-                                    }))}
-                                    className="min-h-[100px]"
-                                    placeholder="Premium location&#10;World-class amenities&#10;Green certified"
-                                />
-                            </div>
+
                         </CardContent>
                     </Card>
                 </TabsContent>
