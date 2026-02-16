@@ -148,12 +148,12 @@ export default function HomePage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-32 px-6 lg:px-8 max-w-[1400px] mx-auto min-h-screen flex flex-col justify-center">
+      <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-32 px-6 lg:px-8 max-w-[1400px] mx-auto min-h-[85vh] flex flex-col justify-center">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
           {/* Left Content */}
           <div className="relative z-10 space-y-8 animate-in slide-in-from-bottom-10 fade-in duration-1000">
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-[1.1] tracking-tight text-teal-950 drop-shadow-sm">
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold leading-[1.1] tracking-tight text-teal-950 drop-shadow-sm">
               Scale Your Business Without <br />
               <span className="text-teal-600">Breaking the Bank</span>
             </h1>
@@ -186,7 +186,7 @@ export default function HomePage() {
 
             {/* Trust Indicators */}
             <div className="pt-12 mt-12">
-              <div className="inline-flex items-center gap-12 p-8 rounded-[2rem] bg-white/40 backdrop-blur-md border border-white/60 shadow-2xl shadow-teal-900/10 animate-in fade-in slide-in-from-bottom-5 duration-1000 delay-500">
+              <div className="flex flex-col md:inline-flex md:flex-row items-center gap-6 md:gap-12 p-6 md:p-8 rounded-[2rem] bg-white/40 backdrop-blur-md border border-white/60 shadow-2xl shadow-teal-900/10 animate-in fade-in slide-in-from-bottom-5 duration-1000 delay-500">
                 {[
                   { label: 'Less Competition', end: 93, suffix: '%' },
                   { label: 'Ad Platforms', end: 6, suffix: '+' },
@@ -206,7 +206,7 @@ export default function HomePage() {
           </div>
 
           {/* Right Content - Spline 3D */}
-          <div className="relative h-[500px] lg:h-[700px] w-full animate-in fade-in duration-1000 delay-300 lg:-mr-20">
+          <div className="relative h-[350px] md:h-[500px] lg:h-[700px] w-full animate-in fade-in duration-1000 delay-300 lg:-mr-20">
             {/* Glow Effect behind model */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-teal-400/20 blur-[120px] rounded-full pointer-events-none" />
 
@@ -233,7 +233,7 @@ export default function HomePage() {
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             {[
               {
                 title: "Too Expensive",
@@ -254,7 +254,7 @@ export default function HomePage() {
                 problem: "99% invisibility rate"
               }
             ].map((card, i) => (
-              <div key={i} className="group relative bg-white/40 backdrop-blur-md border border-white/60 p-10 rounded-[2.5rem] shadow-2xl shadow-teal-900/5 hover:-translate-y-2 transition-all duration-500">
+              <div key={i} className="group relative bg-white/40 backdrop-blur-md border border-white/60 p-6 md:p-10 rounded-[2.5rem] shadow-2xl shadow-teal-900/5 hover:-translate-y-2 transition-all duration-500">
                 <div className={`w-14 h-1.5 rounded-full bg-gradient-to-r ${card.accent} mb-8`} />
                 <h3 className="text-2xl font-bold text-teal-950 mb-4">{card.title}</h3>
                 <p className="text-teal-800/70 leading-relaxed font-light mb-8">

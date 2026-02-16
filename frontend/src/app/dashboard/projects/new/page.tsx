@@ -326,6 +326,7 @@ export default function AddProjectPage() {
         try {
             const payload = {
                 ...formData,
+                estimatedPossessionDate: formData.estimated_possession_date ? new Date(formData.estimated_possession_date).toISOString() : null,
                 budget_min: parseFloat(formData.budget_min),
                 budget_max: parseFloat(formData.budget_max),
                 highlights: formData.highlights.filter((h) => h.trim() !== ""),

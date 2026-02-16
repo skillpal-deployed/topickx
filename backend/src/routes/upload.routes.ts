@@ -57,7 +57,7 @@ if (useSpaces && s3Client) {
         cloudinary: cloudinary,
         params: {
             folder: 'listinghub',
-            allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'pdf'],
+            allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'pdf', 'gif'],
             public_id: (req: Express.Request, file: Express.Multer.File) => {
                 const name = file.originalname.split('.')[0].replace(/[^a-zA-Z0-9]/g, '_');
                 return `${uuidv4()}-${name}`;

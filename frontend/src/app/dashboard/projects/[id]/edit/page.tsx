@@ -327,6 +327,7 @@ export default function EditProjectPage({
                 about_project: formData.about_project,
                 builder_description: formData.builder_description,
                 possession_status: formData.possession_status,
+                estimatedPossessionDate: formData.estimated_possession_date ? new Date(formData.estimated_possession_date).toISOString() : null,
 
                 rera_id: formData.rera_id,
                 usp_1: formData.usp_1,

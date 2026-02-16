@@ -38,6 +38,7 @@ import {
     Star,
     ChevronDown,
     AlertTriangle,
+    Activity,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { OtpInput } from "@/components/ui/otp-input";
@@ -98,14 +99,21 @@ const AMENITY_ICONS: Record<string, any> = {
     "park": Trees,
     "parking": Car,
     "security": Shield,
-    "cctv": Shield,
+    "clubhouse": Building,
+    "library": Home,
     "wifi": Wifi,
     "internet": Wifi,
     "power backup": Zap,
-    "power": Zap,
-    "club house": Users,
-    "clubhouse": Users,
-    "community": Users,
+    "lift": ArrowLeft, // Using ArrowLeft as placeholder, should use Elevator if available, or just Building
+    "elevator": Building,
+    "fire safety": AlertTriangle,
+    "intercom": Phone,
+    "maintenance staff": Users,
+    "bank": IndianRupee,
+    "atm": IndianRupee,
+    "play area": Dumbbell, // Playground
+    "jogging track": Activity,
+    "cctv": Shield,
 };
 
 interface ProjectDetailViewProps {
@@ -128,6 +136,7 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
     });
     const [submitting, setSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+    const [showFullAbout, setShowFullAbout] = useState(false);
 
     // OTP State
     const [otpSent, setOtpSent] = useState(false);
@@ -372,7 +381,7 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
             </header>
 
             {/* Hero Section */}
-            <section className="relative min-h-[70vh] md:min-h-[80vh] flex items-end overflow-hidden bg-emerald-900">
+            <section className="relative min-h-[50vh] md:min-h-[80vh] flex items-end overflow-hidden bg-emerald-900">
                 {/* Background Image */}
                 <div
                     className="absolute inset-0 bg-cover bg-center blur-[2px] scale-105"
@@ -405,7 +414,7 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                 <div className="relative container mx-auto px-4 py-12 md:py-20">
                     <div className="grid lg:grid-cols-5 gap-8 items-end">
                         {/* Project Info - Left Side */}
-                        <div className="lg:col-span-3 text-white">
+                        <div className="lg:col-span-3 text-white flex flex-col justify-center items-center text-center">
                             {/* Badges */}
                             <div className="flex flex-wrap gap-2 mb-6">
                                 <Badge className="bg-amber-500/90 text-amber-950 border border-amber-400/30 px-4 py-1.5 text-sm font-semibold shadow-lg backdrop-blur-md">
@@ -443,7 +452,7 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                             </div>
 
                             {/* Project Name */}
-                            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight">
+                            <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight">
                                 {project.name}
                             </h1>
 
@@ -491,7 +500,7 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
 
 
                         {/* Enquiry Form - Right Side */}
-                        <div className="lg:col-span-2" id="enquiry-form">
+                        <div className="lg:col-span-2 scroll-mt-24" id="enquiry-form">
                             <div className="bg-white rounded-2xl shadow-2xl p-6 md:p-8">
                                 <div className="text-center mb-6">
                                     <h3 className="text-xl font-bold text-slate-900 mb-1">
@@ -633,7 +642,7 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
             </section>
 
             {/* Main Content */}
-            <div className="container mx-auto px-4 py-8 md:py-12 space-y-8 md:space-y-10 relative z-10">
+            <div className="container mx-auto px-4 py-8 md:py-12 space-y-6 md:space-y-10 relative z-10 pb-24 md:pb-12">
 
                 {/* USP Section - New Location */}
                 {(project.usp1 || project.usp2) && (
@@ -671,9 +680,20 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                             <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><Building className="h-6 w-6" /></span>
                             About {project.name}
                         </h2>
-                        <p className="text-slate-600 leading-relaxed whitespace-pre-line">
-                            {project.aboutProject}
-                        </p>
+                        <div className="relative">
+                            <p className={`text-slate-600 leading-relaxed whitespace-pre-line ${!showFullAbout ? 'line-clamp-6' : ''}`}>
+                                {project.aboutProject}
+                            </p>
+                            {project.aboutProject.length > 400 && (
+                                <Button
+                                    variant="link"
+                                    onClick={() => setShowFullAbout(!showFullAbout)}
+                                    className="p-0 h-auto text-emerald-600 font-semibold mt-2 hover:text-emerald-700"
+                                >
+                                    {showFullAbout ? "Read Less" : "Read All"}
+                                </Button>
+                            )}
+                        </div>
                     </section>
                 )}
 
@@ -708,54 +728,76 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                     </section>
                 )}
 
-                {/* Location */}
-                {project.address && (
+                {/* Amenities */}
+                {project.amenities?.length > 0 && (
                     <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
-                        <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-6 flex items-center gap-3">
-                            <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><MapPin className="h-6 w-6" /></span>
-                            Address
+                        <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-8 flex items-center gap-3">
+                            <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><Wifi className="h-6 w-6" /></span>
+                            Premium Amenities
                         </h2>
-                        <p className="text-slate-600 text-lg">{project.address}</p>
-                        <p className="text-slate-500 mt-2">{project.locality}, {project.city}</p>
-                    </section>
-                )}
-
-                {/* Location Highlights */}
-                {project.locationHighlights && project.locationHighlights?.length > 0 && (
-                    <section className="bg-emerald-950 rounded-[2rem] p-8 md:p-10 text-white relative overflow-hidden">
-                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
-                        <h2 className="text-3xl md:text-4xl font-bold text-amber-50 mb-8 flex items-center gap-3 relative z-10">
-                            <span className="bg-white/10 p-2 rounded-xl text-amber-400 backdrop-blur-sm"><MapPin className="h-6 w-6" /></span>
-                            Commute & Convenience
-                        </h2>
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 relative z-10">
-                            {project.locationHighlights.map((highlight, idx) => (
-                                <div key={idx} className="flex items-start gap-3 p-4 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-colors">
-                                    <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 text-amber-400">
-                                        <Check className="h-4 w-4" />
+                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                            {project.amenities.map((amenity, idx) => {
+                                const Icon = getAmenityIcon(amenity);
+                                return (
+                                    <div key={idx} className="flex flex-col items-center text-center gap-3 p-4 rounded-2xl hover:bg-slate-50 transition-colors group">
+                                        <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                                            <Icon className="h-8 w-8" />
+                                        </div>
+                                        <span className="font-semibold text-slate-700 text-sm">{amenity}</span>
                                     </div>
-                                    <span className="text-stone-200">{highlight}</span>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </section>
                 )}
 
-                {/* Video Tour */}
-                {project.videoUrl && (
-                    <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
-                        <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-8 flex items-center gap-3">
-                            <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><Play className="h-6 w-6" /></span>
-                            Project Video Tour
-                        </h2>
-                        <div className="aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-2xl ring-4 ring-slate-100">
-                            <iframe
-                                src={project.videoUrl.replace("watch?v=", "embed/")}
-                                title="Project Video Tour"
-                                className="w-full h-full"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                            />
+                {/* Gallery */}
+                {galleryImages.length > 1 && (
+                    <section className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
+                        <h2 className="text-2xl font-bold mb-6">Gallery</h2>
+                        <div className="relative group">
+                            {/* Left Arrow */}
+                            <button
+                                onClick={() => {
+                                    const container = document.getElementById('gallery-scroll');
+                                    if (container) container.scrollBy({ left: -300, behavior: 'smooth' });
+                                }}
+                                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 -translate-x-1/2 hover:scale-110"
+                            >
+                                <ChevronLeft className="w-6 h-6 text-slate-700" />
+                            </button>
+
+                            {/* Gallery Container */}
+                            <div
+                                id="gallery-scroll"
+                                className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-2 snap-x snap-mandatory px-4 md:px-0"
+                                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                            >
+                                {galleryImages.map((img, idx) => (
+                                    <div
+                                        key={idx}
+                                        className="flex-shrink-0 w-64 md:w-80 aspect-video rounded-xl overflow-hidden cursor-pointer group/item snap-center"
+                                        onClick={() => openLightbox(idx, galleryImages.map(img => getImageUrl(img)))}
+                                    >
+                                        <img
+                                            src={getImageUrl(img)}
+                                            alt={`Gallery ${idx + 1}`}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Right Arrow */}
+                            <button
+                                onClick={() => {
+                                    const container = document.getElementById('gallery-scroll');
+                                    if (container) container.scrollBy({ left: 300, behavior: 'smooth' });
+                                }}
+                                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 translate-x-1/2 hover:scale-110"
+                            >
+                                <ChevronRight className="w-6 h-6 text-slate-700" />
+                            </button>
                         </div>
                     </section>
                 )}
@@ -808,87 +850,68 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                     </section>
                 )}
 
-                {/* Gallery */}
-                {galleryImages.length > 1 && (
-                    <section className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
-                        <h2 className="text-2xl font-bold mb-6">Gallery</h2>
-                        <div className="relative group">
-                            {/* Left Arrow */}
-                            <button
-                                onClick={() => {
-                                    const container = document.getElementById('gallery-scroll');
-                                    if (container) container.scrollBy({ left: -300, behavior: 'smooth' });
-                                }}
-                                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 -translate-x-1/2 hover:scale-110"
-                            >
-                                <ChevronLeft className="w-6 h-6 text-slate-700" />
-                            </button>
-
-                            {/* Gallery Container */}
-                            <div
-                                id="gallery-scroll"
-                                className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-2"
-                                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                            >
-                                {galleryImages.map((img, idx) => (
-                                    <div
-                                        key={idx}
-                                        className="flex-shrink-0 w-64 md:w-80 aspect-video rounded-xl overflow-hidden cursor-pointer group/item"
-                                        onClick={() => openLightbox(idx, galleryImages.map(img => getImageUrl(img)))}
-                                    >
-                                        <img
-                                            src={getImageUrl(img)}
-                                            alt={`Gallery ${idx + 1}`}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Right Arrow */}
-                            <button
-                                onClick={() => {
-                                    const container = document.getElementById('gallery-scroll');
-                                    if (container) container.scrollBy({ left: 300, behavior: 'smooth' });
-                                }}
-                                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 translate-x-1/2 hover:scale-110"
-                            >
-                                <ChevronRight className="w-6 h-6 text-slate-700" />
-                            </button>
+                {/* Video Tour */}
+                {project.videoUrl && (
+                    <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
+                        <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-8 flex items-center gap-3">
+                            <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><Play className="h-6 w-6" /></span>
+                            Project Video Tour
+                        </h2>
+                        <div className="aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-2xl ring-4 ring-slate-100">
+                            <iframe
+                                src={project.videoUrl.replace("watch?v=", "embed/")}
+                                title="Project Video Tour"
+                                className="w-full h-full"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                            />
                         </div>
                     </section>
                 )}
 
-                {/* Amenities */}
-                {project.amenities?.length > 0 && (
+                {/* Location */}
+                {project.address && (
                     <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
-                        <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-8 flex items-center gap-3">
-                            <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><Wifi className="h-6 w-6" /></span>
-                            Premium Amenities
+                        <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-6 flex items-center gap-3">
+                            <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><MapPin className="h-6 w-6" /></span>
+                            Address
                         </h2>
-                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                            {project.amenities.map((amenity, idx) => {
-                                const Icon = getAmenityIcon(amenity);
-                                return (
-                                    <div key={idx} className="flex flex-col items-center text-center gap-3 p-4 rounded-2xl hover:bg-slate-50 transition-colors group">
-                                        <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                                            <Icon className="h-8 w-8" />
-                                        </div>
-                                        <span className="font-semibold text-slate-700 text-sm">{amenity}</span>
+                        <p className="text-slate-600 text-lg">{project.address}</p>
+                        <p className="text-slate-500 mt-2">{project.locality}, {project.city}</p>
+                    </section>
+                )}
+
+                {/* Location Highlights */}
+                {project.locationHighlights && project.locationHighlights?.length > 0 && (
+                    <section className="bg-emerald-950 rounded-[2rem] p-8 md:p-10 text-white relative overflow-hidden">
+                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
+                        <h2 className="text-3xl md:text-4xl font-bold text-amber-50 mb-8 flex items-center gap-3 relative z-10">
+                            <span className="bg-white/10 p-2 rounded-xl text-amber-400 backdrop-blur-sm"><MapPin className="h-6 w-6" /></span>
+                            Commute & Convenience
+                        </h2>
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 relative z-10">
+                            {project.locationHighlights.map((highlight, idx) => (
+                                <div key={idx} className="flex items-start gap-3 p-4 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-colors">
+                                    <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 text-amber-400">
+                                        <Check className="h-4 w-4" />
                                     </div>
-                                );
-                            })}
+                                    <span className="text-stone-200">{highlight}</span>
+                                </div>
+                            ))}
                         </div>
                     </section>
                 )}
 
                 {/* Builder Description */}
                 {project.builderDescription && (
-                    <section className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
-                        <h2 className="text-2xl font-bold mb-4">About Builder</h2>
-                        <div className="prose max-w-none text-muted-foreground bg-slate-50 p-6 rounded-lg">
-                            <h3 className="text-lg font-semibold text-foreground mb-2">{project.builderName}</h3>
-                            <p>{project.builderDescription}</p>
+                    <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
+                        <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-6 flex items-center gap-3">
+                            <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><Building className="h-6 w-6" /></span>
+                            About Builder
+                        </h2>
+                        <div className="bg-stone-50 p-6 rounded-2xl border border-stone-100">
+                            <h3 className="text-xl font-bold text-emerald-900 mb-2">{project.builderName}</h3>
+                            <p className="text-slate-600 leading-relaxed whitespace-pre-line">{project.builderDescription}</p>
                         </div>
                     </section>
                 )}
@@ -947,6 +970,32 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                     </button>
                 </div>
             )}
+            {/* Sticky Bottom Action Bar (Mobile Only) */}
+            <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 p-3 flex gap-3 md:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.1)] pb-safe-area">
+                {project.advertiser?.phone ? (
+                    <>
+                        <a href={`tel:${project.advertiser.phone}`} className="flex-1">
+                            <Button variant="outline" className="w-full h-12 rounded-xl border-emerald-600 text-emerald-700 font-bold bg-emerald-50 hover:bg-emerald-100">
+                                <Phone className="w-5 h-5 mr-2" />
+                                Call
+                            </Button>
+                        </a>
+                        <Button
+                            onClick={scrollToEnquiry}
+                            className="flex-1 h-12 rounded-xl bg-emerald-950 text-white font-bold shadow-lg shadow-emerald-900/20"
+                        >
+                            Enquire
+                        </Button>
+                    </>
+                ) : (
+                    <Button
+                        onClick={scrollToEnquiry}
+                        className="w-full h-12 rounded-xl bg-emerald-950 text-white font-bold shadow-lg shadow-emerald-900/20"
+                    >
+                        Enquire Now
+                    </Button>
+                )}
+            </div>
         </div>
     );
 }

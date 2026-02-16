@@ -23,7 +23,9 @@ import {
     Clock,
     TrendingUp,
     Timer,
-    Verified
+    Verified,
+    Filter,
+    ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -105,6 +107,7 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
     const [mappingsLoaded, setMappingsLoaded] = useState(false);
 
     // Filters
+    const [showMobileFilters, setShowMobileFilters] = useState(false);
     const [propertyTypeFilter, setPropertyTypeFilter] = useState("all");
     const [unitTypeFilter, setUnitTypeFilter] = useState("all");
     const [localityFilter, setLocalityFilter] = useState("all");
@@ -508,7 +511,7 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
             </header>
 
             {/* Hero Section */}
-            <section className="relative bg-emerald-900 overflow-hidden min-h-[600px] flex flex-col items-center justify-center pt-20 pb-32">
+            <section className="relative bg-emerald-900 overflow-hidden min-h-[auto] md:min-h-[600px] flex flex-col items-center justify-center pt-24 pb-24 md:pt-20 md:pb-32">
                 {/* Background Image */}
                 <div className="absolute inset-0">
                     <img
@@ -528,7 +531,7 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                             {landingPage.locality && ` • ${landingPage.locality}`}
                         </div>
 
-                        <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-white mb-8 leading-tight drop-shadow-2xl shadow-black tracking-tight">
+                        <h1 className="text-3xl sm:text-5xl lg:text-7xl font-bold text-white mb-8 leading-tight drop-shadow-2xl shadow-black tracking-tight">
                             {landingPage.name}
                         </h1>
 
@@ -539,7 +542,7 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                         )}
 
                         {/* Stats */}
-                        <div className="flex flex-wrap items-center justify-center gap-8 text-white mb-16">
+                        <div className="grid grid-cols-2 md:flex md:flex-wrap items-center justify-center gap-4 md:gap-8 text-white mb-16 px-4">
                             <div className="flex items-center gap-3 bg-emerald-950/30 px-5 py-3 rounded-2xl backdrop-blur-sm border border-emerald-500/10">
                                 <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
                                     <Building2 className="w-5 h-5 text-emerald-100" />
@@ -562,8 +565,24 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                         </div>
 
                         {/* Filter Bar Inside Hero */}
-                        <div className="bg-white rounded-[2rem] shadow-2xl shadow-emerald-950/20 p-4 sm:p-5 border border-white/20 mx-auto w-full max-w-5xl backdrop-blur-sm bg-white/95">
-                            <div className={`grid grid-cols-1 sm:grid-cols-2 ${showLocationFilter ? 'lg:grid-cols-6' : 'lg:grid-cols-5'} gap-3 items-end text-left`}>
+                        <div className="bg-white rounded-[2rem] shadow-2xl shadow-emerald-950/20 p-3 sm:p-5 border border-white/20 mx-auto w-full max-w-5xl backdrop-blur-sm bg-white/95 transition-all duration-300">
+                            {/* Mobile Filter Toggle */}
+                            <div className="lg:hidden flex items-center justify-between pb-2 mb-2 border-b border-slate-100" onClick={() => setShowMobileFilters(!showMobileFilters)}>
+                                <div className="flex items-center gap-2 font-bold text-slate-700">
+                                    <Filter className="w-4 h-4 text-emerald-600" />
+                                    <span>Search Filters</span>
+                                    {hasActiveFilters && (
+                                        <Badge variant="secondary" className="h-5 px-1.5 text-[10px] bg-emerald-100 text-emerald-700">
+                                            Active
+                                        </Badge>
+                                    )}
+                                </div>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full hover:bg-slate-100">
+                                    <ChevronRight className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${showMobileFilters ? 'rotate-90' : ''}`} />
+                                </Button>
+                            </div>
+
+                            <div className={`${showMobileFilters ? 'grid' : 'hidden'} lg:grid grid-cols-1 sm:grid-cols-2 ${showLocationFilter ? 'lg:grid-cols-6' : 'lg:grid-cols-5'} gap-3 items-end text-left animate-in slide-in-from-top-2 lg:animate-none`}>
                                 {/* Location Filter */}
                                 {showLocationFilter && (
                                     <div className="space-y-1.5">
