@@ -327,7 +327,12 @@ export const updateProject = async (
             // Ensure array fields are actually arrays
             if (['propertyType', 'unitTypes', 'amenities', 'highlights', 'images', 'locationHighlights'].includes(field)) {
                 if (value && !Array.isArray(value)) {
-                    value = [value];
+                    // Handle object with numeric keys (e.g., {0: "val1", 1: "val2"})
+                    if (typeof value === 'object' && value !== null) {
+                        value = Object.values(value);
+                    } else {
+                        value = [value];
+                    }
                 }
             }
 
