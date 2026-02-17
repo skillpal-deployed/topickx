@@ -337,18 +337,23 @@ export const updateProject = async (
             }
 
             // Convert estimatedPossessionDate to proper ISO-8601 format
-            if (field === 'estimatedPossessionDate' && value) {
-                // If value is in "YYYY-MM" format, convert to "YYYY-MM-01T00:00:00.000Z"
-                if (typeof value === 'string') {
-                    // Check if it's a partial date (YYYY-MM or similar)
-                    if (/^\d{4}-\d{2}$/.test(value)) {
-                        // Add -01 for the first day of the month and make it a full ISO date
-                        value = new Date(`${value}-01T00:00:00.000Z`).toISOString();
-                    } else if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-                        // If it's YYYY-MM-DD, convert to full ISO
-                        value = new Date(`${value}T00:00:00.000Z`).toISOString();
+            // Convert estimatedPossessionDate to proper ISO-8601 format
+            if (field === 'estimatedPossessionDate') {
+                if (value) {
+                    // If value is in "YYYY-MM" format, convert to "YYYY-MM-01T00:00:00.000Z"
+                    if (typeof value === 'string') {
+                        // Check if it's a partial date (YYYY-MM or similar)
+                        if (/^\d{4}-\d{2}$/.test(value)) {
+                            // Add -01 for the first day of the month and make it a full ISO date
+                            value = new Date(`${value}-01T00:00:00.000Z`).toISOString();
+                        } else if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+                            // If it's YYYY-MM-DD, convert to full ISO
+                            value = new Date(`${value}T00:00:00.000Z`).toISOString();
+                        }
+                        // Otherwise, assume it's already a valid ISO string
                     }
-                    // Otherwise, assume it's already a valid ISO string
+                } else if (value === "") {
+                    value = null;
                 }
             }
 
