@@ -132,12 +132,12 @@ export const resolveProjectsData = async (projects: any[]) => {
         if (Array.isArray(ids)) {
             return ids.map(id => {
                 const option = optionMap.get(id);
-                // Return option if found, otherwise return the id as name (it might be a custom amenity or slug that didn't match anything)
-                return option ? { name: option.name, iconUrl: option.iconUrl } : { name: id, iconUrl: null };
-            });
+                // Return option if found, otherwise filter it out (don't show raw UUIDs)
+                return option ? { name: option.name, iconUrl: option.iconUrl } : null;
+            }).filter(Boolean);
         }
         const option = optionMap.get(ids);
-        return [option ? { name: option.name, iconUrl: option.iconUrl } : { name: ids, iconUrl: null }];
+        return option ? [{ name: option.name, iconUrl: option.iconUrl }] : [];
     };
 
     return projects.map(p => ({

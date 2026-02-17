@@ -469,7 +469,7 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
 
                             {/* Price */}
                             <div className="mb-6">
-                                <p className="text-white/60 text-sm uppercase tracking-wider mb-1" data-label="price">Starting Price</p>
+                                <p className="text-white/60 text-sm uppercase tracking-wider mb-1" data-label="price">Price Range</p>
                                 <p className="text-3xl md:text-4xl font-bold text-white">
                                     {formatBudgetRange(project.budgetMin, project.budgetMax)}
                                 </p>
