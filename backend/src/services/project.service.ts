@@ -91,6 +91,33 @@ export const resolveProjectsData = async (projects: any[]) => {
 
     const optionMap = new Map(options.map(o => [o.id, { name: o.name, iconUrl: o.iconUrl }]));
 
+    // Check for amenities that were not found by ID, they might be stored as names
+    // This handles legacy data or data inconsistencies where names were saved instead of IDs
+    const missingOptionIds = Array.from(optionIds).filter(id => !optionMap.has(id));
+
+    if (missingOptionIds.length > 0) {
+        // Try to find them by name (case insensitive)
+        const optionsByName = await prisma.option.findMany({
+            where: {
+                name: {
+                    in: missingOptionIds,
+                    mode: 'insensitive'
+                },
+                optionType: 'AMENITY' // Restrict to amenities to avoid confusion
+            },
+            select: { id: true, name: true, iconUrl: true }
+        });
+
+        // Add found options to map, using the "missing ID" (which is actually a name) as the key
+        optionsByName.forEach(o => {
+            // Find which original ID (name) matches this option
+            const originalName = missingOptionIds.find(missing => missing.toLowerCase() === o.name.toLowerCase());
+            if (originalName) {
+                optionMap.set(originalName, { name: o.name, iconUrl: o.iconUrl });
+            }
+        });
+    }
+
     const resolve = (id: string | null | undefined) => (id && optionMap.has(id) ? optionMap.get(id)!.name : id || "");
 
     const resolveArray = (ids: any) => {
@@ -105,6 +132,7 @@ export const resolveProjectsData = async (projects: any[]) => {
         if (Array.isArray(ids)) {
             return ids.map(id => {
                 const option = optionMap.get(id);
+                // Return option if found, otherwise return the id as name (it might be a custom amenity or slug that didn't match anything)
                 return option ? { name: option.name, iconUrl: option.iconUrl } : { name: id, iconUrl: null };
             });
         }
