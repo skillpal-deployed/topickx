@@ -140,7 +140,9 @@ export default function EditProjectPage({
                         (data.highlights && data.highlights.length > 0)
                             ? data.highlights
                             : [""],
-                    amenities: data.amenities || [],
+                    amenities: data.amenities
+                        ? data.amenities.map((a: any) => (typeof a === 'object' && a !== null && a.name) ? a.name : a)
+                        : [],
                     images: data.images || [],
                     floor_plans: data.floorPlans || data.floor_plans || [],
                     video_url: data.videoUrl || data.video_url || "",
