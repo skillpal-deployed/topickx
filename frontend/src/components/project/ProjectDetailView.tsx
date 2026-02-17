@@ -417,7 +417,7 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
 
                             {/* Badges */}
                             <div className="flex flex-wrap justify-center gap-2 mb-6">
-                                <Badge className="bg-amber-500/90 text-amber-950 border border-amber-400/30 px-4 py-1.5 text-sm font-semibold shadow-lg backdrop-blur-md">
+                                <Badge className="bg-amber-500/90 text-amber-950 border border-amber-400/30 px-4 py-1.5 text-sm font-semibold shadow-lg backdrop-blur-md hover:bg-amber-500 hover:text-amber-950">
                                     {Array.isArray(project.propertyType) ? project.propertyType.join(', ') : project.propertyType}
                                 </Badge>
                                 {project.reraId && (
@@ -469,7 +469,7 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
 
                             {/* Price */}
                             <div className="mb-6">
-                                <p className="text-white/60 text-sm uppercase tracking-wider mb-1">Starting Price</p>
+                                <p className="text-white/60 text-sm uppercase tracking-wider mb-1" data-label="price">Starting Price</p>
                                 <p className="text-3xl md:text-4xl font-bold text-white">
                                     {formatBudgetRange(project.budgetMin, project.budgetMax)}
                                 </p>
