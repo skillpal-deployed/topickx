@@ -1023,7 +1023,7 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
             <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 p-3 flex gap-3 items-center md:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.1)] pb-safe-area">
                 {/* Starting Price */}
                 <div className="flex-1 flex flex-col">
-                    <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">Starting Price</span>
+                    <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">Price Range</span>
                     <div className="text-lg font-bold text-emerald-950 flex items-center gap-1">
                         <IndianRupee className="h-4 w-4" />
                         {formatBudgetRange(project.budgetMin, project.budgetMax)}
