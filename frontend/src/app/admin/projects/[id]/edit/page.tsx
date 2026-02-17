@@ -110,7 +110,7 @@ export default function EditProjectPage() {
                         if (idMatch) return idMatch.id;
                         // Check if val is a Name (legacy data)
                         const nameMatch = options.find(o => o.name.toLowerCase() === valStr.toLowerCase() || (o.label && o.label.toLowerCase() === valStr.toLowerCase()));
-                        return nameMatch ? nameMatch.id : val;
+                        return nameMatch ? nameMatch.id : valStr;
                     }).filter(Boolean); // Filter out nulls if any
                 };
 
