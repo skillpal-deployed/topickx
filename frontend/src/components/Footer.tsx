@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Building2, Mail, Phone, MapPin, Facebook, X, Instagram, Linkedin, Send, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,16 +18,15 @@ export default function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16">
                     {/* Column 1: About TopickX */}
                     <div className="space-y-8">
-                        <Link href="/" className="flex items-center gap-3 group">
-                            <div className="relative">
-                                <div className="absolute inset-0 bg-teal-500 blur-lg opacity-20 group-hover:opacity-40 transition-opacity" />
-                                <div className="relative bg-teal-600 p-2.5 rounded-xl border border-teal-400/20 shadow-xl group-hover:-translate-y-1 transition-transform">
-                                    <Building2 className="h-7 w-7 text-white" />
-                                </div>
+                        <Link href="/" className="flex items-center gap-4 group">
+                            <div className="relative h-24 w-64 -ml-20 overflow-visible">
+                                <Image
+                                    src="/home-logo.png"
+                                    alt="Topickx Logo"
+                                    fill
+                                    className="object-contain object-left scale-[3] origin-left"
+                                />
                             </div>
-                            <span className="text-3xl font-black tracking-tighter">
-                                Topick<span className="text-teal-500 font-sans">x</span>
-                            </span>
                         </Link>
                         <p className="text-slate-400 leading-relaxed text-sm font-medium">
                             The smart multi-platform marketing solution that gives you premium visibility on Google AND Facebook with only 15 competing businesses per landing page. Get more leads, pay less, stand out more.

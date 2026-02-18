@@ -71,15 +71,18 @@ export default function HomePage() {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="relative h-16 w-64">
+              <div className="relative h-16 w-16">
                 <Image
-                  src="/home-logo.png"
-                  alt="Topickx Logo"
+                  src="/logo-icon.png"
+                  alt="Topickx Icon"
                   fill
-                  className="object-contain object-left"
+                  className="object-contain"
                   priority
                 />
               </div>
+              <span className="font-extrabold text-4xl tracking-tight text-teal-900">
+                Topickx
+              </span>
             </Link>
 
             {/* Desktop Nav */}

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Printer, ArrowLeft, Download } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 interface Invoice {
@@ -109,16 +110,23 @@ export default function InvoicePage() {
                             <p className="text-sm text-muted-foreground">
                                 #{invoice.id.substring(0, 8).toUpperCase()}
                             </p>
-                            <div className="mt-4 text-sm text-muted-foreground">
+                            <div className="mt-4 text-sm text-muted-foreground text-right">
                                 <p className="font-semibold text-foreground">Topickx</p>
-                                <p>Premium Real Estate Platform</p>
-                                <p>India</p>
+                                <p>D-16, 1st Floor, Mahalaxmi Nagar Rd,</p>
+                                <p>Behind World Trade Park, D-Block,</p>
+                                <p>Malviya Nagar, Jaipur,</p>
+                                <p>Rajasthan 302017</p>
                             </div>
                         </div>
                         <div className="text-right">
-                            {/* You can replace this with an actual Logo Image if available */}
-                            <div className="h-12 w-32 bg-slate-100 rounded flex items-center justify-center text-slate-400 font-bold mb-4 ml-auto">
-                                LOGO
+                            {/* Logo Image */}
+                            <div className="relative h-24 w-64 ml-auto overflow-visible mb-4">
+                                <Image
+                                    src="/home-logo.png"
+                                    alt="Topickx Logo"
+                                    fill
+                                    className="object-contain object-right scale-[3] origin-right translate-x-4"
+                                />
                             </div>
                             <div className="text-sm">
                                 <p className="text-muted-foreground">Date Issued</p>

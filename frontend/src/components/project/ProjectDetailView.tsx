@@ -365,16 +365,19 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
 
             {/* Sticky Header */}
             <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b shadow-sm">
-                <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-                    <Link href="/" className="flex items-center space-x-2">
-                        <div className="relative h-16 w-64">
+                <div className="container mx-auto px-4 h-24 flex items-center justify-between">
+                    <Link href="/" className="flex items-center space-x-3">
+                        <div className="relative h-12 w-12">
                             <Image
-                                src="/home-logo.png"
-                                alt="Topickx Logo"
+                                src="/logo-icon.png"
+                                alt="Topickx Icon"
                                 fill
-                                className="object-contain object-left"
+                                className="object-contain"
                             />
                         </div>
+                        <span className="text-3xl font-heading font-extrabold text-slate-900 tracking-tight">
+                            Topickx
+                        </span>
                     </Link>
                     <div className="flex items-center gap-4">
                         <Button onClick={scrollToEnquiry} className="bg-slate-900 hover:bg-slate-800 text-amber-50 font-semibold shadow-md border border-white/10 rounded-full px-6 transition-all active:scale-95">
@@ -643,386 +646,410 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                         </div>
                     </div>
                 </div>
-            </section>
+            </section >
 
             {/* Main Content */}
-            <div className="container mx-auto px-4 py-8 md:py-12 space-y-6 md:space-y-10 relative z-10 pb-24 md:pb-12">
+            < div className="container mx-auto px-4 py-8 md:py-12 space-y-6 md:space-y-10 relative z-10 pb-24 md:pb-12" >
 
                 {/* USP Section - New Location */}
-                {(project.usp1 || project.usp2) && (
-                    <div className="grid sm:grid-cols-2 gap-4 max-w-4xl mx-auto">
-                        {project.usp1 && (
-                            <div className="bg-white/70 backdrop-blur-md rounded-2xl p-5 border-2 border-amber-100/50 shadow-sm flex items-center gap-4 group hover:border-amber-400 transition-all">
-                                <div className="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
-                                    <Star className="w-6 h-6 fill-current" />
+                {
+                    (project.usp1 || project.usp2) && (
+                        <div className="grid sm:grid-cols-2 gap-4 max-w-4xl mx-auto">
+                            {project.usp1 && (
+                                <div className="bg-white/70 backdrop-blur-md rounded-2xl p-5 border-2 border-amber-100/50 shadow-sm flex items-center gap-4 group hover:border-amber-400 transition-all">
+                                    <div className="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+                                        <Star className="w-6 h-6 fill-current" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-bold text-amber-600 uppercase tracking-widest">Premium USP</p>
+                                        <p className="text-lg font-bold text-slate-800">{project.usp1?.substring(0, 50)}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-xs font-bold text-amber-600 uppercase tracking-widest">Premium USP</p>
-                                    <p className="text-lg font-bold text-slate-800">{project.usp1?.substring(0, 50)}</p>
+                            )}
+                            {project.usp2 && (
+                                <div className="bg-white/70 backdrop-blur-md rounded-2xl p-5 border-2 border-emerald-100/50 shadow-sm flex items-center gap-4 group hover:border-emerald-400 transition-all">
+                                    <div className="w-12 h-12 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-600/20">
+                                        <Verified className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Premium USP</p>
+                                        <p className="text-lg font-bold text-slate-800">{project.usp2?.substring(0, 50)}</p>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-                        {project.usp2 && (
-                            <div className="bg-white/70 backdrop-blur-md rounded-2xl p-5 border-2 border-emerald-100/50 shadow-sm flex items-center gap-4 group hover:border-emerald-400 transition-all">
-                                <div className="w-12 h-12 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-600/20">
-                                    <Verified className="w-6 h-6" />
-                                </div>
-                                <div>
-                                    <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Premium USP</p>
-                                    <p className="text-lg font-bold text-slate-800">{project.usp2?.substring(0, 50)}</p>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
+                            )}
+                        </div>
+                    )
+                }
 
 
                 {/* About Project */}
-                {project.aboutProject && (
-                    <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
-                        <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-6 flex items-center gap-3">
-                            <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><Building className="h-6 w-6" /></span>
-                            About {project.name}
-                        </h2>
-                        <div className="relative">
-                            <p className={`text-slate-600 leading-relaxed whitespace-pre-line ${!showFullAbout ? 'line-clamp-6' : ''}`}>
-                                {project.aboutProject}
-                            </p>
-                            {project.aboutProject.length > 400 && (
-                                <Button
-                                    variant="link"
-                                    onClick={() => setShowFullAbout(!showFullAbout)}
-                                    className="p-0 h-auto text-emerald-600 font-semibold mt-2 hover:text-emerald-700"
-                                >
-                                    {showFullAbout ? "Read Less" : "Read All"}
-                                </Button>
-                            )}
-                        </div>
-                    </section>
-                )}
+                {
+                    project.aboutProject && (
+                        <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
+                            <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-6 flex items-center gap-3">
+                                <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><Building className="h-6 w-6" /></span>
+                                About {project.name}
+                            </h2>
+                            <div className="relative">
+                                <p className={`text-slate-600 leading-relaxed whitespace-pre-line ${!showFullAbout ? 'line-clamp-6' : ''}`}>
+                                    {project.aboutProject}
+                                </p>
+                                {project.aboutProject.length > 400 && (
+                                    <Button
+                                        variant="link"
+                                        onClick={() => setShowFullAbout(!showFullAbout)}
+                                        className="p-0 h-auto text-emerald-600 font-semibold mt-2 hover:text-emerald-700"
+                                    >
+                                        {showFullAbout ? "Read Less" : "Read All"}
+                                    </Button>
+                                )}
+                            </div>
+                        </section>
+                    )
+                }
 
                 {/* Highlights */}
-                {project.highlights?.length > 0 && (
-                    <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
-                        <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-8 flex items-center gap-3">
-                            <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><Star className="h-6 w-6" /></span>
-                            Key Highlights
-                        </h2>
-                        <div className="grid md:grid-cols-2 gap-4">
-                            {project.highlights.flatMap(h => {
-                                // 1. Terminology Replacement: Property -> Project
-                                const cleanH = h.replace(/\bProperty\b/g, 'Project').replace(/\bProperties\b/g, 'Projects');
+                {
+                    project.highlights?.length > 0 && (
+                        <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
+                            <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-8 flex items-center gap-3">
+                                <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><Star className="h-6 w-6" /></span>
+                                Key Highlights
+                            </h2>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                {project.highlights.flatMap(h => {
+                                    // 1. Terminology Replacement: Property -> Project
+                                    const cleanH = h.replace(/\bProperty\b/g, 'Project').replace(/\bProperties\b/g, 'Projects');
 
-                                // 2. Robust Splitting Logic
-                                if (cleanH.includes('\n')) {
-                                    return cleanH.split('\n').filter(s => s.trim());
-                                }
+                                    // 2. Robust Splitting Logic
+                                    if (cleanH.includes('\n')) {
+                                        return cleanH.split('\n').filter(s => s.trim());
+                                    }
 
-                                // Return as is (trusted input from new admin UI)
-                                return [cleanH];
-                            }).map((highlight, idx) => (
-                                <div key={idx} className="flex items-start gap-4 p-5 bg-stone-50 rounded-2xl border border-stone-100">
-                                    <div className="w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
-                                        <Check className="h-3.5 w-3.5 text-white stroke-[3]" />
+                                    // Return as is (trusted input from new admin UI)
+                                    return [cleanH];
+                                }).map((highlight, idx) => (
+                                    <div key={idx} className="flex items-start gap-4 p-5 bg-stone-50 rounded-2xl border border-stone-100">
+                                        <div className="w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+                                            <Check className="h-3.5 w-3.5 text-white stroke-[3]" />
+                                        </div>
+                                        <span className="text-emerald-900 font-medium leading-relaxed">{highlight}</span>
                                     </div>
-                                    <span className="text-emerald-900 font-medium leading-relaxed">{highlight}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                )}
+                                ))}
+                            </div>
+                        </section>
+                    )
+                }
 
 
                 {/* Amenities */}
-                {project.amenities?.length > 0 && (
-                    <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
-                        <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-8 flex items-center gap-3">
-                            <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><Wifi className="h-6 w-6" /></span>
-                            Premium Amenities
-                        </h2>
-                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                            {project.amenities.map((amenity: any, idx: number) => {
-                                const amenityName = typeof amenity === 'string' ? amenity : amenity.name;
-                                const iconUrl = typeof amenity === 'object' ? amenity.iconUrl : null;
-                                const Icon = getAmenityIcon(amenityName);
+                {
+                    project.amenities?.length > 0 && (
+                        <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
+                            <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-8 flex items-center gap-3">
+                                <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><Wifi className="h-6 w-6" /></span>
+                                Premium Amenities
+                            </h2>
+                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                                {project.amenities.map((amenity: any, idx: number) => {
+                                    const amenityName = typeof amenity === 'string' ? amenity : amenity.name;
+                                    const iconUrl = typeof amenity === 'object' ? amenity.iconUrl : null;
+                                    const Icon = getAmenityIcon(amenityName);
 
-                                return (
-                                    <div key={idx} className="flex flex-col items-center text-center gap-3 p-4 rounded-2xl hover:bg-slate-50 transition-colors group">
-                                        <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                                            {iconUrl ? (
-                                                <img src={iconUrl} alt={amenityName} className="h-8 w-8 object-contain" />
-                                            ) : (
-                                                <Icon className="h-8 w-8" />
-                                            )}
+                                    return (
+                                        <div key={idx} className="flex flex-col items-center text-center gap-3 p-4 rounded-2xl hover:bg-slate-50 transition-colors group">
+                                            <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                                                {iconUrl ? (
+                                                    <img src={iconUrl} alt={amenityName} className="h-8 w-8 object-contain" />
+                                                ) : (
+                                                    <Icon className="h-8 w-8" />
+                                                )}
+                                            </div>
+                                            <span className="font-semibold text-slate-700 text-sm">{amenityName}</span>
                                         </div>
-                                        <span className="font-semibold text-slate-700 text-sm">{amenityName}</span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </section>
-                )}
+                                    );
+                                })}
+                            </div>
+                        </section>
+                    )
+                }
 
                 {/* Video Tour */}
-                {project.videoUrl && (
-                    <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
-                        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-8 flex items-center gap-3">
-                            <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><Play className="h-6 w-6" /></span>
-                            Project Video Tour
-                        </h2>
-                        <div className="aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-2xl ring-4 ring-slate-100">
-                            <iframe
-                                src={project.videoUrl.replace("watch?v=", "embed/")}
-                                title="Project Video Tour"
-                                className="w-full h-full"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                            />
-                        </div>
-                    </section>
-                )}
+                {
+                    project.videoUrl && (
+                        <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
+                            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-8 flex items-center gap-3">
+                                <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><Play className="h-6 w-6" /></span>
+                                Project Video Tour
+                            </h2>
+                            <div className="aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-2xl ring-4 ring-slate-100">
+                                <iframe
+                                    src={project.videoUrl.replace("watch?v=", "embed/")}
+                                    title="Project Video Tour"
+                                    className="w-full h-full"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                />
+                            </div>
+                        </section>
+                    )
+                }
 
                 {/* Gallery */}
-                {galleryImages.length > 1 && (
-                    <section className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
-                        <h2 className="text-2xl font-bold mb-6">Gallery</h2>
-                        <div className="relative group">
-                            {/* Left Arrow */}
-                            <button
-                                onClick={() => {
-                                    const container = document.getElementById('gallery-scroll');
-                                    if (container) container.scrollBy({ left: -300, behavior: 'smooth' });
-                                }}
-                                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 -translate-x-1/2 hover:scale-110"
-                            >
-                                <ChevronLeft className="w-6 h-6 text-slate-700" />
-                            </button>
+                {
+                    galleryImages.length > 1 && (
+                        <section className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
+                            <h2 className="text-2xl font-bold mb-6">Gallery</h2>
+                            <div className="relative group">
+                                {/* Left Arrow */}
+                                <button
+                                    onClick={() => {
+                                        const container = document.getElementById('gallery-scroll');
+                                        if (container) container.scrollBy({ left: -300, behavior: 'smooth' });
+                                    }}
+                                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 -translate-x-1/2 hover:scale-110"
+                                >
+                                    <ChevronLeft className="w-6 h-6 text-slate-700" />
+                                </button>
 
-                            {/* Gallery Container */}
-                            <div
-                                id="gallery-scroll"
-                                className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-2 snap-x snap-mandatory px-4 md:px-0"
-                                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                            >
-                                {galleryImages.map((img, idx) => (
-                                    <div
-                                        key={idx}
-                                        className="flex-shrink-0 w-64 md:w-80 aspect-video rounded-xl overflow-hidden cursor-pointer group/item snap-center"
-                                        onClick={() => openLightbox(idx, galleryImages.map(img => getImageUrl(img)))}
-                                    >
-                                        <img
-                                            src={getImageUrl(img)}
-                                            alt={`Gallery ${idx + 1}`}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                ))}
+                                {/* Gallery Container */}
+                                <div
+                                    id="gallery-scroll"
+                                    className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-2 snap-x snap-mandatory px-4 md:px-0"
+                                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                                >
+                                    {galleryImages.map((img, idx) => (
+                                        <div
+                                            key={idx}
+                                            className="flex-shrink-0 w-64 md:w-80 aspect-video rounded-xl overflow-hidden cursor-pointer group/item snap-center"
+                                            onClick={() => openLightbox(idx, galleryImages.map(img => getImageUrl(img)))}
+                                        >
+                                            <img
+                                                src={getImageUrl(img)}
+                                                alt={`Gallery ${idx + 1}`}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Right Arrow */}
+                                <button
+                                    onClick={() => {
+                                        const container = document.getElementById('gallery-scroll');
+                                        if (container) container.scrollBy({ left: 300, behavior: 'smooth' });
+                                    }}
+                                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 translate-x-1/2 hover:scale-110"
+                                >
+                                    <ChevronRight className="w-6 h-6 text-slate-700" />
+                                </button>
                             </div>
-
-                            {/* Right Arrow */}
-                            <button
-                                onClick={() => {
-                                    const container = document.getElementById('gallery-scroll');
-                                    if (container) container.scrollBy({ left: 300, behavior: 'smooth' });
-                                }}
-                                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 translate-x-1/2 hover:scale-110"
-                            >
-                                <ChevronRight className="w-6 h-6 text-slate-700" />
-                            </button>
-                        </div>
-                    </section>
-                )}
+                        </section>
+                    )
+                }
 
                 {/* Floor Plans */}
-                {floorPlans.length > 0 && (
-                    <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
-                        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-8 flex items-center gap-3">
-                            <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><Ruler className="h-6 w-6" /></span>
-                            Floor Plans & Configuration
-                        </h2>
-                        <div className="relative group">
-                            {/* Left Arrow */}
-                            <button
-                                onClick={() => {
-                                    const container = document.getElementById('floorplans-scroll');
-                                    if (container) container.scrollBy({ left: -300, behavior: 'smooth' });
-                                }}
-                                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 -translate-x-1/2 hover:scale-110"
-                            >
-                                <ChevronLeft className="w-6 h-6 text-slate-700" />
-                            </button>
+                {
+                    floorPlans.length > 0 && (
+                        <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
+                            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-8 flex items-center gap-3">
+                                <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><Ruler className="h-6 w-6" /></span>
+                                Floor Plans & Configuration
+                            </h2>
+                            <div className="relative group">
+                                {/* Left Arrow */}
+                                <button
+                                    onClick={() => {
+                                        const container = document.getElementById('floorplans-scroll');
+                                        if (container) container.scrollBy({ left: -300, behavior: 'smooth' });
+                                    }}
+                                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 -translate-x-1/2 hover:scale-110"
+                                >
+                                    <ChevronLeft className="w-6 h-6 text-slate-700" />
+                                </button>
 
-                            {/* Floor Plans Container */}
-                            <div
-                                id="floorplans-scroll"
-                                className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-2 snap-x snap-mandatory px-4 md:px-0"
-                                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                            >
-                                {floorPlans.map((fp, idx) => (
-                                    <div
-                                        key={idx}
-                                        className="flex-shrink-0 w-72 md:w-80 group/item border border-slate-200 rounded-xl overflow-hidden cursor-pointer snap-center"
-                                        onClick={() => {
-                                            const images = floorPlans.map(p => getImageUrl(typeof p === 'string' ? p : p.url));
-                                            openLightbox(idx, images);
-                                        }}
-                                    >
-                                        <div className="aspect-[4/3] bg-slate-50 relative overflow-hidden">
-                                            <img
-                                                src={getImageUrl(typeof fp === 'string' ? fp : fp.url)}
-                                                alt={typeof fp === 'string' ? `Floor Plan ${idx + 1}` : (fp.description || `Floor Plan ${idx + 1}`)}
-                                                className="w-full h-full object-contain"
-                                            />
-                                            <div className="absolute inset-0 bg-black/0 group-hover/item:bg-black/20 transition-colors flex items-center justify-center">
-                                                <span className="opacity-0 group-hover/item:opacity-100 transition-opacity text-white text-sm font-medium bg-black/50 px-3 py-1 rounded-full">
-                                                    Click to expand
-                                                </span>
+                                {/* Floor Plans Container */}
+                                <div
+                                    id="floorplans-scroll"
+                                    className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-2 snap-x snap-mandatory px-4 md:px-0"
+                                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                                >
+                                    {floorPlans.map((fp, idx) => (
+                                        <div
+                                            key={idx}
+                                            className="flex-shrink-0 w-72 md:w-80 group/item border border-slate-200 rounded-xl overflow-hidden cursor-pointer snap-center"
+                                            onClick={() => {
+                                                const images = floorPlans.map(p => getImageUrl(typeof p === 'string' ? p : p.url));
+                                                openLightbox(idx, images);
+                                            }}
+                                        >
+                                            <div className="aspect-[4/3] bg-slate-50 relative overflow-hidden">
+                                                <img
+                                                    src={getImageUrl(typeof fp === 'string' ? fp : fp.url)}
+                                                    alt={typeof fp === 'string' ? `Floor Plan ${idx + 1}` : (fp.description || `Floor Plan ${idx + 1}`)}
+                                                    className="w-full h-full object-contain"
+                                                />
+                                                <div className="absolute inset-0 bg-black/0 group-hover/item:bg-black/20 transition-colors flex items-center justify-center">
+                                                    <span className="opacity-0 group-hover/item:opacity-100 transition-opacity text-white text-sm font-medium bg-black/50 px-3 py-1 rounded-full">
+                                                        Click to expand
+                                                    </span>
+                                                </div>
                                             </div>
+                                            {typeof fp !== 'string' && (fp.description || fp.price) && (
+                                                <div className="p-4 bg-white">
+                                                    {fp.description && (
+                                                        <p className="font-semibold text-slate-900">{fp.description}</p>
+                                                    )}
+                                                    {fp.price && (
+                                                        <p className="text-primary font-bold text-lg flex items-center gap-1 mt-1">
+                                                            <IndianRupee className="h-4 w-4" />
+                                                            {fp.price}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
-                                        {typeof fp !== 'string' && (fp.description || fp.price) && (
-                                            <div className="p-4 bg-white">
-                                                {fp.description && (
-                                                    <p className="font-semibold text-slate-900">{fp.description}</p>
-                                                )}
-                                                {fp.price && (
-                                                    <p className="text-primary font-bold text-lg flex items-center gap-1 mt-1">
-                                                        <IndianRupee className="h-4 w-4" />
-                                                        {fp.price}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        )}
+                                    ))}
+                                </div>
+
+                                {/* Right Arrow */}
+                                <button
+                                    onClick={() => {
+                                        const container = document.getElementById('floorplans-scroll');
+                                        if (container) container.scrollBy({ left: 300, behavior: 'smooth' });
+                                    }}
+                                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 translate-x-1/2 hover:scale-110"
+                                >
+                                    <ChevronRight className="w-6 h-6 text-slate-700" />
+                                </button>
+                            </div>
+                        </section>
+                    )
+                }
+
+                {/* Location Highlights */}
+                {
+                    project.locationHighlights && project.locationHighlights?.length > 0 && (
+                        <section className="bg-emerald-950 rounded-[2rem] p-8 md:p-10 text-white relative overflow-hidden">
+                            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
+                            <h2 className="text-3xl md:text-4xl font-bold text-amber-50 mb-8 flex items-center gap-3 relative z-10">
+                                <span className="bg-white/10 p-2 rounded-xl text-amber-400 backdrop-blur-sm"><MapPin className="h-6 w-6" /></span>
+                                Commute & Convenience
+                            </h2>
+                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 relative z-10">
+                                {project.locationHighlights.map((highlight, idx) => (
+                                    <div key={idx} className="flex items-start gap-3 p-4 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-colors">
+                                        <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 text-amber-400">
+                                            <Check className="h-4 w-4" />
+                                        </div>
+                                        <span className="text-stone-200">{highlight}</span>
                                     </div>
                                 ))}
                             </div>
-
-                            {/* Right Arrow */}
-                            <button
-                                onClick={() => {
-                                    const container = document.getElementById('floorplans-scroll');
-                                    if (container) container.scrollBy({ left: 300, behavior: 'smooth' });
-                                }}
-                                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 translate-x-1/2 hover:scale-110"
-                            >
-                                <ChevronRight className="w-6 h-6 text-slate-700" />
-                            </button>
-                        </div>
-                    </section>
-                )}
-
-                {/* Location Highlights */}
-                {project.locationHighlights && project.locationHighlights?.length > 0 && (
-                    <section className="bg-emerald-950 rounded-[2rem] p-8 md:p-10 text-white relative overflow-hidden">
-                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
-                        <h2 className="text-3xl md:text-4xl font-bold text-amber-50 mb-8 flex items-center gap-3 relative z-10">
-                            <span className="bg-white/10 p-2 rounded-xl text-amber-400 backdrop-blur-sm"><MapPin className="h-6 w-6" /></span>
-                            Commute & Convenience
-                        </h2>
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 relative z-10">
-                            {project.locationHighlights.map((highlight, idx) => (
-                                <div key={idx} className="flex items-start gap-3 p-4 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-colors">
-                                    <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 text-amber-400">
-                                        <Check className="h-4 w-4" />
-                                    </div>
-                                    <span className="text-stone-200">{highlight}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                )}
+                        </section>
+                    )
+                }
 
                 {/* Location */}
-                {project.address && (
-                    <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
-                        <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-6 flex items-center gap-3">
-                            <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><MapPin className="h-6 w-6" /></span>
-                            Address
-                        </h2>
-                        <p className="text-slate-600 text-lg">{project.address}</p>
-                        <p className="text-slate-500 mt-2">{project.locality}, {project.city}</p>
-                    </section>
-                )}
+                {
+                    project.address && (
+                        <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
+                            <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-6 flex items-center gap-3">
+                                <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><MapPin className="h-6 w-6" /></span>
+                                Address
+                            </h2>
+                            <p className="text-slate-600 text-lg">{project.address}</p>
+                            <p className="text-slate-500 mt-2">{project.locality}, {project.city}</p>
+                        </section>
+                    )
+                }
 
                 {/* Builder Description */}
-                {project.builderDescription && (
-                    <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
-                        <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-6 flex items-center gap-3">
-                            <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><Building className="h-6 w-6" /></span>
-                            About Advertiser
-                        </h2>
-                        <div className="bg-stone-50 p-6 rounded-2xl border border-stone-100">
-                            <div className="flex items-center gap-4 mb-4">
-                                {project.advertiserLogo && (
-                                    <div className="relative h-16 w-16 flex-shrink-0 bg-white rounded-xl p-2 shadow-sm border border-stone-200">
-                                        <Image
-                                            src={getImageUrl(project.advertiserLogo)}
-                                            alt={`${project.builderName} Logo`}
-                                            fill
-                                            className="object-contain"
-                                        />
-                                    </div>
-                                )}
-                                <h3 className="text-xl font-bold text-emerald-900">{project.builderName}</h3>
+                {
+                    project.builderDescription && (
+                        <section className="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">
+                            <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-6 flex items-center gap-3">
+                                <span className="bg-amber-50 p-2 rounded-xl text-amber-600"><Building className="h-6 w-6" /></span>
+                                About Advertiser
+                            </h2>
+                            <div className="bg-stone-50 p-6 rounded-2xl border border-stone-100">
+                                <div className="flex items-center gap-4 mb-4">
+                                    {project.advertiserLogo && (
+                                        <div className="relative h-16 w-16 flex-shrink-0 bg-white rounded-xl p-2 shadow-sm border border-stone-200">
+                                            <Image
+                                                src={getImageUrl(project.advertiserLogo)}
+                                                alt={`${project.builderName} Logo`}
+                                                fill
+                                                className="object-contain"
+                                            />
+                                        </div>
+                                    )}
+                                    <h3 className="text-xl font-bold text-emerald-900">{project.builderName}</h3>
+                                </div>
+                                <p className="text-slate-600 leading-relaxed whitespace-pre-line">{project.builderDescription}</p>
                             </div>
-                            <p className="text-slate-600 leading-relaxed whitespace-pre-line">{project.builderDescription}</p>
-                        </div>
-                    </section>
-                )}
+                        </section>
+                    )
+                }
 
                 {/* Disclaimer */}
-                {project.disclaimer && (
-                    <div className="text-xs text-muted-foreground p-4 bg-slate-50 rounded-lg text-center">
-                        <p className="font-semibold mb-1">Disclaimer</p>
-                        <p>{project.disclaimer}</p>
-                    </div>
-                )}
-            </div>
+                {
+                    project.disclaimer && (
+                        <div className="text-xs text-muted-foreground p-4 bg-slate-50 rounded-lg text-center">
+                            <p className="font-semibold mb-1">Disclaimer</p>
+                            <p>{project.disclaimer}</p>
+                        </div>
+                    )
+                }
+            </div >
 
             {/* Lightbox */}
-            {lightboxIndex > -1 && lightboxImages.length > 0 && (
-                <div
-                    className="fixed inset-0 z-[60] bg-black/95 backdrop-blur-sm flex items-center justify-center"
-                    onClick={() => {
-                        setLightboxIndex(-1);
-                        setLightboxImages([]);
-                    }}
-                >
-                    <button
-                        className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors"
+            {
+                lightboxIndex > -1 && lightboxImages.length > 0 && (
+                    <div
+                        className="fixed inset-0 z-[60] bg-black/95 backdrop-blur-sm flex items-center justify-center"
                         onClick={() => {
                             setLightboxIndex(-1);
                             setLightboxImages([]);
                         }}
                     >
-                        <X className="w-8 h-8" />
-                    </button>
+                        <button
+                            className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors"
+                            onClick={() => {
+                                setLightboxIndex(-1);
+                                setLightboxImages([]);
+                            }}
+                        >
+                            <X className="w-8 h-8" />
+                        </button>
 
-                    <button
-                        className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors p-4"
-                        onClick={prevImage}
-                    >
-                        <ChevronLeft className="w-12 h-12" />
-                    </button>
+                        <button
+                            className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors p-4"
+                            onClick={prevImage}
+                        >
+                            <ChevronLeft className="w-12 h-12" />
+                        </button>
 
-                    <div className="max-w-[90vw] max-h-[90vh] relative" onClick={e => e.stopPropagation()}>
-                        <img
-                            src={getImageUrl(lightboxImages[lightboxIndex])}
-                            alt="Lightbox"
-                            className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
-                        />
-                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/80 bg-black/50 px-4 py-2 rounded-full text-sm font-medium backdrop-blur-md">
-                            {lightboxIndex + 1} / {lightboxImages.length}
+                        <div className="max-w-[90vw] max-h-[90vh] relative" onClick={e => e.stopPropagation()}>
+                            <img
+                                src={getImageUrl(lightboxImages[lightboxIndex])}
+                                alt="Lightbox"
+                                className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+                            />
+                            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/80 bg-black/50 px-4 py-2 rounded-full text-sm font-medium backdrop-blur-md">
+                                {lightboxIndex + 1} / {lightboxImages.length}
+                            </div>
                         </div>
-                    </div>
 
-                    <button
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors p-4"
-                        onClick={nextImage}
-                    >
-                        <ChevronRight className="w-12 h-12" />
-                    </button>
-                </div>
-            )}
+                        <button
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors p-4"
+                            onClick={nextImage}
+                        >
+                            <ChevronRight className="w-12 h-12" />
+                        </button>
+                    </div>
+                )
+            }
             {/* Sticky Bottom Action Bar (Mobile Only) */}
             <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 p-3 flex gap-3 items-center md:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.1)] pb-safe-area">
                 {/* Starting Price */}
@@ -1041,6 +1068,6 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                     Enquire
                 </Button>
             </div>
-        </div>
+        </div >
     );
 }
