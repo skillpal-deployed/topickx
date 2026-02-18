@@ -155,7 +155,8 @@ export const getPackageRequests = async (status?: string) => {
 
 export const createPackageRequest = async (
     advertiserId: string,
-    packageDefinitionId: string
+    packageDefinitionId: string,
+    projectId?: string
 ) => {
     const pkgDef = await prisma.packageDefinition.findUnique({
         where: { id: packageDefinitionId },
@@ -182,6 +183,7 @@ export const createPackageRequest = async (
             advertiserId,
             packageDefinitionId,
             status: 'pending',
+            projectId,
         },
         include: {
             packageDefinition: true,
@@ -257,6 +259,23 @@ export const confirmPayment = async (
         },
     });
 
+    // If this was a renewal request (linked to a project), update the project
+    if (request.projectId) {
+        await prisma.project.update({
+            where: { id: request.projectId },
+            data: {
+                packageId: purchase.id,
+                status: 'APPROVED_AWAITING_PLACEMENT', // Reset status for re-placement
+                // We keep the original details, just need placement
+            },
+        });
+
+        await logAudit('project_renewed', currentUserId, currentUserRole, {
+            projectId: request.projectId,
+            newPackageId: purchase.id,
+        });
+    }
+
     await logAudit('payment_confirmed', currentUserId, currentUserRole, {
         requestId,
         purchaseId: purchase.id,
@@ -264,6 +283,7 @@ export const confirmPayment = async (
         amount: data.amountPaid || request.packageDefinition.price,
         paymentType: data.paymentType,
         pendingAmount: data.pendingAmount,
+        projectId: request.projectId, // Log if it was a renewal
     });
 
     return { message: 'Payment confirmed', purchaseId: purchase.id };

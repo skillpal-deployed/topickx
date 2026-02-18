@@ -88,6 +88,7 @@ model PackageRequest {
   amountPaid           Float?
   discount             Float?            @default(0)
   salespersonId        String?
+  projectId            String?           // Optional: For renewal requests linked to a specific project
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
   paymentDueDate       DateTime?

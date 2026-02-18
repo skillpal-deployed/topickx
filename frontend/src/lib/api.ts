@@ -80,8 +80,8 @@ export const advertiserAPI = {
 
     // Package Requests
     getPackageRequests: () => api.get("/advertiser/package-requests"),
-    createPackageRequest: (packageDefinitionId: string) =>
-        api.post("/advertiser/package-request", { packageDefinitionId }),
+    createPackageRequest: (packageDefinitionId: string, projectId?: string) =>
+        api.post("/advertiser/package-request", { packageDefinitionId, projectId }),
 
     // Packages
     getPackages: () => api.get("/advertiser/packages"),
@@ -124,6 +124,15 @@ export const adminAPI = {
 
     // Permissions
     getPermissions: () => api.get("/admin/permissions"),
+
+    // File Upload
+    uploadFile: (file: File) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        return api.post("/upload", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+    },
 
     // Admin Users
     getUsers: () => api.get("/admin/users"),

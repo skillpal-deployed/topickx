@@ -26,6 +26,23 @@ import {
     Users,
     Clock,
 } from "lucide-react";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
 
 interface Project {
     id: string;
@@ -59,6 +76,13 @@ export default function ProjectsPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
 
+    // Renewal State
+    const [renewDialogOpen, setRenewDialogOpen] = useState(false);
+    const [selectedProjectForRenewal, setSelectedProjectForRenewal] = useState<Project | null>(null);
+    const [availablePackages, setAvailablePackages] = useState<any[]>([]);
+    const [selectedPackageId, setSelectedPackageId] = useState<string>("");
+    const [renewing, setRenewing] = useState(false);
+
     useEffect(() => {
         const fetchProjects = async () => {
             try {
@@ -74,6 +98,37 @@ export default function ProjectsPage() {
 
         fetchProjects();
     }, []);
+
+    const handleRenewClick = async (project: Project) => {
+        try {
+            // Fetch package definitions (not purchased packages, but definitions to buy new one)
+            const response = await advertiserAPI.getPackageDefinitions();
+            setAvailablePackages(response.data);
+            setSelectedProjectForRenewal(project);
+            setRenewDialogOpen(true);
+        } catch (error) {
+            console.error("Error fetching packages:", error);
+            toast.error("Failed to load packages");
+        }
+    };
+
+    const handleRenewConfirm = async () => {
+        if (!selectedPackageId || !selectedProjectForRenewal) return;
+
+        setRenewing(true);
+        try {
+            await advertiserAPI.createPackageRequest(selectedPackageId, selectedProjectForRenewal.id);
+            toast.success("Renewal request sent successfully!");
+            setRenewDialogOpen(false);
+            setSelectedProjectForRenewal(null);
+            setSelectedPackageId("");
+        } catch (error) {
+            console.error("Error renewing project:", error);
+            toast.error("Failed to send renewal request");
+        } finally {
+            setRenewing(false);
+        }
+    };
 
     const getStatusBadge = (status: string) => {
         const variants: Record<string, any> = {
@@ -266,21 +321,32 @@ export default function ProjectsPage() {
                                     </div>
                                 </div>
 
-                                <div className="flex gap-2">
-                                    <Link href={`/dashboard/projects/${project.id}`} className="flex-1">
-                                        <Button variant="outline" size="sm" className="w-full">
-                                            <FolderOpen className="h-4 w-4 mr-1" />
-                                            Manage
-                                        </Button>
-                                    </Link>
-                                    <Link href={getProjectUrl(project as any)} target="_blank" className="flex-1">
-                                        <Button variant="outline" size="sm" className="w-full">
-                                            <Eye className="h-4 w-4 mr-1" />
-                                            Preview
-                                        </Button>
-                                    </Link>
-                                    {/* Edit button removed - Advertisers cannot edit after creation */}
-                                </div>
+                                {project.status === 'EXPIRED' ? (
+                                    <Button
+                                        variant="default"
+                                        size="sm"
+                                        className="w-full bg-amber-600 hover:bg-amber-700"
+                                        onClick={() => handleRenewClick(project)}
+                                    >
+                                        <Clock className="h-4 w-4 mr-1" />
+                                        Renew
+                                    </Button>
+                                ) : (
+                                    <div className="flex gap-2 w-full">
+                                        <Link href={`/dashboard/projects/${project.id}`} className="flex-1">
+                                            <Button variant="outline" size="sm" className="w-full">
+                                                <FolderOpen className="h-4 w-4 mr-1" />
+                                                Manage
+                                            </Button>
+                                        </Link>
+                                        <Link href={getProjectUrl(project as any)} target="_blank" className="flex-1">
+                                            <Button variant="outline" size="sm" className="w-full">
+                                                <Eye className="h-4 w-4 mr-1" />
+                                                Preview
+                                            </Button>
+                                        </Link>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     ))}
@@ -299,13 +365,54 @@ export default function ProjectsPage() {
                             <Link href="/dashboard/projects/new">
                                 <Button>
                                     <Plus className="h-4 w-4 mr-2" />
-                                    Create Project
+                                    New Project
                                 </Button>
                             </Link>
                         )}
                     </CardContent>
                 </Card>
-            )}
+            )
+            }
+
+            <Dialog open={renewDialogOpen} onOpenChange={setRenewDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Renew Project</DialogTitle>
+                        <DialogDescription>
+                            Select a package to renew <strong>{selectedProjectForRenewal?.name}</strong>.
+                            Upon payment, the project will be submitted for review.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="py-4">
+                        <label className="text-sm font-medium mb-2 block">Select Package</label>
+                        <Select value={selectedPackageId} onValueChange={setSelectedPackageId}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Choose a package..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {availablePackages.map((pkg) => (
+                                    <SelectItem key={pkg.id} value={pkg.id}>
+                                        {pkg.name} - {pkg.durationMonths} Months ({pkg.currency} {pkg.price})
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setRenewDialogOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleRenewConfirm}
+                            disabled={!selectedPackageId || renewing}
+                        >
+                            {renewing ? "Sending Request..." : "Request Renewal"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

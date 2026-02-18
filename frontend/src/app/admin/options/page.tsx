@@ -161,18 +161,11 @@ export default function OptionsPage() {
         }
 
         setUploadingIcon(true);
+        setUploadingIcon(true);
         try {
-            const formData = new FormData();
-            formData.append('file', file);
+            const response = await adminAPI.uploadFile(file);
+            const data = response.data;
 
-            const response = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (!response.ok) throw new Error('Upload failed');
-
-            const data = await response.json();
             if (isEdit) {
                 setEditOption({ ...editOption, iconUrl: data.url });
             } else {
