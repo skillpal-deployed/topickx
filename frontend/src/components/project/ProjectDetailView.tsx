@@ -367,17 +367,14 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
             <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b shadow-sm">
                 <div className="container mx-auto px-4 h-16 flex items-center justify-between">
                     <Link href="/" className="flex items-center space-x-2">
-                        <div className="relative w-8 h-8">
+                        <div className="relative h-16 w-64">
                             <Image
-                                src="/icon.png"
+                                src="/home-logo.png"
                                 alt="Topickx Logo"
                                 fill
-                                className="object-contain"
+                                className="object-contain object-left"
                             />
                         </div>
-                        <span className="text-xl font-heading font-bold">
-                            <span className="text-primary">Topickx</span>
-                        </span>
                     </Link>
                     <div className="flex items-center gap-4">
                         <Button onClick={scrollToEnquiry} className="bg-slate-900 hover:bg-slate-800 text-amber-50 font-semibold shadow-md border border-white/10 rounded-full px-6 transition-all active:scale-95">

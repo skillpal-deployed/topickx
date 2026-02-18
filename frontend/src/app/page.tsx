@@ -71,17 +71,15 @@ export default function HomePage() {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-12 h-12 rounded-full bg-teal-900/5 backdrop-blur-md flex items-center justify-center border border-teal-900/10 group-hover:bg-teal-900/10 transition-all relative overflow-hidden">
+              <div className="relative h-16 w-64">
                 <Image
-                  src="/icon.png"
+                  src="/home-logo.png"
                   alt="Topickx Logo"
                   fill
-                  className="object-contain p-2"
+                  className="object-contain object-left"
+                  priority
                 />
               </div>
-              <span className="font-extrabold text-2xl tracking-tight text-teal-900">
-                Topickx
-              </span>
             </Link>
 
             {/* Desktop Nav */}

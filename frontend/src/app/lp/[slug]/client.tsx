@@ -498,15 +498,14 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
             <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-emerald-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <div className="relative w-8 h-8">
+                        <div className="relative h-16 w-64">
                             <Image
-                                src="/icon.png"
+                                src="/home-logo.png"
                                 alt="Topickx Logo"
                                 fill
-                                className="object-contain"
+                                className="object-contain object-left"
                             />
                         </div>
-                        <span className="font-bold text-xl text-slate-900">Topickx</span>
                     </div>
                     <Button
                         onClick={() => setShowMandatoryForm(true)}
