@@ -423,39 +423,36 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                             )}
 
                             {/* Badges */}
-                            {/* Badges - Unified Premium Design */}
-                            <div className="flex flex-wrap justify-center gap-3 mb-8">
-                                {/* Property Type */}
-                                <Badge variant="outline" className="bg-slate-950/40 border-white/10 text-white px-4 py-1.5 backdrop-blur-md shadow-sm">
+                            <div className="flex flex-wrap justify-center gap-2 mb-6">
+                                <Badge className="bg-amber-500/90 text-amber-950 border border-amber-400/30 px-4 py-1.5 text-sm font-semibold shadow-lg backdrop-blur-md hover:bg-amber-500 hover:text-amber-950">
                                     {Array.isArray(project.propertyType) ? project.propertyType.join(', ') : project.propertyType}
                                 </Badge>
-
-                                {/* RERA Approved */}
                                 {project.reraId && (
-                                    <Badge variant="outline" className="bg-slate-950/40 border-white/10 text-white px-4 py-1.5 backdrop-blur-md shadow-sm">
-                                        <Verified className="h-3.5 w-3.5 mr-2 text-amber-400" />
+                                    <Badge variant="outline" className="bg-slate-950/30 text-white border-slate-500/20 backdrop-blur-sm">
+                                        <Verified className="h-3 w-3 mr-1 text-amber-400" />
                                         RERA Approved
                                     </Badge>
                                 )}
-
-                                {/* Possession Status */}
-                                <Badge variant="outline" className="bg-slate-950/40 border-white/10 text-white px-4 py-1.5 backdrop-blur-md shadow-sm">
-                                    <Calendar className="h-3.5 w-3.5 mr-2 text-amber-400" />
+                                <Badge variant="outline" className="bg-slate-950/30 text-white border-slate-500/20 backdrop-blur-sm">
+                                    <Calendar className="h-3 w-3 mr-1 text-amber-400" />
                                     {project.possessionStatus}
                                 </Badge>
-
-                                {/* Expected Completion - Only if under construction */}
                                 {project.possessionStatus?.toLowerCase().includes("under construction") && project.estimatedPossessionDate && (() => {
                                     try {
                                         const date = new Date(project.estimatedPossessionDate);
-                                        if (isNaN(date.getTime())) return null;
+                                        // Check if date is valid
+                                        if (isNaN(date.getTime())) {
+                                            console.warn('Invalid estimated possession date:', project.estimatedPossessionDate);
+                                            return null;
+                                        }
                                         return (
-                                            <Badge variant="outline" className="bg-slate-950/40 border-white/10 text-white px-4 py-1.5 backdrop-blur-md shadow-sm">
-                                                <Timer className="h-3.5 w-3.5 mr-2 text-amber-400" />
+                                            <Badge variant="outline" className="bg-amber-500/20 text-amber-100 border-amber-400/30 backdrop-blur-sm">
+                                                <Timer className="h-3 w-3 mr-1 text-amber-400" />
                                                 Expected: {date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                                             </Badge>
                                         );
                                     } catch (error) {
+                                        console.error('Error formatting estimated possession date:', error);
                                         return null;
                                     }
                                 })()}
