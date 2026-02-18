@@ -764,7 +764,7 @@ export const deleteProject = async (
 };
 
 export const getPlacementQueue = async () => {
-    return prisma.project.findMany({
+    const projects = await prisma.project.findMany({
         where: { status: ProjectStatus.APPROVED_AWAITING_PLACEMENT },
         include: {
             advertiser: {
@@ -782,4 +782,6 @@ export const getPlacementQueue = async () => {
         },
         orderBy: { createdAt: 'asc' },
     });
+
+    return resolveProjectsData(projects);
 };

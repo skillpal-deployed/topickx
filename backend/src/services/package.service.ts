@@ -532,6 +532,40 @@ export const activatePackage = async (packageId: string) => {
     });
 };
 
+export const updatePackageDates = async (
+    packageId: string,
+    startDate: string | Date,
+    endDate: string | Date,
+    currentUserId: string,
+    currentUserRole: AdminRole
+) => {
+    const pkg = await prisma.packagePurchase.findUnique({
+        where: { id: packageId },
+    });
+
+    if (!pkg) {
+        throw new Error('Package not found');
+    }
+
+    const updated = await prisma.packagePurchase.update({
+        where: { id: packageId },
+        data: {
+            startDate: new Date(startDate),
+            endDate: new Date(endDate),
+        },
+    });
+
+    await logAudit('package_dates_updated', currentUserId, currentUserRole, {
+        packageId,
+        oldStartDate: pkg.startDate,
+        oldEndDate: pkg.endDate,
+        newStartDate: updated.startDate,
+        newEndDate: updated.endDate,
+    });
+
+    return updated;
+};
+
 // ==================== Renewals ====================
 
 export const getRenewals = async (days: number = 30) => {

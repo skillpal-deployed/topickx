@@ -86,6 +86,8 @@ export const advertiserAPI = {
     // Packages
     getPackages: () => api.get("/advertiser/packages"),
     getAvailablePackages: () => api.get("/advertiser/available-packages"),
+    updatePackageDates: (packageId: string, data: { startDate: string; endDate: string }) =>
+        api.put(`/admin/packages/${packageId}/dates`, data),
 
     // Projects
     getProjects: () => api.get("/advertiser/projects"),
@@ -190,6 +192,10 @@ export const adminAPI = {
         api.put(`/admin/package-definitions/${id}`, data),
     deletePackageDefinition: (id: string) =>
         api.delete(`/admin/package-definitions/${id}`),
+
+    // Packages
+    updatePackageDates: (packageId: string, data: { startDate: string; endDate: string }) =>
+        api.put(`/admin/packages/${packageId}/dates`, data),
 
     // Payment Requests
     getPaymentRequests: (status?: string) =>

@@ -145,10 +145,8 @@ export default function AdminLayout({
                     {/* Logo */}
                     <div className="flex items-center justify-between h-16 px-6 border-b border-slate-200">
                         <Link href="/admin" className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                                <Building2 className="w-5 h-5 text-white" />
-                            </div>
-                            <span className="font-display font-semibold text-lg text-slate-900">
+                            <img src="/logo-icon.png" alt="Topickx" className="w-8 h-8 object-contain" />
+                            <span className="font-display font-bold text-xl text-slate-900 tracking-tight">
                                 Topickx
                             </span>
                         </Link>
@@ -240,7 +238,7 @@ export default function AdminLayout({
             {/* Main Content */}
             <div className="lg:ml-64">
                 {/* Top Header */}
-                <header className="sticky top-0 z-30 h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 flex items-center justify-between">
+                <header className="sticky top-0 z-30 h-16 bg-white border-b border-slate-200 px-4 flex items-center justify-between">
                     <button
                         className="lg:hidden p-2"
                         onClick={() => setSidebarOpen(true)}

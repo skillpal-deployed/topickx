@@ -21,12 +21,25 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function ProjectDetailsPage() {
     const params = useParams();
     const router = useRouter();
     const [project, setProject] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [isEditDatesOpen, setIsEditDatesOpen] = useState(false);
+    const [editStartDate, setEditStartDate] = useState("");
+    const [editEndDate, setEditEndDate] = useState("");
 
     useEffect(() => {
         if (params.id) {
@@ -55,6 +68,32 @@ export default function ProjectDetailsPage() {
             console.error("Error reviewing project:", error);
             toast.error("Failed to update status");
         }
+    };
+
+    const handleUpdateDates = async () => {
+        if (!project.package?.id) return;
+        try {
+            await adminAPI.updatePackageDates(project.package.id, {
+                startDate: editStartDate,
+                endDate: editEndDate,
+            });
+            toast.success("Dates updated successfully");
+            setIsEditDatesOpen(false);
+            fetchProject(project.id);
+        } catch (error) {
+            console.error("Error updating dates:", error);
+            toast.error("Failed to update dates");
+        }
+    };
+
+    const openDateEditModal = () => {
+        if (project.package?.startDate) {
+            setEditStartDate(new Date(project.package.startDate).toISOString().split('T')[0]);
+        }
+        if (project.package?.endDate) {
+            setEditEndDate(new Date(project.package.endDate).toISOString().split('T')[0]);
+        }
+        setIsEditDatesOpen(true);
     };
 
     if (loading) {
@@ -200,6 +239,14 @@ export default function ProjectDetailsPage() {
                                 <span className="text-sm">{formatDate(project.createdAt)}</span>
                             </div>
 
+                            <div className="flex items-center justify-between pt-2">
+                                <span className="text-sm font-medium">Dates</span>
+                                {project.package && (
+                                    <Button variant="ghost" size="sm" onClick={openDateEditModal} className="h-6 w-6 p-0">
+                                        <Edit className="h-3 w-3" />
+                                    </Button>
+                                )}
+                            </div>
                             {project.status === 'LIVE' && project.package?.startDate && (
                                 <div className="flex justify-between items-center">
                                     <span className="text-sm text-muted-foreground">Live Date</span>
@@ -249,6 +296,44 @@ export default function ProjectDetailsPage() {
                     </Card>
                 </div>
             </div>
+
+            {/* Edit Dates Modal */}
+            <Dialog open={isEditDatesOpen} onOpenChange={setIsEditDatesOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Edit Project Dates</DialogTitle>
+                        <DialogDescription>
+                            Modify the start and expiry dates for this project package.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="startDate">Live Date</Label>
+                            <Input
+                                id="startDate"
+                                type="date"
+                                value={editStartDate}
+                                onChange={(e) => setEditStartDate(e.target.value)}
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="endDate">Expiry Date</Label>
+                            <Input
+                                id="endDate"
+                                type="date"
+                                value={editEndDate}
+                                onChange={(e) => setEditEndDate(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsEditDatesOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleUpdateDates}>Save Changes</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div >
     );
 }

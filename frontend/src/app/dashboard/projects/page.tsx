@@ -255,7 +255,7 @@ export default function ProjectsPage() {
                                             <Users className="h-4 w-4 text-blue-500" />
                                             <span className="font-medium text-blue-600">{project.leadCount ?? 0} Leads</span>
                                         </div>
-                                        {project.expiryDate && (
+                                        {project.status === 'LIVE' && project.expiryDate && (
                                             <div className="flex items-center gap-1.5 text-muted-foreground">
                                                 <Clock className="h-4 w-4 text-amber-500" />
                                                 <span className="text-amber-600">

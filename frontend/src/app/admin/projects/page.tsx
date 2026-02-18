@@ -83,7 +83,12 @@ interface Project {
             slug: string;
         };
     }[];
+    package?: {
+        startDate?: string;
+        endDate?: string;
+    };
 }
+
 
 
 
@@ -306,6 +311,8 @@ export default function AdminProjectsPage() {
                                         <th className="text-left p-4 font-medium">Landing Page</th>
                                         <th className="text-left p-4 font-medium">Advertiser</th>
                                         <th className="text-left p-4 font-medium">Budget</th>
+                                        <th className="text-left p-4 font-medium">Live Date</th>
+                                        <th className="text-left p-4 font-medium">Expiry Date</th>
                                         <th className="text-right p-4 font-medium">Visits</th>
                                         <th className="text-left p-4 font-medium">Status</th>
                                         <th className="text-left p-4 font-medium">Actions</th>
@@ -376,6 +383,12 @@ export default function AdminProjectsPage() {
                                             </td>
                                             <td className="p-4 text-sm font-medium">
                                                 {formatBudgetRange(project.budgetMin, project.budgetMax)}
+                                            </td>
+                                            <td className="p-4 text-sm text-nowrap">
+                                                {project.package?.startDate ? formatDate(project.package.startDate) : "-"}
+                                            </td>
+                                            <td className="p-4 text-sm text-nowrap">
+                                                {project.package?.endDate ? formatDate(project.package.endDate) : "-"}
                                             </td>
                                             <td className="p-4 text-right font-bold text-primary">
                                                 {project.visits || 0}
