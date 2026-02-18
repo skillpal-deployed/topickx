@@ -199,6 +199,19 @@ export default function ProjectDetailsPage() {
                                 <span className="text-sm text-muted-foreground">Created At</span>
                                 <span className="text-sm">{formatDate(project.createdAt)}</span>
                             </div>
+
+                            {project.status === 'LIVE' && project.package?.startDate && (
+                                <div className="flex justify-between items-center">
+                                    <span className="text-sm text-muted-foreground">Live Date</span>
+                                    <span className="text-sm">{formatDate(project.package.startDate)}</span>
+                                </div>
+                            )}
+                            {project.status === 'LIVE' && project.package?.endDate && (
+                                <div className="flex justify-between items-center">
+                                    <span className="text-sm text-muted-foreground">Expiry Date</span>
+                                    <span className="text-sm">{formatDate(project.package.endDate)}</span>
+                                </div>
+                            )}
                             {project.packageRequest && (
                                 <div className="p-3 bg-slate-50 rounded-lg space-y-2">
                                     <p className="text-xs font-semibold uppercase text-muted-foreground">
@@ -236,6 +249,6 @@ export default function ProjectDetailsPage() {
                     </Card>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

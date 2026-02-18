@@ -9,7 +9,7 @@ import {
     PackageState,
 } from '../types';
 import { logAudit } from './audit.service';
-import { activatePackage } from './package.service';
+// import { activatePackage } from './package.service';
 
 // ==================== Advertiser Project Operations ====================
 
@@ -530,9 +530,9 @@ export const reviewProject = async (
             newStatus = ProjectStatus.APPROVED_AWAITING_PLACEMENT;
 
             // Activate the package if not already active
-            if (project.package.state === PackageState.UNSTARTED) {
-                await activatePackage(project.packageId);
-            }
+            // if (project.package.state === PackageState.UNSTARTED) {
+            //     await activatePackage(project.packageId);
+            // }
             break;
 
         case 'request_changes':
@@ -695,10 +695,10 @@ export const createAdminProject = async (
         },
     });
 
-    // Activate package
-    if (pkg.state === PackageState.UNSTARTED) {
-        await activatePackage(pkg.id);
-    }
+    // Activate package - MOVED TO PLACEMENT
+    // if (pkg.state === PackageState.UNSTARTED) {
+    //     await activatePackage(pkg.id);
+    // }
 
     await logAudit('admin_project_created', currentUserId, currentUserRole, {
         projectId: project.id,

@@ -6,8 +6,10 @@ import {
     LandingPageUpdateRequest,
     PlacementRequest,
     SlotReorderRequest,
+    PackageState,
 } from '../types';
 import { logAudit } from './audit.service';
+import { activatePackage } from './package.service';
 
 // ==================== Landing Pages ====================
 
@@ -331,6 +333,7 @@ export const placeProject = async (
 ) => {
     const project = await prisma.project.findUnique({
         where: { id: data.projectId },
+        include: { package: true },
     });
 
     if (!project) {
@@ -339,6 +342,11 @@ export const placeProject = async (
 
     if (project.status !== ProjectStatus.APPROVED_AWAITING_PLACEMENT) {
         throw new Error('Project is not ready for placement');
+    }
+
+    // Activate package if not started
+    if (project.package?.state === PackageState.UNSTARTED) {
+        await activatePackage(project.packageId);
     }
 
     const landingPage = await prisma.landingPage.findUnique({
@@ -538,10 +546,16 @@ export const replaceSlot = async (
 
     const newProject = await prisma.project.findUnique({
         where: { id: newProjectId },
+        include: { package: true },
     });
 
     if (!newProject || newProject.status !== ProjectStatus.APPROVED_AWAITING_PLACEMENT) {
         throw new Error('New project not found or not ready for placement');
+    }
+
+    // Activate package if not started
+    if (newProject.package?.state === PackageState.UNSTARTED) {
+        await activatePackage(newProject.packageId);
     }
 
     // Update old project status
@@ -581,10 +595,16 @@ export const reassignProject = async (
     // 1. Verify project exists
     const project = await prisma.project.findUnique({
         where: { id: projectId },
+        include: { package: true },
     });
 
     if (!project) {
         throw new Error('Project not found');
+    }
+
+    // Activate package if not started
+    if (project.package?.state === PackageState.UNSTARTED) {
+        await activatePackage(project.packageId);
     }
 
     // 2. Verify target landing page exists
