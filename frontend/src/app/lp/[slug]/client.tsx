@@ -498,7 +498,14 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
             <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-emerald-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <Building2 className="w-8 h-8 text-emerald-600" />
+                        <div className="relative w-8 h-8">
+                            <Image
+                                src="/icon.png"
+                                alt="Topickx Logo"
+                                fill
+                                className="object-contain"
+                            />
+                        </div>
                         <span className="font-bold text-xl text-slate-900">Topickx</span>
                     </div>
                     <Button
@@ -853,7 +860,7 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
                         {[
-                            { icon: CheckCircle, title: 'Top Builders', desc: 'Curated Developers' },
+                            { icon: CheckCircle, title: 'Top Projects', desc: 'Curated Developers' },
                             { icon: TrendingUp, title: 'Best Deals', desc: 'Exclusive Offers' }
                         ].map((item, idx) => (
                             <div key={idx} className="text-center group">
