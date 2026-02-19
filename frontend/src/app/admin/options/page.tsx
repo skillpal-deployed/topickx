@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { adminAPI } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { getImageUrl } from "@/lib/utils";
 import {
     Card,
     CardContent,
@@ -336,7 +337,7 @@ export default function OptionsPage() {
                                             />
                                             {newOption.iconUrl && (
                                                 <div className="flex items-center gap-2">
-                                                    <img src={newOption.iconUrl} alt="Icon preview" className="h-8 w-8 object-contain" />
+                                                    <img src={getImageUrl(newOption.iconUrl)} alt="Icon preview" className="h-8 w-8 object-contain" />
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
@@ -413,7 +414,7 @@ export default function OptionsPage() {
                                                                 className="max-w-[150px]"
                                                             />
                                                             {editOption.iconUrl && (
-                                                                <img src={editOption.iconUrl} alt="Icon" className="h-6 w-6 object-contain" />
+                                                                <img src={getImageUrl(editOption.iconUrl)} alt="Icon" className="h-6 w-6 object-contain" />
                                                             )}
                                                         </div>
                                                     )}
@@ -438,7 +439,7 @@ export default function OptionsPage() {
                                             <>
                                                 <div className="flex items-center gap-4">
                                                     {activeCategory === 'amenity' && option.iconUrl && (
-                                                        <img src={option.iconUrl} alt={option.label} className="h-6 w-6 object-contain" />
+                                                        <img src={getImageUrl(option.iconUrl)} alt={option.label} className="h-6 w-6 object-contain" />
                                                     )}
                                                     <Badge variant="outline">{option.value}</Badge>
                                                     <span className="font-medium">{option.label}</span>

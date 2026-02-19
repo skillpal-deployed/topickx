@@ -393,10 +393,14 @@ export default function AdminProjectsPage() {
                                                 {formatBudgetRange(project.budgetMin, project.budgetMax)}
                                             </td>
                                             <td className="p-4 text-sm text-nowrap">
-                                                {project.package?.startDate ? formatDate(project.package.startDate) : "-"}
+                                                {['LIVE', 'PAUSED', 'EXPIRED'].includes(project.status) && project.package?.startDate
+                                                    ? formatDate(project.package.startDate)
+                                                    : "-"}
                                             </td>
                                             <td className="p-4 text-sm text-nowrap">
-                                                {project.package?.endDate ? formatDate(project.package.endDate) : "-"}
+                                                {['LIVE', 'PAUSED', 'EXPIRED'].includes(project.status) && project.package?.endDate
+                                                    ? formatDate(project.package.endDate)
+                                                    : "-"}
                                             </td>
                                             <td className="p-4 text-right font-bold text-primary">
                                                 {project.visits || 0}

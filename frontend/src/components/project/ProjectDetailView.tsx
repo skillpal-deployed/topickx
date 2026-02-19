@@ -760,7 +760,7 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                                         <div key={idx} className="flex flex-col items-center text-center gap-3 p-4 rounded-2xl hover:bg-slate-50 transition-colors group">
                                             <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                                                 {iconUrl ? (
-                                                    <img src={iconUrl} alt={amenityName} className="h-8 w-8 object-contain" />
+                                                    <img src={getImageUrl(iconUrl)} alt={amenityName} className="h-8 w-8 object-contain" />
                                                 ) : (
                                                     <Icon className="h-8 w-8" />
                                                 )}
