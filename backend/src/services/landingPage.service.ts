@@ -312,13 +312,40 @@ export const deleteLandingPage = async (
         throw new Error('Landing page not found');
     }
 
+    // Get all projects on this page before deletion
+    const slots = await prisma.landingPageSlot.findMany({
+        where: { landingPageId: id },
+        select: { projectId: true }
+    });
+
+    const projectIds = slots.map(s => s.projectId);
+
     await prisma.landingPage.delete({
         where: { id },
     });
 
+    // For each project, check if it has any other active placements
+    // If not, revert status to APPROVED_AWAITING_PLACEMENT
+    await Promise.all(projectIds.map(async (pid) => {
+        const count = await prisma.landingPageSlot.count({
+            where: { projectId: pid }
+        });
+
+        if (count === 0) {
+            await prisma.project.update({
+                where: { id: pid },
+                data: {
+                    status: ProjectStatus.APPROVED_AWAITING_PLACEMENT,
+                    isVisible: false
+                }
+            });
+        }
+    }));
+
     await logAudit('landing_page_deleted', currentUserId, currentUserRole, {
         pageId: id,
         pageName: page.name,
+        affectedProjects: projectIds
     });
 
     return { message: 'Landing page deleted' };

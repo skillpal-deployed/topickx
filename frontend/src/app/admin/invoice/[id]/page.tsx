@@ -116,6 +116,8 @@ export default function InvoicePage() {
                                 <p>Behind World Trade Park, D-Block,</p>
                                 <p>Malviya Nagar, Jaipur,</p>
                                 <p>Rajasthan 302017</p>
+                                <p className="mt-1">T: +91 7976634376</p>
+                                <p>E: hello@topickx.com</p>
                             </div>
                         </div>
                         <div className="text-right">
@@ -128,7 +130,7 @@ export default function InvoicePage() {
                                     className="object-contain object-right scale-[3] origin-right translate-x-4"
                                 />
                             </div>
-                            <div className="text-sm">
+                            <div className="text-sm text-right">
                                 <p className="text-muted-foreground">Date Issued</p>
                                 <p className="font-medium">{formatDate(invoice.createdAt)}</p>
                             </div>

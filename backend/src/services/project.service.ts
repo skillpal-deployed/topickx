@@ -762,24 +762,23 @@ export const resumeProject = async (
         where: { projectId },
     });
 
+    let newStatus: ProjectStatus = ProjectStatus.LIVE;
+    // If no placements, valid status is APPROVED_AWAITING_PLACEMENT
     if (placementCount === 0) {
-        // If no placements, we cannot set to LIVE. 
-        // We set it to APPROVED_AWAITING_PLACEMENT instead, so it can be placed again.
-        // OR we throw an error telling them to place it.
-        // Throwing error is better to avoid confusion why it didn't go live.
-        throw new Error('Cannot resume: Project is not placed on any landing page. Please place it first.');
+        newStatus = ProjectStatus.APPROVED_AWAITING_PLACEMENT;
     }
 
     const updated = await prisma.project.update({
         where: { id: projectId },
         data: {
-            status: ProjectStatus.LIVE,
-            isVisible: true
+            status: newStatus,
+            isVisible: newStatus === ProjectStatus.LIVE // Only visible if LIVE
         },
     });
 
     await logAudit('project_resumed', currentUserId, currentUserRole, {
         projectId,
+        newStatus,
     });
 
     return updated;
