@@ -57,7 +57,7 @@ if (useSpaces && s3Client) {
         cloudinary: cloudinary,
         params: {
             folder: 'listinghub',
-            allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'pdf', 'gif'],
+            allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'pdf', 'gif', 'svg'],
             public_id: (req: Express.Request, file: Express.Multer.File) => {
                 const name = file.originalname.split('.')[0].replace(/[^a-zA-Z0-9]/g, '_');
                 return `${uuidv4()}-${name}`;
@@ -78,12 +78,12 @@ if (useSpaces && s3Client) {
 }
 
 const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'];
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf', 'image/svg+xml'];
 
     if (allowedTypes.includes(file.mimetype)) {
         cb(null, true);
     } else {
-        cb(new Error('Invalid file type. Only JPEG, PNG, WebP, GIF, and PDF are allowed.'));
+        cb(new Error('Invalid file type. Only JPEG, PNG, WebP, GIF, SVG, and PDF are allowed.'));
     }
 };
 

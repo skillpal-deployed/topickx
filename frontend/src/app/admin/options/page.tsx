@@ -156,7 +156,7 @@ export default function OptionsPage() {
 
         // Validate file type
         if (!file.type.startsWith('image/')) {
-            alert('Please upload an image file (SVG, PNG, or WEBP recommended)');
+            alert('Please upload an image file (SVG, PNG, WEBP, or GIF recommended)');
             return;
         }
 
@@ -325,11 +325,11 @@ export default function OptionsPage() {
                                 {activeCategory === 'amenity' && (
                                     <div className="mb-4">
                                         <Label>Icon (Optional)</Label>
-                                        <p className="text-xs text-slate-500 mb-2">SVG recommended (128x128px viewBox)</p>
+                                        <p className="text-xs text-slate-500 mb-2">SVG, PNG, WebP, or GIF recommended</p>
                                         <div className="flex items-center gap-3">
                                             <Input
                                                 type="file"
-                                                accept="image/svg+xml,image/png,image/webp"
+                                                accept="image/svg+xml,image/png,image/webp,image/gif"
                                                 onChange={(e) => handleIconUpload(e, false)}
                                                 disabled={uploadingIcon}
                                                 className="flex-1"
@@ -407,7 +407,7 @@ export default function OptionsPage() {
                                                         <div className="flex items-center gap-2">
                                                             <Input
                                                                 type="file"
-                                                                accept="image/svg+xml,image/png,image/webp"
+                                                                accept="image/svg+xml,image/png,image/webp,image/gif"
                                                                 onChange={(e) => handleIconUpload(e, true)}
                                                                 disabled={uploadingIcon}
                                                                 className="max-w-[150px]"
