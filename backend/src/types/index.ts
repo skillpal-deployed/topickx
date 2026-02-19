@@ -61,6 +61,11 @@ export interface AdvertiserUpdateRequest {
     status?: string;
 }
 
+export interface AdvertiserProfileUpdateRequest {
+    leadFilters?: any;
+    maxLeadsPerDay?: number;
+}
+
 export interface PackageDefinitionCreateRequest {
     name: string;
     durationMonths: number;

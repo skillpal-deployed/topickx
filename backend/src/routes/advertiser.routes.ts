@@ -1,15 +1,38 @@
 import { Router, Response } from 'express';
 import { authenticate, requireAdvertiser } from '../middlewares/auth.middleware';
-import { AuthenticatedRequest, ProjectCreateRequest } from '../types';
+import { AuthenticatedRequest, ProjectCreateRequest, AdvertiserProfileUpdateRequest } from '../types';
 import * as packageService from '../services/package.service';
 import * as projectService from '../services/project.service';
 import * as leadService from '../services/lead.service';
+import * as userService from '../services/user.service';
 
 const router = Router();
 
 // All routes require authentication and advertiser role
 router.use(authenticate as any);
 router.use(requireAdvertiser as any);
+
+// ==================== Profile ====================
+
+router.put('/profile', async (req: AuthenticatedRequest, res: Response, next) => {
+    try {
+        const updateData: AdvertiserProfileUpdateRequest = {
+            leadFilters: req.body.leadFilters,
+            maxLeadsPerDay: req.body.maxLeadsPerDay,
+        };
+
+        const result = await userService.updateAdvertiserProfile(
+            req.user!.id,
+            updateData,
+            req.user!.id,
+            req.user!.role as any
+        );
+
+        res.json(result);
+    } catch (error) {
+        next(error);
+    }
+});
 
 // ==================== Dashboard ====================
 

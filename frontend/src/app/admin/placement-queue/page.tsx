@@ -101,9 +101,8 @@ export default function PlacementQueuePage() {
     };
 
     const getAvailableLandingPages = () => {
-        // Filter out full landing pages (assuming max 10 slots)
-        // Adjust logic if `project_count` is available on LP object from API
-        return landingPages.filter((lp) => (lp.listings?.length || 0) < 10);
+        // Filter out full landing pages based on their maxProjects settings
+        return landingPages.filter((lp) => (lp.listings?.length || 0) < (lp.maxProjects || 15));
     };
 
     if (loading) {

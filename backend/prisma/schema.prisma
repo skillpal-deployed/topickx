@@ -348,7 +348,7 @@ model AuditLog {
   userRole  String
   details   Json
   timestamp DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("audit_logs")
 }
@@ -384,6 +384,7 @@ enum ProjectStatus {
   NEEDS_CHANGES
   APPROVED_AWAITING_PLACEMENT
   LIVE
+  PAUSED
   EXPIRED
   REJECTED
 }

@@ -1,4 +1,5 @@
 import { Router, Response } from 'express';
+import { differenceInDays } from 'date-fns';
 import { authenticate, requireAdmin, requirePermissions } from '../middlewares/auth.middleware';
 import { AuthenticatedRequest, AdminRole, ALL_PERMISSIONS, OptionType } from '../types';
 import * as userService from '../services/user.service';
@@ -536,6 +537,27 @@ router.delete('/package-definitions/:id', requirePermissions(['packages', 'all']
     }
 });
 
+// ==================== Packages (Purchases) ====================
+
+router.put('/packages/:id/dates', requirePermissions(['packages', 'projects', 'all']) as any, async (req: AuthenticatedRequest, res, next) => {
+    try {
+        const result = await packageService.updatePackageDates(
+            req.params.id as string,
+            req.body.startDate,
+            req.body.endDate,
+            req.user!.id,
+            req.user!.role
+        );
+        res.json(result);
+    } catch (error) {
+        if (error instanceof Error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        next(error);
+    }
+});
+
 // ==================== Payment Requests ====================
 
 router.get('/payment-requests', requirePermissions(['payments', 'all']) as any, async (req, res, next) => {
@@ -784,6 +806,24 @@ router.post('/projects/:id/pause', requirePermissions(['projects', 'all']) as an
     } catch (error) {
         if (error instanceof Error) {
             res.status(400).json({ error: error.message });
+            return;
+        }
+        next(error);
+    }
+});
+
+router.post('/projects/:id/resume', requirePermissions(['projects', 'all']) as any, async (req: AuthenticatedRequest, res, next) => {
+    try {
+        const result = await projectService.resumeProject(
+            req.params.id as string,
+            req.user!.id,
+            req.user!.role
+        );
+        res.json(result);
+    } catch (error) {
+        if (error instanceof Error) {
+            res.status(400).json({ error: error.message });
+
             return;
         }
         next(error);
@@ -1276,6 +1316,32 @@ router.get('/options/property-types/mappings', async (req: AuthenticatedRequest,
         const mappings = await optionService.getPropertyTypesWithMappings();
         res.json(mappings);
     } catch (error) {
+        next(error);
+    }
+});
+
+// ==================== Renewals ====================
+
+router.get('/renewals', requirePermissions(['renewals', 'all']) as any, async (req: AuthenticatedRequest, res, next) => {
+    try {
+        const days = req.query.days ? parseInt(req.query.days as string) : 30;
+        const packages = await packageService.getRenewals(days);
+
+        const renewals = packages.map(pkg => ({
+            id: pkg.id,
+            advertiserName: pkg.advertiser.companyName,
+            packageName: pkg.packageDefinition.name,
+            expiryDate: pkg.endDate,
+            daysRemaining: pkg.endDate ? differenceInDays(new Date(pkg.endDate), new Date()) : 0,
+            status: pkg.state
+        }));
+
+        res.json(renewals);
+    } catch (error) {
+        if (error instanceof Error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
         next(error);
     }
 });

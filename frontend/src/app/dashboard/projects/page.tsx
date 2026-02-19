@@ -68,6 +68,12 @@ interface Project {
     usp2?: string;
     slug?: string;
     advertiser?: { companyName: string };
+    package?: {
+        packageDefinition: {
+            name: string;
+            durationMonths: number;
+        }
+    };
 }
 
 export default function ProjectsPage() {
@@ -138,6 +144,9 @@ export default function ProjectsPage() {
             DRAFT: { variant: "secondary", label: "Draft" },
             PAUSED: { variant: "outline", label: "Paused" },
             PENDING_PLACEMENT: { variant: "info", label: "Pending Placement" },
+            APPROVED_AWAITING_PLACEMENT: { variant: "info", label: "Approved – Awaiting Placement" },
+            NEEDS_CHANGES: { variant: "warning", label: "Needs Changes" },
+            EXPIRED: { variant: "destructive", label: "Expired" },
         };
         const config = variants[status] || { variant: "secondary", label: status };
         return <Badge variant={config.variant}>{config.label}</Badge>;
@@ -279,6 +288,13 @@ export default function ProjectsPage() {
                                             {project.usp2}
                                         </Badge>
                                     )}
+                                    {/* @ts-ignore */}
+                                    {project.package?.packageDefinition && (
+                                        <Badge variant="secondary" className="text-xs bg-slate-100 text-slate-700 hover:bg-slate-200">
+                                            {/* @ts-ignore */}
+                                            {project.package.packageDefinition.name} ({project.package.packageDefinition.durationMonths}mo)
+                                        </Badge>
+                                    )}
                                 </div>
                             </CardHeader>
 
@@ -339,12 +355,23 @@ export default function ProjectsPage() {
                                                 Manage
                                             </Button>
                                         </Link>
-                                        <Link href={getProjectUrl(project as any)} target="_blank" className="flex-1">
-                                            <Button variant="outline" size="sm" className="w-full">
-                                                <Eye className="h-4 w-4 mr-1" />
-                                                Preview
-                                            </Button>
-                                        </Link>
+                                        {project.status === 'LIVE' ? (
+                                            <Link href={getProjectUrl(project as any)} target="_blank" className="flex-1">
+                                                <Button variant="outline" size="sm" className="w-full">
+                                                    <Eye className="h-4 w-4 mr-1" />
+                                                    View Live
+                                                </Button>
+                                            </Link>
+                                        ) : (
+                                            ['DRAFT', 'NEEDS_CHANGES'].includes(project.status) && (
+                                                <Link href={`/dashboard/projects/${project.id}/edit`} className="flex-1">
+                                                    <Button variant="outline" size="sm" className="w-full">
+                                                        <Edit className="h-4 w-4 mr-1" />
+                                                        Edit
+                                                    </Button>
+                                                </Link>
+                                            )
+                                        )}
                                     </div>
                                 )}
                             </CardContent>

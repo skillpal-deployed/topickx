@@ -13,16 +13,14 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
-import { Package, Plus, Edit, Trash2, CheckCircle } from "lucide-react";
+import { Package, Plus, Edit, Trash2 } from "lucide-react";
 
 interface PackageDefinition {
     id: string;
     name: string;
     description?: string;
     price: number;
-    projectSlots: number;
-    durationDays: number;
-    features: string[];
+    durationMonths: number;
     isActive: boolean;
     createdAt: string;
 }
@@ -112,7 +110,7 @@ export default function PackagesPage() {
                                         <div>
                                             <CardTitle className="text-lg">{pkg.name}</CardTitle>
                                             <CardDescription>
-                                                {pkg.durationDays} days validity
+                                                {pkg.durationMonths} month{pkg.durationMonths !== 1 ? 's' : ''} validity
                                             </CardDescription>
                                         </div>
                                     </div>
@@ -130,18 +128,11 @@ export default function PackagesPage() {
                                         {formatCurrency(pkg.price)}
                                     </span>
                                     <p className="text-sm text-muted-foreground mt-1">
-                                        {pkg.projectSlots} project slots
+                                        {pkg.durationMonths} month{pkg.durationMonths !== 1 ? 's' : ''} duration
                                     </p>
                                 </div>
 
-                                <ul className="space-y-2 max-h-32 overflow-y-auto">
-                                    {(pkg.features || []).map((feature, idx) => (
-                                        <li key={idx} className="flex items-start gap-2 text-sm">
-                                            <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                                            <span>{feature}</span>
-                                        </li>
-                                    ))}
-                                </ul>
+
 
                                 <div className="flex gap-2 pt-4 border-t">
                                     <Link href={`/admin/packages/${pkg.id}/edit`} className="flex-1">

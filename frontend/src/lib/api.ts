@@ -242,6 +242,7 @@ export const adminAPI = {
     reviewProject: (id: string, data: { action: string; comment?: string }) =>
         api.post(`/admin/projects/${id}/review`, data),
     pauseProject: (id: string) => api.post(`/admin/projects/${id}/pause`),
+    resumeProject: (id: string) => api.post(`/admin/projects/${id}/resume`),
     deleteProject: (id: string) => api.delete(`/admin/projects/${id}`),
     reassignProject: (id: string, data: { landing_page_id: string }) =>
         api.post(`/admin/projects/${id}/reassign`, data),

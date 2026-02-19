@@ -86,6 +86,10 @@ interface Project {
     package?: {
         startDate?: string;
         endDate?: string;
+        packageDefinition?: {
+            name: string;
+            durationMonths: number;
+        };
     };
 }
 
@@ -187,16 +191,9 @@ export default function AdminProjectsPage() {
     };
 
     const handleToggleVisibility = async (project: Project) => {
-        // Since getProjects doesn't return isVisible by default, we assume it's true unless paused
-        // But the API supports generic update. We'll toggle status between PAUSED and LIVE (example logic)
-        // Or if 'isVisible' field exists in backend. Checking backend schema Project has isVisible
-        // But getProjects might not include it in the interface.
-        // Let's rely on PAUSE/RESUME action or direct update.
-        // Based on backend service 'pauseProject', let's use that for "Hide"
         try {
             if (project.status === 'PAUSED') {
-                // Resume logic (update status to LIVE)
-                await adminAPI.updateProject(project.id, { status: 'LIVE' });
+                await adminAPI.resumeProject(project.id);
                 toast.success("Project resumed");
             } else {
                 await adminAPI.pauseProject(project.id);
@@ -310,6 +307,7 @@ export default function AdminProjectsPage() {
                                         <th className="text-left p-4 font-medium">Location</th>
                                         <th className="text-left p-4 font-medium">Landing Page</th>
                                         <th className="text-left p-4 font-medium">Advertiser</th>
+                                        <th className="text-left p-4 font-medium">Package</th>
                                         <th className="text-left p-4 font-medium">Budget</th>
                                         <th className="text-left p-4 font-medium">Live Date</th>
                                         <th className="text-left p-4 font-medium">Expiry Date</th>
@@ -377,6 +375,16 @@ export default function AdminProjectsPage() {
                                                     >
                                                         {project.advertiser.companyName}
                                                     </Link>
+                                                ) : (
+                                                    <span className="text-muted-foreground">-</span>
+                                                )}
+                                            </td>
+                                            <td className="p-4 text-sm">
+                                                {project.package?.packageDefinition ? (
+                                                    <div className="flex flex-col">
+                                                        <span className="font-medium">{project.package.packageDefinition.name}</span>
+                                                        <span className="text-xs text-muted-foreground">{project.package.packageDefinition.durationMonths} months</span>
+                                                    </div>
                                                 ) : (
                                                     <span className="text-muted-foreground">-</span>
                                                 )}

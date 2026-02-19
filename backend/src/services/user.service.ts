@@ -6,6 +6,7 @@ import {
     AdminUserUpdateRequest,
     AdvertiserCreateRequest,
     AdvertiserUpdateRequest,
+    AdvertiserProfileUpdateRequest,
     ALL_PERMISSIONS,
 } from '../types';
 import { logAudit } from './audit.service';
@@ -620,5 +621,54 @@ export const changeAdvertiserPassword = async (
     });
 
     return { message: 'Password changed successfully' };
+};
+
+export const updateAdvertiserProfile = async (
+    advertiserId: string,
+    data: AdvertiserProfileUpdateRequest,
+    currentUserId: string,
+    currentUserRole: AdminRole
+) => {
+    const advertiser = await prisma.user.findFirst({
+        where: {
+            id: advertiserId,
+            role: AdminRole.ADVERTISER,
+        },
+    });
+
+    if (!advertiser) {
+        throw new Error('Advertiser not found');
+    }
+
+    const updateData: any = {};
+
+    if (data.leadFilters !== undefined) {
+        updateData.leadFilters = data.leadFilters;
+    }
+
+    if (data.maxLeadsPerDay !== undefined) {
+        // Ensure it's a valid number
+        const limit = Number(data.maxLeadsPerDay);
+        if (isNaN(limit) || limit < 0) {
+            throw new Error('Invalid max leads per day');
+        }
+        updateData.maxLeadsPerDay = limit;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+        return { message: 'No changes provided' };
+    }
+
+    await prisma.user.update({
+        where: { id: advertiserId },
+        data: updateData,
+    });
+
+    await logAudit('advertiser_profile_updated', currentUserId, currentUserRole, {
+        advertiserId,
+        updatedFields: Object.keys(updateData),
+    });
+
+    return { message: 'Profile updated successfully' };
 };
 

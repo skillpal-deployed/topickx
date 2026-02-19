@@ -721,17 +721,50 @@ export const pauseProject = async (
         throw new Error('Project not found');
     }
 
-    // Remove from all landing pages
-    await prisma.landingPageSlot.deleteMany({
-        where: { projectId },
-    });
+    // Do NOT remove from landing pages - just update status/visibility
+    // The query engine should respect the status or isVisible flag
 
     const updated = await prisma.project.update({
         where: { id: projectId },
-        data: { status: ProjectStatus.APPROVED_AWAITING_PLACEMENT },
+        data: {
+            status: ProjectStatus.PAUSED,
+            isVisible: false
+        },
     });
 
     await logAudit('project_paused', currentUserId, currentUserRole, {
+        projectId,
+    });
+
+    return updated;
+};
+
+export const resumeProject = async (
+    projectId: string,
+    currentUserId: string,
+    currentUserRole: AdminRole
+) => {
+    const project = await prisma.project.findUnique({
+        where: { id: projectId },
+    });
+
+    if (!project) {
+        throw new Error('Project not found');
+    }
+
+    if (project.status !== ProjectStatus.PAUSED) {
+        throw new Error('Project is not paused');
+    }
+
+    const updated = await prisma.project.update({
+        where: { id: projectId },
+        data: {
+            status: ProjectStatus.LIVE,
+            isVisible: true
+        },
+    });
+
+    await logAudit('project_resumed', currentUserId, currentUserRole, {
         projectId,
     });
 

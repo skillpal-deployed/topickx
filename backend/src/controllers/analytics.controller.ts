@@ -232,22 +232,38 @@ export const getAdminPerformance = async (req: Request | any, res: Response) => 
         });
 
         // 3. Enrich data
+        // 3. Enrich data
         const enrichedStats = await Promise.all(stats.map(async (stat) => {
-            if (!stat.landingPageId || !stat.projectId) return null;
+            // Remove the strict check that filters out valid data
+            // if (!stat.landingPageId || !stat.projectId) return null;
 
-            const landingPage = await prisma.landingPage.findUnique({
-                where: { id: stat.landingPageId },
-                select: { name: true, slug: true }
-            });
+            let landingPage = null;
+            if (stat.landingPageId) {
+                landingPage = await prisma.landingPage.findUnique({
+                    where: { id: stat.landingPageId },
+                    select: { name: true, slug: true }
+                });
+            }
 
-            const project = projects.find(p => p.id === stat.projectId);
+            let project = null;
+            if (stat.projectId) {
+                // Find project in our pre-fetched list
+                const p = projects.find(p => p.id === stat.projectId);
+                if (p) {
+                    project = {
+                        name: p.name,
+                        advertiser: p.advertiser,
+                        id: p.id
+                    };
+                }
+            }
+
+            // If we have neither project nor landing page, skip (shouldn't happen with current query)
+            if (!landingPage && !project) return null;
 
             return {
                 landingPage,
-                project: {
-                    name: project?.name,
-                    advertiser: project?.advertiser
-                },
+                project,
                 visits: stat._count._all
             };
         }));
