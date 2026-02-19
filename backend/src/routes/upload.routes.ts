@@ -78,11 +78,13 @@ if (useSpaces && s3Client) {
 }
 
 const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+    console.log(`[Upload Debug] Processing file: ${file.originalname}, Mimetype: ${file.mimetype}`);
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf', 'image/svg+xml'];
 
     if (allowedTypes.includes(file.mimetype)) {
         cb(null, true);
     } else {
+        console.log(`[Upload Debug] Rejected file: ${file.originalname}, Mimetype: ${file.mimetype}`);
         cb(new Error('Invalid file type. Only JPEG, PNG, WebP, GIF, SVG, and PDF are allowed.'));
     }
 };

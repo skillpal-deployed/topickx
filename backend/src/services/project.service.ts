@@ -746,6 +746,7 @@ export const resumeProject = async (
 ) => {
     const project = await prisma.project.findUnique({
         where: { id: projectId },
+        include: { placements: true },
     });
 
     if (!project) {
@@ -754,6 +755,19 @@ export const resumeProject = async (
 
     if (project.status !== ProjectStatus.PAUSED) {
         throw new Error('Project is not paused');
+    }
+
+    // Check if project has any active placements
+    const placementCount = await prisma.landingPageSlot.count({
+        where: { projectId },
+    });
+
+    if (placementCount === 0) {
+        // If no placements, we cannot set to LIVE. 
+        // We set it to APPROVED_AWAITING_PLACEMENT instead, so it can be placed again.
+        // OR we throw an error telling them to place it.
+        // Throwing error is better to avoid confusion why it didn't go live.
+        throw new Error('Cannot resume: Project is not placed on any landing page. Please place it first.');
     }
 
     const updated = await prisma.project.update({
