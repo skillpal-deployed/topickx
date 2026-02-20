@@ -92,7 +92,7 @@ export const getOptionsByIds = async (ids: string[]) => {
     if (!ids || ids.length === 0) return [];
     return prisma.option.findMany({
         where: { id: { in: ids } },
-        select: { id: true, name: true },
+        select: { id: true, name: true, iconUrl: true },
     });
 };
 
@@ -139,6 +139,7 @@ export const createOption = async (
             name: data.name,
             parentId: data.parentId,
             isActive: data.isActive ?? true,
+            ...((data as any).iconUrl !== undefined && { iconUrl: (data as any).iconUrl }),
         },
     });
 
@@ -168,6 +169,7 @@ export const updateOption = async (
     const updateData: any = {};
     if (data.name !== undefined) updateData.name = data.name;
     if (data.isActive !== undefined) updateData.isActive = data.isActive;
+    if ((data as any).iconUrl !== undefined) updateData.iconUrl = (data as any).iconUrl;
 
     const option = await prisma.option.update({
         where: { id },

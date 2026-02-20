@@ -330,8 +330,9 @@ export const adminAPI = {
     runExpiryCheck: () => api.post("/admin/run-expiry-check"),
 
     // Analytics
-    getPerformance: (startDate?: string, endDate?: string, advertiserId?: string, type?: string) =>
-        api.get("/analytics/admin/performance", { params: { startDate, endDate, advertiserId, type } }),
+    getPerformance: (startDate?: string, endDate?: string, advertiserId?: string, type?: string, projectName?: string) =>
+        api.get("/analytics/admin/performance", { params: { startDate, endDate, advertiserId, type, projectName } }),
+
 };
 
 // ==================== Public API ====================

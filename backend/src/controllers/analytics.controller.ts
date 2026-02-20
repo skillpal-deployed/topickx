@@ -20,7 +20,6 @@ export const recordVisit = async (req: Request, res: Response) => {
                 select: { id: true }
             });
             if (!project) {
-                // Project not found by slug, skip recording silently
                 res.status(200).json({ success: true });
                 return;
             }
@@ -106,7 +105,6 @@ export const getAdvertiserPerformance = async (req: Request | any, res: Response
         }
 
         // 2. Build a map of landing pages with visit counts
-        // Group by landing page and show which projects are on each
         const lpMap = new Map<string, {
             landingPage: { id: string; name: string; slug: string; visits: number };
             projects: { id: string; name: string }[];
@@ -137,15 +135,11 @@ export const getAdvertiserPerformance = async (req: Request | any, res: Response
                     by: ['landingPageId'],
                     where: {
                         landingPageId: { in: lpIds },
-                        createdAt: {
-                            gte: start,
-                            lte: end
-                        }
+                        createdAt: { gte: start, lte: end }
                     },
                     _count: { _all: true }
                 });
 
-                // Update visit counts from the query
                 for (const vc of visitCounts) {
                     if (vc.landingPageId && lpMap.has(vc.landingPageId)) {
                         lpMap.get(vc.landingPageId)!.visits = vc._count._all;
@@ -184,92 +178,117 @@ export const getAdvertiserPerformance = async (req: Request | any, res: Response
 
 export const getAdminPerformance = async (req: Request | any, res: Response) => {
     try {
-        const { startDate, endDate, advertiserId, type } = req.query;
+        const { startDate, endDate, advertiserId, type, projectName } = req.query;
 
         const start = startDate ? startOfDay(new Date(startDate as string)) : new Date(0);
         const end = endDate ? endOfDay(new Date(endDate as string)) : new Date();
+        const dateFilter = { gte: start, lte: end };
 
-        // 1. Get projects filter
-        const whereClause: any = {};
-        if (advertiserId) {
-            whereClause.advertiserId = advertiserId;
-        }
+        // ── 1. LANDING PAGE TRAFFIC ──────────────────────────────────────────
+        // Grouped by landingPageId — LP visits have projectId = null so
+        // the old projectId-based filter was silently excluding all of them.
+        let lpStats: any[] = [];
+        if (!type || type === 'all' || type === 'landing-page') {
+            const lpVisits = await prisma.pageVisit.groupBy({
+                by: ['landingPageId'],
+                where: {
+                    landingPageId: { not: null },
+                    createdAt: dateFilter,
+                },
+                _count: { _all: true },
+                orderBy: { _count: { _all: 'desc' } },
+            });
 
-        const projects = await prisma.project.findMany({
-            where: whereClause,
-            select: { id: true, name: true, advertiser: { select: { companyName: true, email: true } } }
-        });
+            lpStats = await Promise.all(
+                lpVisits.map(async (stat) => {
+                    const lp = await prisma.landingPage.findUnique({
+                        where: { id: stat.landingPageId! },
+                        select: { id: true, name: true, slug: true, city: true },
+                    });
+                    if (!lp) return null;
 
-        const projectIds = projects.map(p => p.id);
+                    // Advertiser filter: check if this advertiser has a project on this LP
+                    if (advertiserId) {
+                        const slotCount = await prisma.landingPageSlot.count({
+                            where: {
+                                landingPageId: lp.id,
+                                project: { advertiserId: advertiserId as string },
+                            },
+                        });
+                        if (slotCount === 0) return null;
+                    }
 
-        if (projectIds.length === 0) {
-            res.json({ data: [] });
-            return;
-        }
-
-        // 2. Aggregate visits
-        const visitWhere: any = {
-            projectId: { in: projectIds },
-            createdAt: {
-                gte: start,
-                lte: end
-            }
-        };
-
-        if (type === 'landing-page') {
-            visitWhere.landingPageId = { not: null };
-        } else if (type === 'project-page') {
-            visitWhere.landingPageId = null;
-        }
-        // If type is empty/all, we fetch both
-
-        const stats = await prisma.pageVisit.groupBy({
-            by: ['landingPageId', 'projectId'],
-            where: visitWhere,
-            _count: {
-                _all: true
-            }
-        });
-
-        // 3. Enrich data
-        // 3. Enrich data
-        const enrichedStats = await Promise.all(stats.map(async (stat) => {
-            // Remove the strict check that filters out valid data
-            // if (!stat.landingPageId || !stat.projectId) return null;
-
-            let landingPage = null;
-            if (stat.landingPageId) {
-                landingPage = await prisma.landingPage.findUnique({
-                    where: { id: stat.landingPageId },
-                    select: { name: true, slug: true }
-                });
-            }
-
-            let project = null;
-            if (stat.projectId) {
-                // Find project in our pre-fetched list
-                const p = projects.find(p => p.id === stat.projectId);
-                if (p) {
-                    project = {
-                        name: p.name,
-                        advertiser: p.advertiser,
-                        id: p.id
+                    return {
+                        type: 'landing-page' as const,
+                        landingPage: lp,
+                        project: null,
+                        advertiser: null,
+                        visits: stat._count._all,
                     };
-                }
+                })
+            );
+            lpStats = lpStats.filter(Boolean);
+        }
+
+        // ── 2. PROJECT PAGE TRAFFIC ──────────────────────────────────────────
+        // Grouped by projectId, landingPageId = null (direct project page visits only)
+        let projectStats: any[] = [];
+        if (!type || type === 'all' || type === 'project-page') {
+            const projectWhere: any = {};
+            if (advertiserId) projectWhere.advertiserId = advertiserId as string;
+            if (projectName) {
+                projectWhere.name = { contains: projectName as string, mode: 'insensitive' };
             }
 
-            // If we have neither project nor landing page, skip (shouldn't happen with current query)
-            if (!landingPage && !project) return null;
+            const eligibleProjects = await prisma.project.findMany({
+                where: projectWhere,
+                select: {
+                    id: true,
+                    name: true,
+                    slug: true,
+                    advertiser: { select: { id: true, companyName: true, email: true } },
+                },
+            });
+            const eligibleProjectIds = eligibleProjects.map(p => p.id);
 
-            return {
-                landingPage,
-                project,
-                visits: stat._count._all
-            };
-        }));
+            if (eligibleProjectIds.length > 0) {
+                const projectVisits = await prisma.pageVisit.groupBy({
+                    by: ['projectId'],
+                    where: {
+                        projectId: { in: eligibleProjectIds },
+                        landingPageId: null, // direct project page visits only
+                        createdAt: dateFilter,
+                    },
+                    _count: { _all: true },
+                    orderBy: { _count: { _all: 'desc' } },
+                });
+
+                projectStats = projectVisits.map(stat => {
+                    const project = eligibleProjects.find(p => p.id === stat.projectId);
+                    if (!project) return null;
+                    return {
+                        type: 'project-page' as const,
+                        landingPage: null,
+                        project: { id: project.id, name: project.name, slug: project.slug },
+                        advertiser: project.advertiser,
+                        visits: stat._count._all,
+                    };
+                }).filter(Boolean);
+            }
+        }
+
+        // ── 3. Summary ───────────────────────────────────────────────────────
+        const totalLpVisits = lpStats.reduce((sum: number, s: any) => sum + s.visits, 0);
+        const totalProjectVisits = projectStats.reduce((sum: number, s: any) => sum + s.visits, 0);
 
         res.json({
-            data: enrichedStats.filter(s => s !== null)
+            summary: {
+                totalVisits: totalLpVisits + totalProjectVisits,
+                lpVisits: totalLpVisits,
+                projectVisits: totalProjectVisits,
+            },
+            lpStats,
+            projectStats,
         });
 
     } catch (error) {

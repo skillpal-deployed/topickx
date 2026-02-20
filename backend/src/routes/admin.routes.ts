@@ -1181,6 +1181,7 @@ router.get('/options/:category', async (req: AuthenticatedRequest, res, next) =>
             name: opt.name,  // Add for frontend compatibility
             isActive: opt.isActive,
             parentId: opt.parentId,
+            iconUrl: opt.iconUrl ?? null,  // Include iconUrl for amenity icons
         }));
 
         res.json(transformed);
@@ -1211,7 +1212,8 @@ router.post('/options', requirePermissions(['all']) as any, async (req: Authenti
         const createData = {
             optionType: optionTypeString as OptionType,
             name: String(label),
-            parentId: req.body.parentId
+            parentId: req.body.parentId,
+            iconUrl: req.body.iconUrl || null,
         };
 
         console.log('Calling optionService.createOption with:', createData);
@@ -1228,6 +1230,7 @@ router.post('/options', requirePermissions(['all']) as any, async (req: Authenti
             value: option.name.toLowerCase().replace(/\s+/g, '_'),
             label: option.name,
             isActive: option.isActive,
+            iconUrl: option.iconUrl ?? null,
         });
     } catch (error) {
         if (error instanceof Error) {
@@ -1241,11 +1244,11 @@ router.post('/options', requirePermissions(['all']) as any, async (req: Authenti
 // PUT /admin/options/:id - Update option
 router.put('/options/:id', requirePermissions(['all']) as any, async (req: AuthenticatedRequest, res, next) => {
     try {
-        const { label, isActive } = req.body;
+        const { label, isActive, iconUrl } = req.body;
 
         const option = await optionService.updateOption(
             getParam(req.params.id),
-            { name: label, isActive },
+            { name: label, isActive, iconUrl: iconUrl !== undefined ? (iconUrl || null) : undefined },
             req.user!.id,
             req.user!.role
         );
@@ -1255,6 +1258,7 @@ router.put('/options/:id', requirePermissions(['all']) as any, async (req: Authe
             value: option.name.toLowerCase().replace(/\s+/g, '_'),
             label: option.name,
             isActive: option.isActive,
+            iconUrl: option.iconUrl ?? null,
         });
     } catch (error) {
         if (error instanceof Error) {
