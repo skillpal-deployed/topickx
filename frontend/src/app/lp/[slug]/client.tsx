@@ -251,6 +251,10 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                 utmMedium: searchParams.get("utm_medium") || undefined,
                 utmCampaign: searchParams.get("utm_campaign") || undefined,
             });
+            // Fire Meta Pixel Lead event for conversion tracking
+            if (typeof window !== 'undefined' && (window as any).fbq) {
+                (window as any).fbq('track', 'Lead');
+            }
             toast.success("Thank you! You can now browse the projects.");
             sessionStorage.setItem(`lp_lead_submitted_${landingPage?.id}`, "true");
             setShowMandatoryForm(false);
@@ -493,6 +497,38 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
 
     return (
         <div className="min-h-screen bg-brand-bg" data-testid="public-landing-page">
+            {/* Meta Pixel — fires only when a pixelId is configured for this landing page */}
+            {landingPage.fbPixelId && (
+                <>
+                    <Script
+                        id={`fb-pixel-${landingPage.fbPixelId}`}
+                        strategy="afterInteractive"
+                        dangerouslySetInnerHTML={{
+                            __html: `
+                                !function(f,b,e,v,n,t,s)
+                                {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                                n.queue=[];t=b.createElement(e);t.async=!0;
+                                t.src=v;s=b.getElementsByTagName(e)[0];
+                                s.parentNode.insertBefore(t,s)}(window,document,'script',
+                                'https://connect.facebook.net/en_US/fbevents.js');
+                                fbq('init', '${landingPage.fbPixelId}');
+                                fbq('track', 'PageView');
+                            `,
+                        }}
+                    />
+                    <noscript>
+                        <img
+                            height="1"
+                            width="1"
+                            style={{ display: 'none' }}
+                            src={`https://www.facebook.com/tr?id=${landingPage.fbPixelId}&ev=PageView&noscript=1`}
+                            alt=""
+                        />
+                    </noscript>
+                </>
+            )}
             {/* Header */}
             <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-emerald-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-24 flex items-center justify-between">
