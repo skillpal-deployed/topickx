@@ -30,13 +30,13 @@ jobs:
             npm install
             npx prisma generate
             npm run build
-            pm2 restart skillpal-backend
+            pm2 restart all
             
             # --- Frontend Deployment ---
             echo "Deploying Frontend..."
             cd ../frontend
             npm install
             npm run build
-            pm2 restart skillpal-frontend
+            pm2 restart all
 
             echo "Deployment Complete!"
