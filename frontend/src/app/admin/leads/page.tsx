@@ -13,19 +13,13 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
-import {
-    Search,
-    Download,
-    Plus,
-    Globe,
-} from "lucide-react";
+import { Search, Download, Globe, Building2, LayoutTemplate } from "lucide-react";
 import {
     Tabs,
     TabsContent,
     TabsList,
     TabsTrigger,
 } from "@/components/ui/tabs";
-import { toast } from "sonner";
 
 interface Lead {
     id: string;
@@ -38,7 +32,11 @@ interface Lead {
     status: string;
     fbLeadId?: string;
     location?: string;
+    city?: string;
     budget?: string;
+    propertyType?: string;
+    unitType?: string;
+    projectId?: string;
     project?: {
         id: string;
         name: string;
@@ -52,7 +50,12 @@ interface Lead {
     landingPage?: {
         id: string;
         name: string;
+        slug?: string;
         fbAdAccountId?: string;
+    };
+    assignedTo?: {
+        id: string;
+        companyName: string;
     };
 }
 
@@ -60,7 +63,6 @@ export default function AdminLeadsPage() {
     const [leads, setLeads] = useState<Lead[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
-    const [total, setTotal] = useState(0);
 
     useEffect(() => {
         fetchLeads();
@@ -70,7 +72,6 @@ export default function AdminLeadsPage() {
         try {
             const response = await adminAPI.getLeads({});
             setLeads(response.data.leads || response.data);
-            setTotal(response.data.total || response.data.length);
         } catch (error) {
             console.error("Error fetching leads:", error);
         } finally {
@@ -78,9 +79,12 @@ export default function AdminLeadsPage() {
         }
     };
 
-    const lpLeads = leads.filter(l => l.landingPageId);
-    const directLeads = leads.filter(l => !l.landingPageId);
-    const commonLeads = leads.filter(l => l.landingPageId && l.status === 'unassigned');
+    // Project Leads: any lead with a projectId — private to that project's advertiser.
+    // May also carry a landingPageId if submitted via a project card on an LP.
+    const projectLeads = leads.filter(l => !!l.projectId);
+
+    // Common Pool: no projectId + has landingPageId — generic LP enquiry form or FB lead form.
+    const commonPoolLeads = leads.filter(l => !l.projectId && !!l.landingPageId);
 
     const filterFn = (lead: Lead) => {
         const query = searchQuery.toLowerCase();
@@ -89,14 +93,15 @@ export default function AdminLeadsPage() {
             (lead.phone || '').includes(searchQuery) ||
             (lead.email || '').toLowerCase().includes(query) ||
             (lead.project?.name || '').toLowerCase().includes(query) ||
-            (lead.project?.advertiser?.companyName || '').toLowerCase().includes(query)
+            (lead.project?.advertiser?.companyName || '').toLowerCase().includes(query) ||
+            (lead.landingPage?.name || '').toLowerCase().includes(query)
         );
     };
 
     const handleExport = (data: Lead[]) => {
         const csvContent = [
-            ["Name", "Phone", "Email", "Project", "Advertiser", "LP", "Source", "FB Lead ID", "Date"].join(","),
-            ...data.map((lead) =>
+            ["Name", "Phone", "Email", "Project", "Advertiser", "Landing Page", "Source", "City", "Budget", "Type", "FB Lead ID", "Date"].join(","),
+            ...data.map(lead =>
                 [
                     lead.name,
                     lead.phone,
@@ -105,6 +110,9 @@ export default function AdminLeadsPage() {
                     lead.project?.advertiser?.companyName || "",
                     lead.landingPage?.name || "",
                     lead.source,
+                    lead.city || "",
+                    lead.budget || "",
+                    lead.propertyType || "",
                     lead.fbLeadId || "",
                     formatDate(lead.createdAt),
                 ].join(",")
@@ -127,7 +135,7 @@ export default function AdminLeadsPage() {
         );
     }
 
-    const Table = ({ data }: { data: Lead[] }) => {
+    const LeadsTable = ({ data }: { data: Lead[] }) => {
         const filtered = data.filter(filterFn);
         return (
             <div className="overflow-x-auto">
@@ -136,44 +144,86 @@ export default function AdminLeadsPage() {
                         <tr>
                             <th className="text-left p-4 font-medium">Contact</th>
                             <th className="text-left p-4 font-medium">Project / LP</th>
-                            <th className="text-left p-4 font-medium">Source Details</th>
+                            <th className="text-left p-4 font-medium">Preferences</th>
+                            <th className="text-left p-4 font-medium">Source</th>
                             <th className="text-left p-4 font-medium">Date</th>
                             <th className="text-left p-4 font-medium">Assignment</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {filtered.map((lead) => (
+                        {filtered.length === 0 ? (
+                            <tr>
+                                <td colSpan={6} className="p-8 text-center text-muted-foreground">
+                                    No leads found
+                                </td>
+                            </tr>
+                        ) : filtered.map(lead => (
                             <tr key={lead.id} className="border-b hover:bg-slate-50 transition-colors">
+                                {/* Contact */}
                                 <td className="p-4">
                                     <div className="font-medium">{lead.name}</div>
-                                    <div className="text-xs text-muted-foreground mt-1">{lead.phone} | {lead.email}</div>
-                                </td>
-                                <td className="p-4">
-                                    <div className="text-sm">
-                                        <p className="font-medium text-slate-700">{lead.project?.name || '-'}</p>
-                                        <p className="text-xs text-muted-foreground">{lead.landingPage?.name || 'Direct'}</p>
+                                    <div className="text-xs text-muted-foreground mt-1">
+                                        {lead.phone} | {lead.email}
                                     </div>
                                 </td>
+
+                                {/* Project / LP */}
                                 <td className="p-4">
-                                    <div className="text-xs space-y-1">
-                                        <div className="flex items-center gap-2">
-                                            <Badge variant="outline" className="capitalize text-[10px]">{lead.source}</Badge>
-                                            {lead.source === 'facebook' && <Globe className="h-3 w-3 text-blue-600" />}
-                                        </div>
-                                        {lead.landingPage?.fbAdAccountId && <p className="text-[10px]">Acc: {lead.landingPage.fbAdAccountId}</p>}
-                                        {lead.fbLeadId && <p className="text-[10px]">ID: {lead.fbLeadId}</p>}
+                                    <div className="text-sm space-y-0.5">
+                                        {lead.project ? (
+                                            <div className="flex items-center gap-1.5">
+                                                <Building2 className="h-3 w-3 text-primary shrink-0" />
+                                                <span className="font-medium text-slate-700">{lead.project.name}</span>
+                                            </div>
+                                        ) : (
+                                            <span className="text-muted-foreground text-xs italic">No project</span>
+                                        )}
+                                        {lead.landingPage && (
+                                            <div className="flex items-center gap-1.5">
+                                                <LayoutTemplate className="h-3 w-3 text-muted-foreground shrink-0" />
+                                                <span className="text-xs text-muted-foreground">{lead.landingPage.name}</span>
+                                            </div>
+                                        )}
+                                        {lead.project?.advertiser && (
+                                            <span className="text-xs text-slate-400">{lead.project.advertiser.companyName}</span>
+                                        )}
                                     </div>
                                 </td>
-                                <td className="p-4 text-sm text-muted-foreground">
+
+                                {/* Preferences */}
+                                <td className="p-4 text-xs text-muted-foreground space-y-0.5">
+                                    {lead.city && <div>{lead.city}</div>}
+                                    {lead.location && lead.location !== lead.city && <div>{lead.location}</div>}
+                                    {lead.propertyType && <Badge variant="outline" className="text-[10px]">{lead.propertyType}</Badge>}
+                                    {lead.unitType && <div>{lead.unitType}</div>}
+                                    {lead.budget && <div className="font-medium text-slate-600">{lead.budget}</div>}
+                                    {!lead.city && !lead.location && !lead.propertyType && !lead.budget && <span>—</span>}
+                                </td>
+
+                                {/* Source */}
+                                <td className="p-4">
+                                    <div className="flex items-center gap-1.5">
+                                        <Badge variant="outline" className="capitalize text-[10px]">{lead.source}</Badge>
+                                        {lead.source === 'facebook' && <Globe className="h-3 w-3 text-blue-600" />}
+                                    </div>
+                                    {lead.fbLeadId && <p className="text-[10px] text-muted-foreground mt-1">ID: {lead.fbLeadId}</p>}
+                                </td>
+
+                                {/* Date */}
+                                <td className="p-4 text-sm text-muted-foreground whitespace-nowrap">
                                     {formatDate(lead.createdAt)}
                                 </td>
+
+                                {/* Assignment */}
                                 <td className="p-4">
                                     {lead.status === 'assigned' ? (
                                         <div className="text-xs">
                                             <Badge variant="success" className="mb-1">Assigned</Badge>
-                                            <p className="text-muted-foreground truncate max-w-[120px]">
-                                                {lead.project?.advertiser?.companyName}
-                                            </p>
+                                            {(lead.assignedTo?.companyName || lead.project?.advertiser?.companyName) && (
+                                                <p className="text-muted-foreground truncate max-w-[120px]">
+                                                    {lead.assignedTo?.companyName || lead.project?.advertiser?.companyName}
+                                                </p>
+                                            )}
                                         </div>
                                     ) : (
                                         <Badge variant="secondary" className="bg-slate-200">Pending Pool</Badge>
@@ -189,30 +239,33 @@ export default function AdminLeadsPage() {
 
     return (
         <div className="space-y-6">
-            {/* Page Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl md:text-3xl font-heading font-bold">Leads Management</h1>
-                    <p className="text-muted-foreground mt-1">
-                        Track and distribute leads across all landing pages
-                    </p>
-                </div>
+            <div>
+                <h1 className="text-2xl md:text-3xl font-heading font-bold">Leads Management</h1>
+                <p className="text-muted-foreground mt-1">
+                    Track and distribute leads across all landing pages and projects
+                </p>
             </div>
 
             <Tabs defaultValue="all" className="w-full">
                 <div className="flex items-center justify-between mb-4 border-b">
                     <TabsList className="bg-transparent h-auto p-0 gap-6">
-                        <TabsTrigger value="all" className="data-[state=active]:border-primary data-[state=active]:bg-transparent border-b-2 border-transparent rounded-none px-0 py-2 text-base font-semibold">
+                        <TabsTrigger
+                            value="all"
+                            className="data-[state=active]:border-primary data-[state=active]:bg-transparent border-b-2 border-transparent rounded-none px-0 py-2 text-base font-semibold"
+                        >
                             All Leads ({leads.length})
                         </TabsTrigger>
-                        <TabsTrigger value="direct" className="data-[state=active]:border-primary data-[state=active]:bg-transparent border-b-2 border-transparent rounded-none px-0 py-2 text-base font-semibold">
-                            Direct ({directLeads.length})
+                        <TabsTrigger
+                            value="project"
+                            className="data-[state=active]:border-primary data-[state=active]:bg-transparent border-b-2 border-transparent rounded-none px-0 py-2 text-base font-semibold"
+                        >
+                            Project Leads ({projectLeads.length})
                         </TabsTrigger>
-                        <TabsTrigger value="lp" className="data-[state=active]:border-primary data-[state=active]:bg-transparent border-b-2 border-transparent rounded-none px-0 py-2 text-base font-semibold">
-                            Landing Page ({lpLeads.length})
-                        </TabsTrigger>
-                        <TabsTrigger value="common" className="data-[state=active]:border-primary data-[state=active]:bg-transparent border-b-2 border-transparent rounded-none px-0 py-2 text-base font-semibold">
-                            Common Pool ({commonLeads.length})
+                        <TabsTrigger
+                            value="common"
+                            className="data-[state=active]:border-primary data-[state=active]:bg-transparent border-b-2 border-transparent rounded-none px-0 py-2 text-base font-semibold"
+                        >
+                            Common Pool ({commonPoolLeads.length})
                         </TabsTrigger>
                     </TabsList>
 
@@ -222,7 +275,7 @@ export default function AdminLeadsPage() {
                             <Input
                                 placeholder="Search leads..."
                                 value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onChange={e => setSearchQuery(e.target.value)}
                                 className="pl-10 h-9"
                             />
                         </div>
@@ -233,42 +286,49 @@ export default function AdminLeadsPage() {
                     </div>
                 </div>
 
+                {/* All Leads */}
                 <TabsContent value="all" className="mt-0">
                     <Card>
                         <CardContent className="p-0">
-                            <Table data={leads} />
+                            <LeadsTable data={leads} />
                         </CardContent>
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="direct" className="mt-0">
+                {/* Project Leads */}
+                <TabsContent value="project" className="mt-0">
                     <Card>
                         <CardHeader className="pb-4">
-                            <CardTitle className="text-lg">Direct Leads</CardTitle>
-                            <CardDescription>Leads submitted directly on project pages without landing page.</CardDescription>
+                            <CardTitle className="text-lg flex items-center gap-2">
+                                <Building2 className="h-5 w-5 text-primary" />
+                                Project Leads
+                            </CardTitle>
+                            <CardDescription>
+                                Leads submitted on a specific project page — private to that project's advertiser only.
+                                The landing page column shows which LP the project was listed on (if any).
+                            </CardDescription>
                         </CardHeader>
                         <CardContent className="p-0">
-                            <Table data={directLeads} />
+                            <LeadsTable data={projectLeads} />
                         </CardContent>
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="lp" className="mt-0">
-                    <Card>
-                        <CardContent className="p-0">
-                            <Table data={lpLeads} />
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-
+                {/* Common Pool */}
                 <TabsContent value="common" className="mt-0">
                     <Card>
                         <CardHeader className="pb-4">
-                            <CardTitle className="text-lg">Common Nature Leads</CardTitle>
-                            <CardDescription>Unassigned leads from Facebook and Landing Pages shared pool.</CardDescription>
+                            <CardTitle className="text-lg flex items-center gap-2">
+                                <LayoutTemplate className="h-5 w-5 text-primary" />
+                                Common Pool
+                            </CardTitle>
+                            <CardDescription>
+                                Leads from the landing page's generic enquiry form or Facebook lead forms — no specific project selected.
+                                Distributed to eligible advertisers on that LP based on their lead filters.
+                            </CardDescription>
                         </CardHeader>
                         <CardContent className="p-0">
-                            <Table data={commonLeads} />
+                            <LeadsTable data={commonPoolLeads} />
                         </CardContent>
                     </Card>
                 </TabsContent>
