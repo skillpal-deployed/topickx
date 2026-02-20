@@ -195,8 +195,8 @@ export const getAdminPerformance = async (req: Request | any, res: Response) => 
                     landingPageId: { not: null },
                     createdAt: dateFilter,
                 },
-                _count: { _all: true },
-                orderBy: { _count: { _all: 'desc' } },
+                _count: { id: true },
+                orderBy: { _count: { id: 'desc' } },
             });
 
             lpStats = await Promise.all(
@@ -223,7 +223,7 @@ export const getAdminPerformance = async (req: Request | any, res: Response) => 
                         landingPage: lp,
                         project: null,
                         advertiser: null,
-                        visits: stat._count._all,
+                        visits: (stat as any)._count?.id || 0,
                     };
                 })
             );
@@ -259,8 +259,8 @@ export const getAdminPerformance = async (req: Request | any, res: Response) => 
                         landingPageId: null, // direct project page visits only
                         createdAt: dateFilter,
                     },
-                    _count: { _all: true },
-                    orderBy: { _count: { _all: 'desc' } },
+                    _count: { id: true },
+                    orderBy: { _count: { id: 'desc' } },
                 });
 
                 projectStats = projectVisits.map(stat => {
@@ -271,7 +271,7 @@ export const getAdminPerformance = async (req: Request | any, res: Response) => 
                         landingPage: null,
                         project: { id: project.id, name: project.name, slug: project.slug },
                         advertiser: project.advertiser,
-                        visits: stat._count._all,
+                        visits: (stat as any)._count?.id || 0,
                     };
                 }).filter(Boolean);
             }

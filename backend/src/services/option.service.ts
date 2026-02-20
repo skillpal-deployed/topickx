@@ -139,7 +139,7 @@ export const createOption = async (
             name: data.name,
             parentId: data.parentId,
             isActive: data.isActive ?? true,
-            ...((data as any).iconUrl !== undefined && { iconUrl: (data as any).iconUrl }),
+            ...(data.iconUrl !== undefined && { iconUrl: data.iconUrl }),
         },
     });
 
@@ -169,7 +169,7 @@ export const updateOption = async (
     const updateData: any = {};
     if (data.name !== undefined) updateData.name = data.name;
     if (data.isActive !== undefined) updateData.isActive = data.isActive;
-    if ((data as any).iconUrl !== undefined) updateData.iconUrl = (data as any).iconUrl;
+    if (data.iconUrl !== undefined) updateData.iconUrl = data.iconUrl;
 
     const option = await prisma.option.update({
         where: { id },

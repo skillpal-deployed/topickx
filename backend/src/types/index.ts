@@ -252,11 +252,13 @@ export interface OptionCreateRequest {
     name: string;
     parentId?: string;
     isActive?: boolean;
+    iconUrl?: string | null;
 }
 
 export interface OptionUpdateRequest {
     name?: string;
     isActive?: boolean;
+    iconUrl?: string | null;
 }
 
 export interface OtpSendRequest {
