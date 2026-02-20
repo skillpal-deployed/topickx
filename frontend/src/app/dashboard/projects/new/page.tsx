@@ -86,6 +86,7 @@ export default function AddProjectPage() {
         usp_2: "",
         project_logo: "",
         advertiser_logo: "",
+        location_highlights: [] as string[],
     });
     const [isManualLocality, setIsManualLocality] = useState(false);
 
@@ -285,24 +286,29 @@ export default function AddProjectPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Validation
+        // ── Basic Info Validation ──────────────────────────────────────────
         if (!formData.package_id) {
             toast.error("Please select a package");
             setActiveTab("basic");
             return;
         }
-        if (
-            !formData.name ||
-            !formData.builder_name ||
-            !formData.city ||
-            !formData.locality
-        ) {
+        if (!formData.name || !formData.builder_name || !formData.city || !formData.locality) {
             toast.error("Please fill in all required fields in Basic Info");
+            setActiveTab("basic");
+            return;
+        }
+        if (!formData.address || !formData.address.trim()) {
+            toast.error("Full address is required");
             setActiveTab("basic");
             return;
         }
         if (!formData.property_type) {
             toast.error("Please select property type");
+            setActiveTab("basic");
+            return;
+        }
+        if (!formData.possession_status) {
+            toast.error("Please select possession status");
             setActiveTab("basic");
             return;
         }
@@ -312,13 +318,45 @@ export default function AddProjectPage() {
             return;
         }
         if (!formData.budget_min || !formData.budget_max) {
-            toast.error("Please enter budget range");
+            toast.error("Please enter budget range (Min & Max)");
             setActiveTab("basic");
             return;
         }
-        if (!formData.possession_status) {
-            toast.error("Please select possession status");
+        if (!formData.price || !formData.price.trim()) {
+            toast.error("Display price is required (e.g. ₹45 Lac onwards)");
             setActiveTab("basic");
+            return;
+        }
+        if (!formData.price_details || !formData.price_details.trim()) {
+            toast.error("Price details are required");
+            setActiveTab("basic");
+            return;
+        }
+        if (formData.amenities.length === 0) {
+            toast.error("Please select at least one amenity");
+            setActiveTab("basic");
+            return;
+        }
+        if (!formData.usp_1 || !formData.usp_1.trim()) {
+            toast.error("Premium USP 1 is required");
+            setActiveTab("basic");
+            return;
+        }
+        if (!formData.usp_2 || !formData.usp_2.trim()) {
+            toast.error("Premium USP 2 is required");
+            setActiveTab("basic");
+            return;
+        }
+
+        // ── Content Tab Validation ─────────────────────────────────────────
+        if (!formData.about_project || !formData.about_project.trim()) {
+            toast.error("About the Project description is required");
+            setActiveTab("content");
+            return;
+        }
+        if (!formData.builder_description || !formData.builder_description.trim()) {
+            toast.error("About the Builder description is required");
+            setActiveTab("content");
             return;
         }
 
@@ -632,7 +670,7 @@ export default function AddProjectPage() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="address">Full Address</Label>
+                                    <Label htmlFor="address">Full Address *</Label>
                                     <Textarea
                                         id="address"
                                         name="address"
@@ -706,7 +744,7 @@ export default function AddProjectPage() {
                                 )}
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="rera_id">RERA ID (Optional)</Label>
+                                    <Label htmlFor="rera_id">RERA ID <span className="text-muted-foreground font-normal">(Optional)</span></Label>
                                     <Input
                                         id="rera_id"
                                         name="rera_id"
@@ -719,7 +757,7 @@ export default function AddProjectPage() {
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="usp_1">Premium USP 1</Label>
+                                        <Label htmlFor="usp_1">Premium USP 1 *</Label>
                                         <Input
                                             id="usp_1"
                                             name="usp_1"
@@ -731,7 +769,7 @@ export default function AddProjectPage() {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="usp_2">Premium USP 2</Label>
+                                        <Label htmlFor="usp_2">Premium USP 2 *</Label>
                                         <Input
                                             id="usp_2"
                                             name="usp_2"
@@ -805,7 +843,7 @@ export default function AddProjectPage() {
                             <CardContent className="space-y-4">
                                 <div className="grid sm:grid-cols-3 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="price">Display Price</Label>
+                                        <Label htmlFor="price">Display Price *</Label>
                                         <Input
                                             id="price"
                                             name="price"
@@ -841,7 +879,7 @@ export default function AddProjectPage() {
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="price_details">Price Details</Label>
+                                    <Label htmlFor="price_details">Price Details *</Label>
                                     <Textarea
                                         id="price_details"
                                         name="price_details"
@@ -857,7 +895,7 @@ export default function AddProjectPage() {
                         {/* Amenities */}
                         <Card>
                             <CardHeader>
-                                <CardTitle className="text-lg">Amenities</CardTitle>
+                                <CardTitle className="text-lg">Amenities *</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -884,7 +922,7 @@ export default function AddProjectPage() {
                         {/* Highlights */}
                         <Card>
                             <CardHeader>
-                                <CardTitle className="text-lg">Highlights</CardTitle>
+                                <CardTitle className="text-lg">Highlights <span className="text-sm font-normal text-muted-foreground">(Optional)</span></CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-3">
                                 {formData.highlights.map((highlight, index) => (
@@ -920,6 +958,27 @@ export default function AddProjectPage() {
                                     <Plus className="w-4 h-4" />
                                     Add Highlight
                                 </Button>
+                            </CardContent>
+                        </Card>
+
+                        {/* Location Highlights */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-lg">Location Highlights <span className="text-sm font-normal text-muted-foreground">(Optional)</span></CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-2">
+                                    <p className="text-sm text-muted-foreground">Enter each location advantage on a new line (e.g., "5 min to Metro Station")</p>
+                                    <Textarea
+                                        value={formData.location_highlights.join("\n")}
+                                        onChange={(e) => setFormData(prev => ({
+                                            ...prev,
+                                            location_highlights: e.target.value.split("\n").filter(line => line.trim())
+                                        }))}
+                                        className="min-h-[120px] h-12"
+                                        placeholder="Near IT Park&#10;Close to Schools&#10;5 min to Highway"
+                                    />
+                                </div>
                             </CardContent>
                         </Card>
                     </TabsContent>
@@ -1098,7 +1157,7 @@ export default function AddProjectPage() {
 
                         <Card>
                             <CardHeader>
-                                <CardTitle className="text-lg">About the Project</CardTitle>
+                                <CardTitle className="text-lg">About the Project *</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <Textarea
@@ -1113,7 +1172,7 @@ export default function AddProjectPage() {
 
                         <Card>
                             <CardHeader>
-                                <CardTitle className="text-lg">About the Builder</CardTitle>
+                                <CardTitle className="text-lg">About the Builder *</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <Textarea

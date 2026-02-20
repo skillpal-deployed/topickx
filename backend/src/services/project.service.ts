@@ -215,7 +215,15 @@ export const createProject = async (
     // }
 
     // Generate unique slug
-    let finalSlug = await generateSlug(data.name, data.builderName, data.city, advertiserId);
+    let finalSlug = await generateSlug(
+        data.name,
+        data.builderName,
+        data.city,
+        advertiserId,
+        data.locality,
+        Array.isArray(data.propertyType) ? data.propertyType : (data.propertyType ? [data.propertyType] : []),
+        data.unitTypes || []
+    );
     let counter = 1;
     let uniqueSlug = finalSlug;
 
@@ -265,7 +273,16 @@ export const createProject = async (
 };
 
 // Helper to generate slug
-const generateSlug = async (name: string, builderName: string, cityId: string, advertiserId?: string): Promise<string> => {
+// Formula: advertiserName-projectName-unitTypes-propertyType-locality-city
+const generateSlug = async (
+    name: string,
+    builderName: string,
+    cityId: string,
+    advertiserId?: string,
+    localityId?: string,
+    propertyTypeIds?: string[],
+    unitTypeIds?: string[]
+): Promise<string> => {
     // Get City Name
     let cityName = cityId;
 
@@ -286,6 +303,24 @@ const generateSlug = async (name: string, builderName: string, cityId: string, a
         }
     }
 
+    // Get Locality Name if available
+    let localityName = "";
+    if (localityId && uuidRegex.test(localityId)) {
+        try {
+            const locality = await prisma.option.findUnique({
+                where: { id: localityId },
+                select: { name: true },
+            });
+            if (locality) {
+                localityName = locality.name;
+            }
+        } catch (e) {
+            // Ignore
+        }
+    } else if (localityId) {
+        localityName = localityId;
+    }
+
     // Get Advertiser Name if available
     let advertiserName = "";
     if (advertiserId) {
@@ -302,8 +337,40 @@ const generateSlug = async (name: string, builderName: string, cityId: string, a
         }
     }
 
-    // New Structure: advertiserName-name-city
-    const rawSlug = `${advertiserName} ${name} ${cityName}`;
+    // Resolve property types (use first one only to keep slug concise)
+    let propertyTypeLabel = "";
+    if (propertyTypeIds && propertyTypeIds.length > 0) {
+        const ptId = propertyTypeIds[0];
+        if (uuidRegex.test(ptId)) {
+            try {
+                const pt = await prisma.option.findUnique({ where: { id: ptId }, select: { name: true } });
+                if (pt) propertyTypeLabel = pt.name;
+            } catch (e) { /* ignore */ }
+        } else {
+            propertyTypeLabel = ptId;
+        }
+    }
+
+    // Resolve unit types (join all, e.g. "3BHK 4BHK" → "3bhk-4bhk")
+    let unitTypeLabels = "";
+    if (unitTypeIds && unitTypeIds.length > 0) {
+        const resolvedUnits: string[] = [];
+        for (const utId of unitTypeIds) {
+            if (uuidRegex.test(utId)) {
+                try {
+                    const ut = await prisma.option.findUnique({ where: { id: utId }, select: { name: true } });
+                    if (ut) resolvedUnits.push(ut.name);
+                } catch (e) { /* ignore */ }
+            } else {
+                resolvedUnits.push(utId);
+            }
+        }
+        unitTypeLabels = resolvedUnits.join(' ');
+    }
+
+    // Final structure: advertiserName projectName unitTypes propertyType locality city
+    const parts = [advertiserName, name, unitTypeLabels, propertyTypeLabel, localityName, cityName].filter(Boolean);
+    const rawSlug = parts.join(' ');
 
     const normalized = rawSlug
         .toLowerCase()
@@ -413,8 +480,13 @@ export const updateProject = async (
             const n = data.name || project.name;
             const b = data.builderName || project.builderName;
             const c = data.city || project.city;
+            const l = data.locality || project.locality;
             const advId = advertiserId || project.advertiserId;
-            targetSlug = await generateSlug(n, b, c, advId);
+            const propTypes = data.propertyType
+                ? (Array.isArray(data.propertyType) ? data.propertyType : [data.propertyType])
+                : (Array.isArray(project.propertyType) ? project.propertyType : []);
+            const unitTypes = data.unitTypes || project.unitTypes || [];
+            targetSlug = await generateSlug(n, b, c, advId, l, propTypes, unitTypes);
         }
     }
 

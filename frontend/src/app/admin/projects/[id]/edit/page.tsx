@@ -39,6 +39,7 @@ export default function EditProjectPage() {
     const [unitTypeOptions, setUnitTypeOptions] = useState<any[]>([]);
     const [possessionStatusOptions, setPossessionStatusOptions] = useState<any[]>([]);
     const [propertyUnitMappings, setPropertyUnitMappings] = useState<Record<string, string[]>>({});
+    const [activeTab, setActiveTab] = useState("overview");
 
     const [formData, setFormData] = useState({
         name: "",
@@ -277,6 +278,66 @@ export default function EditProjectPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // ── Overview Tab Validation ─────────────────────────────────────────
+        if (!formData.name || !formData.builderName || !formData.city || !formData.locality) {
+            toast.error("Please fill in all required fields in Overview");
+            setActiveTab("overview");
+            return;
+        }
+        if (!formData.address || !formData.address.trim()) {
+            toast.error("Full address is required");
+            setActiveTab("overview");
+            return;
+        }
+        if (!formData.budgetMin || !formData.budgetMax) {
+            toast.error("Please enter budget range (Min & Max)");
+            setActiveTab("overview");
+            return;
+        }
+        if (formData.propertyType.length === 0) {
+            toast.error("Please select at least one property type");
+            setActiveTab("overview");
+            return;
+        }
+        if (formData.unitTypes.length === 0) {
+            toast.error("Please select at least one unit type");
+            setActiveTab("overview");
+            return;
+        }
+        if (!formData.possessionStatus) {
+            toast.error("Please select possession status");
+            setActiveTab("overview");
+            return;
+        }
+
+        // ── Content Tab Validation ───────────────────────────────────────────
+        if (!formData.aboutProject || !formData.aboutProject.trim()) {
+            toast.error("About the Project description is required");
+            setActiveTab("content");
+            return;
+        }
+        if (!formData.builderDescription || !formData.builderDescription.trim()) {
+            toast.error("About the Builder description is required");
+            setActiveTab("content");
+            return;
+        }
+        if (formData.amenities.length === 0) {
+            toast.error("Please select at least one amenity");
+            setActiveTab("content");
+            return;
+        }
+        if (!formData.usp1 || !formData.usp1.trim()) {
+            toast.error("Premium USP 1 is required");
+            setActiveTab("content");
+            return;
+        }
+        if (!formData.usp2 || !formData.usp2.trim()) {
+            toast.error("Premium USP 2 is required");
+            setActiveTab("content");
+            return;
+        }
+
         setIsSaving(true);
         try {
             await adminAPI.updateProject(projectId, formData);
@@ -337,7 +398,7 @@ export default function EditProjectPage() {
                 </div>
             </div>
 
-            <Tabs defaultValue="overview" className="space-y-4">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
                 <TabsList className="grid w-full grid-cols-5 lg:w-[500px]">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
                     <TabsTrigger value="media">Media</TabsTrigger>
@@ -355,18 +416,18 @@ export default function EditProjectPage() {
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label>Project Name</Label>
+                                    <Label>Project Name *</Label>
                                     <Input name="name" value={formData.name} onChange={handleChange} />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Builder Name</Label>
+                                    <Label>Builder Name *</Label>
                                     <Input name="builderName" value={formData.builderName} onChange={handleChange} />
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label>City</Label>
+                                    <Label>City *</Label>
                                     <Select value={formData.city} onValueChange={(v) => handleSelectChange("city", v)}>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select city" />
@@ -381,7 +442,7 @@ export default function EditProjectPage() {
                                     </Select>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Locality</Label>
+                                    <Label>Locality *</Label>
                                     <Select value={formData.locality} onValueChange={(v) => handleSelectChange("locality", v)}>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select locality" />
@@ -400,24 +461,24 @@ export default function EditProjectPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <Label>Full Address</Label>
+                                <Label>Full Address *</Label>
                                 <Textarea name="address" value={formData.address} onChange={handleChange} />
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label>Price (Numeric)</Label>
+                                    <Label>Price (Numeric) *</Label>
                                     <Input type="number" name="price" value={formData.price} onChange={handleChange} />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>RERA ID</Label>
+                                    <Label>RERA ID <span className="text-muted-foreground font-normal">(Optional)</span></Label>
                                     <Input name="reraId" value={formData.reraId} onChange={handleChange} />
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label>Budget Min (in Rupees)</Label>
+                                    <Label>Budget Min (in Rupees) *</Label>
                                     <Input
                                         type="number"
                                         placeholder="e.g. 5000000 for ₹50L"
@@ -427,7 +488,7 @@ export default function EditProjectPage() {
                                     <p className="text-xs text-muted-foreground">Enter 5000000 for ₹50 Lakhs, 10000000 for ₹1 Crore</p>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Budget Max (in Rupees)</Label>
+                                    <Label>Budget Max (in Rupees) *</Label>
                                     <Input
                                         type="number"
                                         placeholder="e.g. 15000000 for ₹1.5 Cr"
@@ -439,7 +500,7 @@ export default function EditProjectPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <Label>Possession Status</Label>
+                                <Label>Possession Status *</Label>
                                 <Select value={formData.possessionStatus} onValueChange={(v) => handleSelectChange("possessionStatus", v)}>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select status" />
@@ -474,7 +535,7 @@ export default function EditProjectPage() {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label>Property Type</Label>
+                                    <Label>Property Type *</Label>
                                     <MultiSelect
                                         options={propertyTypeOptions.map(o => ({ label: o.name, value: o.id }))}
                                         selected={formData.propertyType || []}
@@ -483,7 +544,7 @@ export default function EditProjectPage() {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Unit Types</Label>
+                                    <Label>Unit Types *</Label>
                                     <MultiSelect
                                         options={(() => {
                                             // Get all selected property type names
@@ -668,17 +729,17 @@ export default function EditProjectPage() {
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <div className="space-y-2">
-                                <Label>About Project</Label>
+                                <Label>About Project *</Label>
                                 <Textarea name="aboutProject" value={formData.aboutProject} onChange={handleChange} className="min-h-[150px]" />
                             </div>
 
                             <div className="space-y-2">
-                                <Label>Builder Description</Label>
+                                <Label>Builder Description *</Label>
                                 <Textarea name="builderDescription" value={formData.builderDescription} onChange={handleChange} className="min-h-[100px]" />
                             </div>
 
                             <div className="space-y-2">
-                                <Label>Amenities</Label>
+                                <Label>Amenities *</Label>
                                 <MultiSelect
                                     options={amenityOptions.map(o => ({ label: o.label || o.name, value: o.id }))}
                                     selected={formData.amenities || []}
@@ -688,7 +749,7 @@ export default function EditProjectPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <Label>Project Highlights (Key Features)</Label>
+                                <Label>Project Highlights <span className="text-sm font-normal text-muted-foreground">(Optional)</span></Label>
                                 <div className="space-y-3">
                                     {formData.highlights.map((highlight, index) => (
                                         <div key={index} className="flex gap-2">
@@ -737,7 +798,7 @@ export default function EditProjectPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <Label>Location Highlights</Label>
+                                <Label>Location Highlights <span className="text-sm font-normal text-muted-foreground">(Optional)</span></Label>
                                 <p className="text-sm text-muted-foreground">Enter each location advantage on a new line (e.g., "5 min to Metro Station")</p>
                                 <Textarea
                                     value={formData.locationHighlights.join("\n")}
@@ -772,11 +833,11 @@ export default function EditProjectPage() {
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label>USP 1</Label>
+                                    <Label>USP 1 *</Label>
                                     <Input name="usp1" value={formData.usp1} onChange={handleChange} placeholder="e.g. Waterfront View" maxLength={50} />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>USP 2</Label>
+                                    <Label>USP 2 *</Label>
                                     <Input name="usp2" value={formData.usp2} onChange={handleChange} placeholder="e.g. 5 mins to Airport" maxLength={50} />
                                 </div>
                             </div>
@@ -891,15 +952,12 @@ export default function EditProjectPage() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
-                                <Label>Slug (URL Friendly Name)</Label>
-                                <Input
-                                    name="slug"
-                                    value={formData.slug || ""}
-                                    onChange={handleChange}
-                                    placeholder="Leave empty to auto-generate from Name + Builder + City"
-                                />
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    Leave empty to automatically generate from Project Name, Builder Name, and City.
+                                <Label>URL Slug (Auto-generated)</Label>
+                                <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-md border text-sm text-muted-foreground">
+                                    <span className="font-mono">/project/{formData.slug || '(auto-generated on save)'}</span>
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                    Automatically generated from: Advertiser Name + Project Name + City + Locality
                                 </p>
                             </div>
                             <div className="space-y-2">

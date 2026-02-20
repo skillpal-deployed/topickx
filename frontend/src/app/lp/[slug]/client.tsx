@@ -773,7 +773,7 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                                 return (
                                     <div
                                         key={project.id}
-                                        onClick={() => window.location.href = `/project/${project.id}?lp=${landingPage.id}`}
+                                        onClick={() => window.location.href = `/project/${project.slug || project.id}?lp=${landingPage.id}`}
                                         className={`group rounded-2xl overflow-hidden flex flex-col cursor-pointer transition-all duration-300 max-w-sm mx-auto w-full ${isFeatured
                                             ? "bg-[#F2F8FC] shadow-xl border-2 border-amber-400 ring-4 ring-amber-400/20 hover:shadow-2xl hover:shadow-amber-100 scale-[1.01] hover:scale-[1.02]"
                                             : "bg-white shadow-sm border border-slate-100 ring-1 ring-slate-100 hover:shadow-lg hover:border-emerald-600/30"

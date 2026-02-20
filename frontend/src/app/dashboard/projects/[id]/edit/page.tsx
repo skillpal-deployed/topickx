@@ -89,6 +89,7 @@ export default function EditProjectPage({
         builder_name: "",
         city: "",
         locality: "",
+        address: "",
         property_type: "",
         unit_types: [] as string[],
         budget_min: "",
@@ -109,6 +110,7 @@ export default function EditProjectPage({
         rera_id: "",
         usp_1: "",
         usp_2: "",
+        location_highlights: [] as string[],
     });
 
     useEffect(() => {
@@ -132,6 +134,7 @@ export default function EditProjectPage({
                     builder_name: data.builderName || data.builder_name || "",
                     city: data.city || "",
                     locality: data.locality || "",
+                    address: data.address || "",
                     property_type: Array.isArray(data.propertyType) ? data.propertyType[0] : (data.propertyType || data.property_type || ""),
                     unit_types: data.unitTypes || data.unit_types || [],
                     budget_min: data.budgetMin || data.budget_min || "",
@@ -169,6 +172,7 @@ export default function EditProjectPage({
                     rera_id: data.reraId || data.rera_id || "",
                     usp_1: data.usp1 || "",
                     usp_2: data.usp2 || "",
+                    location_highlights: data.locationHighlights || data.location_highlights || [],
                 });
             } catch (error) {
                 console.error("Error fetching project:", error);
@@ -296,13 +300,62 @@ export default function EditProjectPage({
     };
 
     const handleSave = async () => {
-        if (
-            !formData.name ||
-            !formData.builder_name ||
-            !formData.city ||
-            !formData.locality
-        ) {
-            toast.error("Please fill all required fields");
+        // ── Basic Info Validation ──────────────────────────────────────────
+        if (!formData.name || !formData.builder_name || !formData.city || !formData.locality) {
+            toast.error("Please fill in all required fields in Basic Info");
+            setActiveTab("basic");
+            return;
+        }
+        if (!formData.address || !formData.address.trim()) {
+            toast.error("Full address is required");
+            setActiveTab("basic");
+            return;
+        }
+        if (!formData.property_type) {
+            toast.error("Please select property type");
+            setActiveTab("basic");
+            return;
+        }
+        if (!formData.possession_status) {
+            toast.error("Please select possession status");
+            setActiveTab("basic");
+            return;
+        }
+        if (formData.unit_types.length === 0) {
+            toast.error("Please select at least one unit type");
+            setActiveTab("basic");
+            return;
+        }
+        if (!formData.budget_min || !formData.budget_max) {
+            toast.error("Please enter budget range (Min & Max)");
+            setActiveTab("basic");
+            return;
+        }
+
+        // ── Content Tab Validation ─────────────────────────────────────────
+        if (!formData.about_project || !formData.about_project.trim()) {
+            toast.error("About the Project description is required");
+            setActiveTab("content");
+            return;
+        }
+        if (!formData.builder_description || !formData.builder_description.trim()) {
+            toast.error("About the Builder description is required");
+            setActiveTab("content");
+            return;
+        }
+        if (formData.amenities.length === 0) {
+            toast.error("Please select at least one amenity");
+            setActiveTab("basic");
+            return;
+        }
+        if (!formData.usp_1 || !formData.usp_1.trim()) {
+            toast.error("Premium USP 1 is required");
+            setActiveTab("basic");
+            return;
+        }
+        if (!formData.usp_2 || !formData.usp_2.trim()) {
+            toast.error("Premium USP 2 is required");
+            setActiveTab("basic");
             return;
         }
 
@@ -334,6 +387,7 @@ export default function EditProjectPage({
                 rera_id: formData.rera_id,
                 usp_1: formData.usp_1,
                 usp_2: formData.usp_2,
+                location_highlights: formData.location_highlights,
             };
 
             await advertiserAPI.updateProject(id, payload);
@@ -539,6 +593,19 @@ export default function EditProjectPage({
                                 </div>
                             </div>
 
+                            <div className="space-y-2">
+                                <Label htmlFor="address">Full Address *</Label>
+                                <Textarea
+                                    id="address"
+                                    name="address"
+                                    placeholder="Complete project address for display"
+                                    value={formData.address}
+                                    onChange={handleInputChange}
+                                    disabled={!canEdit}
+                                    rows={2}
+                                />
+                            </div>
+
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div className="space-y-2">
                                     <Label>Property Type *</Label>
@@ -562,7 +629,7 @@ export default function EditProjectPage({
                                     </Select>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="budget_min">Min Budget (₹)</Label>
+                                    <Label htmlFor="budget_min">Min Budget (₹) *</Label>
                                     <Input
                                         id="budget_min"
                                         name="budget_min"
@@ -574,7 +641,7 @@ export default function EditProjectPage({
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="budget_max">Max Budget (₹)</Label>
+                                    <Label htmlFor="budget_max">Max Budget (₹) *</Label>
                                     <Input
                                         id="budget_max"
                                         name="budget_max"
@@ -589,7 +656,7 @@ export default function EditProjectPage({
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label>Possession Status</Label>
+                                    <Label>Possession Status *</Label>
                                     <Select
                                         value={formData.possession_status}
                                         onValueChange={(v) =>
@@ -610,7 +677,7 @@ export default function EditProjectPage({
                                     </Select>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="rera_id">RERA ID</Label>
+                                    <Label htmlFor="rera_id">RERA ID <span className="text-muted-foreground font-normal">(Optional)</span></Label>
                                     <Input
                                         id="rera_id"
                                         name="rera_id"
@@ -624,7 +691,7 @@ export default function EditProjectPage({
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="usp_1">Premium USP 1</Label>
+                                    <Label htmlFor="usp_1">Premium USP 1 *</Label>
                                     <Input
                                         id="usp_1"
                                         name="usp_1"
@@ -637,7 +704,7 @@ export default function EditProjectPage({
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="usp_2">Premium USP 2</Label>
+                                    <Label htmlFor="usp_2">Premium USP 2 *</Label>
                                     <Input
                                         id="usp_2"
                                         name="usp_2"
@@ -655,7 +722,7 @@ export default function EditProjectPage({
 
                     <Card>
                         <CardHeader>
-                            <CardTitle className="text-lg">Unit Types</CardTitle>
+                            <CardTitle className="text-lg">Unit Types *</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="flex flex-wrap gap-3">
@@ -703,7 +770,7 @@ export default function EditProjectPage({
 
                     <Card>
                         <CardHeader>
-                            <CardTitle className="text-lg">Amenities</CardTitle>
+                            <CardTitle className="text-lg">Amenities *</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -1121,6 +1188,27 @@ export default function EditProjectPage({
 
                     <Card>
                         <CardHeader>
+                            <CardTitle className="text-lg">Location Highlights <span className="text-sm font-normal text-muted-foreground">(Optional)</span></CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-2">
+                                <p className="text-sm text-muted-foreground">Enter each location advantage on a new line (e.g., "5 min to Metro Station")</p>
+                                <Textarea
+                                    value={formData.location_highlights.join("\n")}
+                                    onChange={(e) => setFormData(prev => ({
+                                        ...prev,
+                                        location_highlights: e.target.value.split("\n").filter(line => line.trim())
+                                    }))}
+                                    disabled={!canEdit}
+                                    className="min-h-[120px]"
+                                    placeholder="Near IT Park&#10;Close to Schools&#10;5 min to Highway"
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
                             <CardTitle className="text-lg">Project Highlights</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-3">
@@ -1163,7 +1251,7 @@ export default function EditProjectPage({
 
                     <Card>
                         <CardHeader>
-                            <CardTitle className="text-lg">About the Project</CardTitle>
+                            <CardTitle className="text-lg">About the Project *</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <Textarea
@@ -1172,14 +1260,14 @@ export default function EditProjectPage({
                                 value={formData.about_project}
                                 onChange={handleInputChange}
                                 disabled={!canEdit}
-                                rows={6}
+                                rows={8}
                             />
                         </CardContent>
                     </Card>
 
                     <Card>
                         <CardHeader>
-                            <CardTitle className="text-lg">About the Builder</CardTitle>
+                            <CardTitle className="text-lg">About the Builder *</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <Textarea
@@ -1188,7 +1276,7 @@ export default function EditProjectPage({
                                 value={formData.builder_description}
                                 onChange={handleInputChange}
                                 disabled={!canEdit}
-                                rows={4}
+                                rows={6}
                             />
                         </CardContent>
                     </Card>
