@@ -280,10 +280,12 @@ export const getAdvertiserCommonLeads = async (advertiserId: string, startDate?:
         leadFilterWhere.projectType = { in: filters.projectTypes };
     }
 
-    // 3. Return LP leads matching the advertiser's filters
+    // 3. Return LP leads matching the advertiser's filters (projectId must be null —
+    //    leads with a projectId are private to that project's advertiser)
     return prisma.lead.findMany({
         where: {
             landingPageId: { in: lpIds },
+            projectId: null, // Only LP-generic/FB leads — project-specific leads are never common
             ...leadFilterWhere,
             ...(Object.keys(dateFilter).length > 0 && { createdAt: dateFilter }),
         },
@@ -400,8 +402,9 @@ export const manualUploadLeads = async (
 export const getAdvertiserDirectLeads = async (advertiserId: string) => {
     return prisma.lead.findMany({
         where: {
+            // Any lead tied to this advertiser's project is private — regardless of whether
+            // it also has a landingPageId (LP project card click still belongs to the project owner)
             project: { advertiserId },
-            landingPageId: null, // Only direct project leads — LP-sourced leads belong in common leads
         },
         include: {
             project: {
