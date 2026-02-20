@@ -16,10 +16,10 @@ interface Props {
 // Expects: [advertiser, project, location, ...others]
 // DB Slug: advertiser-project-location
 const reconstructSlug = (segments: string[]): string => {
-    if (segments.length < 3) return segments.join("-");
-
-    // Take first 3 segments and join strictly
-    return segments.slice(0, 3).join("-");
+    // Join all URL path segments with hyphens to reconstruct the DB slug.
+    // e.g. ["abc-builders", "green-valley-heights", "new-pune"] → "abc-builders-green-valley-heights-new-pune"
+    // Previously this incorrectly took only the first 3 segments, breaking multi-word names/cities.
+    return segments.join("-");
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

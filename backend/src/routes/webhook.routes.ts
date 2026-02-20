@@ -40,12 +40,11 @@ router.post('/facebook', async (req: Request, res: Response) => {
                             where: { id: formId },
                             include: {
                                 landingPage: {
-                                    include: {
-                                        slots: {
-                                            orderBy: { position: 'asc' },
-                                            take: 1,
-                                            select: { projectId: true }
-                                        }
+                                    select: {
+                                        id: true,
+                                        name: true,
+                                        city: true,
+                                        fbAccessToken: true,
                                     }
                                 }
                             }
@@ -76,15 +75,15 @@ router.post('/facebook', async (req: Request, res: Response) => {
                         });
 
                         const landingPage = fbForm.landingPage as any;
-                        const firstProjectId = landingPage.slots?.[0]?.projectId || '';
 
-                        // 3. Save Lead to Common Leads
+                        // 3. Save Lead to Common Leads (no projectId — FB/LP leads are not tied to a specific project)
                         const newLead = await prisma.lead.create({
                             data: {
                                 name: fieldData.full_name || fieldData.name || 'Unknown',
                                 email: fieldData.email || '',
                                 phone: fieldData.phone_number || fieldData.phone || '',
-                                location: fieldData.location || fieldData.city || '',
+                                location: fieldData.location || '',
+                                city: fieldData.city || landingPage.city || '', // LP city as fallback
                                 budget: fieldData.budget || '',
                                 projectType: fieldData.project_type || '',
                                 unitType: fieldData.unit_type || '',
@@ -92,7 +91,7 @@ router.post('/facebook', async (req: Request, res: Response) => {
                                 fbLeadId: leadId,
                                 source: 'facebook',
                                 landingPageId: fbForm.landingPageId,
-                                projectId: firstProjectId,
+                                projectId: null, // LP-sourced — distributed by distributeLead
                                 status: 'unassigned'
                             }
                         });

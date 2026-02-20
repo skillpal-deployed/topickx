@@ -33,6 +33,11 @@ interface Lead {
     utmSource?: string;
     utmMedium?: string;
     utmCampaign?: string;
+    city?: string;
+    location?: string;
+    budget?: string;
+    propertyType?: string;
+    unitType?: string;
     project?: {
         id: string;
         name: string;
@@ -325,6 +330,7 @@ export default function LeadsPage() {
                                         <th className="text-left p-4 font-medium">Name</th>
                                         <th className="text-left p-4 font-medium">Mobile No.</th>
                                         <th className="text-left p-4 font-medium">Email ID</th>
+                                        <th className="text-left p-4 font-medium">Preferences</th>
                                         <th className="text-left p-4 font-medium">Project Name</th>
                                         <th className="text-left p-4 font-medium">Landing Page</th>
                                         <th className="text-left p-4 font-medium">Source</th>
@@ -349,6 +355,16 @@ export default function LeadsPage() {
                                                 <a href={`mailto:${lead.email}`} className="text-primary hover:underline">
                                                     {lead.email || "-"}
                                                 </a>
+                                            </td>
+                                            <td className="p-4 text-sm">
+                                                <div className="space-y-0.5">
+                                                    {lead.city && <span className="block text-muted-foreground">{lead.city}</span>}
+                                                    {lead.location && lead.location !== lead.city && <span className="block text-muted-foreground">{lead.location}</span>}
+                                                    {lead.propertyType && <Badge variant="outline" className="text-xs">{lead.propertyType}</Badge>}
+                                                    {lead.unitType && <span className="block text-xs text-muted-foreground">{lead.unitType}</span>}
+                                                    {lead.budget && <span className="block text-xs font-medium">{lead.budget}</span>}
+                                                    {!lead.city && !lead.location && !lead.propertyType && !lead.budget && <span className="text-muted-foreground">-</span>}
+                                                </div>
                                             </td>
                                             <td className="p-4">
                                                 {lead.project ? (

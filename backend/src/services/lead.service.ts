@@ -234,11 +234,17 @@ export const getServicingLeads = async (advertiserId: string, startDate?: string
 };
 
 export const getAdvertiserCommonLeads = async (advertiserId: string, startDate?: string, endDate?: string) => {
-    // 1. Get all Landing Pages where this advertiser has a project placed
-    const projects = await prisma.project.findMany({
-        where: { advertiserId },
-        select: { placements: { select: { landingPageId: true } } }
-    });
+    // 1. Get all Landing Pages where this advertiser has a project placed + their lead filters
+    const [projects, advertiser] = await Promise.all([
+        prisma.project.findMany({
+            where: { advertiserId },
+            select: { placements: { select: { landingPageId: true } } }
+        }),
+        prisma.user.findUnique({
+            where: { id: advertiserId },
+            select: { leadFilters: true }
+        })
+    ]);
 
     const lpIds = [...new Set(projects.flatMap(p => p.placements.map(pl => pl.landingPageId)))];
 
@@ -254,10 +260,31 @@ export const getAdvertiserCommonLeads = async (advertiserId: string, startDate?:
         dateFilter.lte = end;
     }
 
-    // 2. Return all leads from these LPs
+    // 2. Apply advertiser's lead filters (same filters used during FB lead distribution)
+    const filters = (advertiser?.leadFilters as any) || {};
+    const leadFilterWhere: any = {};
+
+    if (filters.locations && Array.isArray(filters.locations) && filters.locations.length > 0) {
+        leadFilterWhere.location = { in: filters.locations };
+    }
+    if (filters.cities && Array.isArray(filters.cities) && filters.cities.length > 0) {
+        leadFilterWhere.city = { in: filters.cities };
+    }
+    if (filters.propertyTypes && Array.isArray(filters.propertyTypes) && filters.propertyTypes.length > 0) {
+        leadFilterWhere.propertyType = { in: filters.propertyTypes };
+    }
+    if (filters.unitTypes && Array.isArray(filters.unitTypes) && filters.unitTypes.length > 0) {
+        leadFilterWhere.unitType = { in: filters.unitTypes };
+    }
+    if (filters.projectTypes && Array.isArray(filters.projectTypes) && filters.projectTypes.length > 0) {
+        leadFilterWhere.projectType = { in: filters.projectTypes };
+    }
+
+    // 3. Return LP leads matching the advertiser's filters
     return prisma.lead.findMany({
         where: {
             landingPageId: { in: lpIds },
+            ...leadFilterWhere,
             ...(Object.keys(dateFilter).length > 0 && { createdAt: dateFilter }),
         },
         include: {
@@ -374,6 +401,7 @@ export const getAdvertiserDirectLeads = async (advertiserId: string) => {
     return prisma.lead.findMany({
         where: {
             project: { advertiserId },
+            landingPageId: null, // Only direct project leads — LP-sourced leads belong in common leads
         },
         include: {
             project: {

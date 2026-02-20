@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import Script from "next/script";
 import Image from "next/image";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -311,7 +312,7 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
 
         setSubmitting(true);
         try {
-            await publicAPI.submitLead({
+            const response = await publicAPI.submitLead({
                 ...leadForm,
                 projectId: selectedProject?.id,
                 landingPageId: landingPage?.id,
@@ -321,17 +322,14 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                 utmCampaign: searchParams.get("utm_campaign") || undefined,
             });
             setLeadSubmitted(true);
-            // Fetch advertiser details for the project
-            // Mock or from project data if available. 
-            // The project object has advertiserLogo, but contact details might need fetching or be in project settings.
-            // Using a fallback contact for now or logic from backend if it returns it in response?
-            // The submitLead response might contain advertiser info?
-            // Assuming default or simulation for now as in code
-            setAdvertiserContact({
-                companyName: selectedProject?.builderName,
-                phone: "+91 9876543210", // Placeholder or real
-                email: "sales@example.com"
-            });
+            // Use actual advertiser contact returned by the backend
+            setAdvertiserContact(
+                response.data.advertiserContact || {
+                    companyName: selectedProject?.builderName,
+                    phone: "",
+                    email: ""
+                }
+            );
             toast.success("Enquiry submitted successfully!");
         } catch (error) {
             console.error("Error submitting lead:", error);
@@ -340,6 +338,7 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
             setSubmitting(false);
         }
     };
+
 
     const openLeadForm = (project: Project) => {
         setSelectedProject(project);
