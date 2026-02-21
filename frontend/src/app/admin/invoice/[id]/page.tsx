@@ -124,10 +124,10 @@ export default function InvoicePage() {
                             {/* Logo Image */}
                             <div className="relative h-24 w-64 ml-auto overflow-visible mb-4">
                                 <Image
-                                    src="/home-logo.png"
+                                    src="/icon.jpeg"
                                     alt="Topickx Logo"
                                     fill
-                                    className="object-contain object-right scale-[3] origin-right translate-x-4"
+                                    className="object-contain object-right scale-[4] origin-right translate-x-4"
                                 />
                             </div>
                             <div className="text-sm text-right">

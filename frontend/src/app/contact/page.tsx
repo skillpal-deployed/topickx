@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
     Mail,
     Phone,
@@ -31,22 +32,29 @@ export default function ContactPage() {
             <div className="fixed inset-0 opacity-[0.4] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay z-0"></div>
 
             {/* Header */}
-            <header className="relative z-10 py-6 px-6 lg:px-8 border-b border-teal-900/5 backdrop-blur-sm bg-white/30">
-                <div className="max-w-7xl mx-auto flex items-center justify-between">
-                    <Link href="/" className="flex items-center gap-3 group">
-                        <div className="w-10 h-10 rounded-full bg-teal-900/5 flex items-center justify-center border border-teal-900/10 group-hover:bg-teal-900/10 transition-all">
-                            <Building2 className="w-5 h-5 text-teal-800" />
+            <header className="fixed top-0 left-0 right-0 z-50 py-4 bg-white/80 backdrop-blur-xl border-b border-teal-100 shadow-sm">
+                <div className="max-w-7xl mx-auto px-6 lg:px-8 flex items-center justify-between">
+                    <Link href="/" className="flex items-center">
+                        <div className="relative w-10 h-10 overflow-visible">
+                            <Image
+                                src="/icon.jpeg"
+                                alt="Topickx Logo"
+                                fill
+                                className="object-contain scale-[4] origin-left"
+                            />
                         </div>
-                        <span className="font-bold text-xl tracking-tight text-teal-900">Topicky</span>
                     </Link>
                     <Link href="/">
-                        <Button variant="ghost" className="text-teal-900 flex items-center gap-2 hover:bg-teal-900/5">
+                        <Button variant="ghost" className="text-teal-900 font-bold hover:bg-teal-900/5 rounded-full px-6 flex items-center gap-2">
                             <ArrowLeft className="w-4 h-4" />
                             Back to Home
                         </Button>
                     </Link>
                 </div>
             </header>
+
+            {/* Header Spacer */}
+            <div className="h-20" />
 
             <main className="relative z-10 flex-1 py-16 px-6 lg:px-8 max-w-4xl mx-auto w-full">
                 <div className="text-center mb-16 space-y-4">

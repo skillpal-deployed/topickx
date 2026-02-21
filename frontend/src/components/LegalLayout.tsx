@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Building2, ArrowLeft, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Footer from "@/components/Footer";
@@ -18,24 +19,29 @@ export default function LegalLayout({ children, title, lastUpdated }: LegalLayou
             <div className="fixed inset-0 opacity-[0.4] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay z-0"></div>
 
             {/* Navigation */}
-            <nav className="relative z-50 py-6">
+            <nav className="fixed top-0 left-0 right-0 z-50 py-4 bg-white/80 backdrop-blur-xl border-b border-teal-100 shadow-sm">
                 <div className="max-w-[1400px] mx-auto px-6 lg:px-8 flex justify-between items-center">
-                    <Link href="/" className="flex items-center gap-3 group">
-                        <div className="w-12 h-12 rounded-full bg-teal-900/5 backdrop-blur-md flex items-center justify-center border border-teal-900/10 group-hover:bg-teal-900/10 transition-all">
-                            <Building2 className="w-6 h-6 text-teal-800" />
+                    <Link href="/" className="flex items-center">
+                        <div className="relative w-10 h-10 overflow-visible">
+                            <Image
+                                src="/icon.jpeg"
+                                alt="Topickx Logo"
+                                fill
+                                className="object-contain scale-[4] origin-left"
+                            />
                         </div>
-                        <span className="font-extrabold text-2xl tracking-tight text-teal-900">
-                            Topickx
-                        </span>
                     </Link>
                     <Link href="/">
-                        <Button variant="ghost" className="text-teal-900 font-bold hover:bg-teal-900/5">
+                        <Button variant="ghost" className="text-teal-900 font-bold hover:bg-teal-900/5 rounded-full px-6">
                             <ArrowLeft className="w-4 h-4 mr-2" />
                             Back to Home
                         </Button>
                     </Link>
                 </div>
             </nav>
+
+            {/* Navbar Spacer */}
+            <div className="h-20" />
 
             {/* Content */}
             <main className="relative z-10 py-16 px-6 lg:px-8 max-w-4xl mx-auto">

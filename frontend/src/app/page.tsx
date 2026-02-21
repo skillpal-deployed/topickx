@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { publicAPI } from "@/lib/api";
-import { getImageUrl, getProjectUrl } from "@/lib/utils";
+import { getImageUrl, getProjectUrl, cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -40,6 +40,15 @@ export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -66,23 +75,27 @@ export default function HomePage() {
       <div className="fixed inset-0 opacity-[0.4] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay z-0"></div>
 
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-6">
+      <nav
+        className={cn(
+          "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+          scrolled
+            ? "py-3 bg-white/80 backdrop-blur-xl border-b border-teal-100 shadow-sm"
+            : "py-6 bg-transparent"
+        )}
+      >
         <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="relative h-16 w-16">
+            <Link href="/" className="flex items-center">
+              <div className="relative h-12 w-12 overflow-visible">
                 <Image
-                  src="/logo-icon.png"
-                  alt="Topickx Icon"
+                  src="/icon.jpeg"
+                  alt="Topickx Logo"
                   fill
-                  className="object-contain"
+                  className="object-contain scale-[4] origin-left"
                   priority
                 />
               </div>
-              <span className="font-extrabold text-4xl tracking-tight text-teal-900">
-                Topickx
-              </span>
             </Link>
 
             {/* Desktop Nav */}
