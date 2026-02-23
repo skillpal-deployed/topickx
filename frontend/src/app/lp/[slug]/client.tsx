@@ -35,7 +35,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { publicAPI } from "@/lib/api";
+import { publicAPI, api } from "@/lib/api";
 import { getImageUrl, formatBudgetRange } from "@/lib/utils";
 import { OtpInput } from "@/components/ui/otp-input";
 import { UNIT_TYPES_BY_PROPERTY } from "@/lib/constants";
@@ -171,7 +171,7 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
     useEffect(() => {
         if (landingPage) {
             // Ping view counter once client-side (avoids SSR double-count)
-            publicAPI.axios?.post?.(`/landing-page/${landingPage.slug}/view`).catch(() => { });
+            api.post(`/landing-page/${landingPage.slug}/view`).catch(() => { });
 
             // Check if user has already submitted lead for this LP in this session
             const hasSubmitted = sessionStorage.getItem(`lp_lead_submitted_${landingPage.id}`);
