@@ -47,6 +47,8 @@ export default function CreateLandingPage() {
         seoDescription: "",
         pageType: "CITY_LOCALITY",
         maxProjects: 15,
+        fbPixelId: "",
+        googleAnalyticsId: "",
     });
 
     useEffect(() => {
@@ -283,6 +285,33 @@ export default function CreateLandingPage() {
                             </div>
                         </div>
 
+                        <div className="space-y-2">
+                            <Label>Tracking / Analytics</Label>
+                            <div className="grid gap-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                                <div className="space-y-2">
+                                    <Label htmlFor="fbPixelId" className="text-xs">Facebook Pixel ID</Label>
+                                    <Input
+                                        id="fbPixelId"
+                                        name="fbPixelId"
+                                        placeholder="e.g. 1234567890123456"
+                                        value={formData.fbPixelId}
+                                        onChange={handleChange}
+                                    />
+                                    <p className="text-xs text-muted-foreground">Fires a PageView + Lead event specific to this landing page campaign.</p>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="googleAnalyticsId" className="text-xs">Google Analytics Measurement ID</Label>
+                                    <Input
+                                        id="googleAnalyticsId"
+                                        name="googleAnalyticsId"
+                                        placeholder="e.g. G-XXXXXXXXXX"
+                                        value={formData.googleAnalyticsId}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="flex justify-end pt-4">
                             <Button type="submit" disabled={loading}>
                                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -292,6 +321,6 @@ export default function CreateLandingPage() {
                     </CardContent>
                 </Card>
             </form>
-        </div>
+        </div >
     );
 }

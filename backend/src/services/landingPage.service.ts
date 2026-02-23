@@ -207,6 +207,8 @@ export const getLandingPageBySlug = async (slug: string) => {
     return {
         ...page,
         projects: resolvedProjects,
+        fbPixelId: page.fbPixelId,
+        googleAnalyticsId: page.googleAnalyticsId,
     };
 };
 

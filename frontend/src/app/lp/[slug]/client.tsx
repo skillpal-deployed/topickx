@@ -170,6 +170,9 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
 
     useEffect(() => {
         if (landingPage) {
+            // Ping view counter once client-side (avoids SSR double-count)
+            publicAPI.axios?.post?.(`/landing-page/${landingPage.slug}/view`).catch(() => { });
+
             // Check if user has already submitted lead for this LP in this session
             const hasSubmitted = sessionStorage.getItem(`lp_lead_submitted_${landingPage.id}`);
             if (!hasSubmitted) {
@@ -326,6 +329,13 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                 utmCampaign: searchParams.get("utm_campaign") || undefined,
             });
             setLeadSubmitted(true);
+            // Fire Meta Pixel Lead event for conversion tracking
+            if (typeof window !== 'undefined' && (window as any).fbq) {
+                (window as any).fbq('track', 'Lead', {
+                    content_name: selectedProject?.name,
+                    currency: 'INR',
+                });
+            }
             // Use actual advertiser contact returned by the backend
             setAdvertiserContact(
                 response.data.advertiserContact || {
@@ -532,16 +542,15 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
             {/* Header */}
             <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-emerald-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-24 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="relative h-12 w-12">
+                    <div className="flex items-center">
+                        <div className="relative h-12 w-12 overflow-visible">
                             <Image
-                                src="/logo-icon.png"
-                                alt="Topickx Icon"
+                                src="/icon.jpeg"
+                                alt="Topickx Logo"
                                 fill
-                                className="object-contain"
+                                className="object-contain scale-[4] origin-left"
                             />
                         </div>
-                        <span className="font-extrabold text-3xl tracking-tight text-slate-900">Topickx</span>
                     </div>
                     <Button
                         onClick={() => setShowMandatoryForm(true)}

@@ -36,6 +36,19 @@ router.get('/landing-page/:slug', async (req, res, next) => {
     }
 });
 
+// POST /api/landing-page/:slug/view - Increment visit counter (client-side only)
+router.post('/landing-page/:slug/view', async (req, res) => {
+    try {
+        await prisma.landingPage.updateMany({
+            where: { slug: req.params.slug, isActive: true },
+            data: { visits: { increment: 1 } },
+        });
+        res.json({ ok: true });
+    } catch {
+        res.json({ ok: false }); // Silent fail — never block the user
+    }
+});
+
 // ==================== Projects ====================
 
 
