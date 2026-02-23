@@ -1,6 +1,14 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
+  // Tell Turbopack the correct workspace root (the frontend/ dir).
+  // Without this, Next.js 16 detects both /var/www/skillpal/package-lock.json
+  // and /var/www/skillpal/frontend/package-lock.json and picks the parent dir,
+  // which causes a Turbopack panic: "Dependency tracking is disabled".
+  turbopack: {
+    root: path.resolve(__dirname),
+  },
   images: {
     remotePatterns: [
       {

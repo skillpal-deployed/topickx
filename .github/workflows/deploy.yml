@@ -36,6 +36,8 @@ jobs:
             echo "Deploying Frontend..."
             cd ../frontend
             npm install
+            # Remove root lockfile — Turbopack picks wrong workspace root when two lockfiles exist
+            rm -f /var/www/skillpal/package-lock.json
             # Clear stale Turbopack/webpack cache to prevent build panics
             rm -rf .next
             npm run build
