@@ -42,7 +42,7 @@ jobs:
           port: ${{ secrets.PORT || 22 }}
           source: "frontend/.next"
           target: "/var/www/skillpal"
-          rm: true
+          # NOTE: do NOT set rm: true — it deletes the entire target dir (including git repo + backend)
 
       # ── Pull code + build backend + restart ──
       - name: Deploy to Server
@@ -64,7 +64,7 @@ jobs:
             npx prisma generate
             npm run build
 
-            # Frontend: install deps only (.next already uploaded)
+            # Frontend: install deps only (.next already uploaded by SCP)
             echo "Installing frontend deps..."
             cd ../frontend
             npm ci
