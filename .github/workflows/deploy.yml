@@ -31,11 +31,13 @@ jobs:
             npx prisma generate
             npm run build
             pm2 restart all
-            
+
             # --- Frontend Deployment ---
             echo "Deploying Frontend..."
             cd ../frontend
             npm install
+            # Clear stale Turbopack/webpack cache to prevent build panics
+            rm -rf .next
             npm run build
             pm2 restart all
 
