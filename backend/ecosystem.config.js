@@ -29,6 +29,7 @@ module.exports = {
             env: {
                 NODE_ENV: 'production',
                 PORT: 3000,
+                HOSTNAME: '127.0.0.1',  // bind to localhost only — nginx proxies externally
             },
             error_file: '/var/log/pm2/skillpal-frontend-error.log',
             out_file: '/var/log/pm2/skillpal-frontend-out.log',

@@ -16,9 +16,9 @@ async function main() {
         // Initialize Cron Jobs
         initCronJobs();
 
-        // Start server
-        app.listen(PORT, () => {
-            console.log(`🚀 Server running on http://localhost:${PORT} [FIXED VERSION 1.1]`);
+        // Start server — bind to localhost only (nginx proxies externally)
+        app.listen(PORT, '127.0.0.1', () => {
+            console.log(`🚀 Server running on http://127.0.0.1:${PORT} [FIXED VERSION 1.1]`);
             console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
         });
     } catch (error) {

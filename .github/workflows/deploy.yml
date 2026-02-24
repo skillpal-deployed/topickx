@@ -47,14 +47,20 @@ jobs:
       # ── Pull code + build backend + restart ──
       - name: Deploy to Server
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           port: ${{ secrets.PORT || 22 }}
+          envs: GITHUB_PAT
           script: |
             cd /var/www/skillpal
+
+            # Authenticate git pull with PAT (works for private repos)
+            git remote set-url origin https://$GITHUB_PAT@github.com/designdigistratics-dotcom/listing-hub.git
             git pull origin main
 
             # Backend
