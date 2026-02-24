@@ -13,6 +13,7 @@ const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
+  preload: false,  // don't fail build if Google Fonts is unreachable
 });
 
 
