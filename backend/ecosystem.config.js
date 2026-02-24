@@ -20,7 +20,7 @@ module.exports = {
         {
             name: 'skillpal-frontend',
             script: 'npm',
-            args: 'start',
+            args: 'start -- --hostname 127.0.0.1 --port 3000',
             cwd: '/var/www/skillpal/frontend',
             instances: 1,
             autorestart: true,
@@ -28,8 +28,6 @@ module.exports = {
             max_memory_restart: '500M',
             env: {
                 NODE_ENV: 'production',
-                PORT: 3000,
-                HOSTNAME: '127.0.0.1',  // bind to localhost only — nginx proxies externally
             },
             error_file: '/var/log/pm2/skillpal-frontend-error.log',
             out_file: '/var/log/pm2/skillpal-frontend-out.log',
