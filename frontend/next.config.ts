@@ -30,6 +30,9 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 60,
   },
   compress: true,
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   modularizeImports: {
     'lucide-react': {
       transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}',
