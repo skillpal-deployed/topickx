@@ -144,11 +144,11 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
     const [mOtpTimer, setMOtpTimer] = useState(0);
 
     useEffect(() => {
-        let interval: NodeJS.Timeout;
+        let interval: NodeJS.Timeout | undefined;
         if (mOtpTimer > 0) {
             interval = setInterval(() => setMOtpTimer((prev) => prev - 1), 1000);
         }
-        return () => clearInterval(interval);
+        return () => { if (interval) clearInterval(interval); };
     }, [mOtpTimer]);
 
     useEffect(() => {
@@ -187,11 +187,11 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
 
     // OTP Timers
     useEffect(() => {
-        let interval: NodeJS.Timeout;
+        let interval: NodeJS.Timeout | undefined;
         if (otpTimer > 0) {
             interval = setInterval(() => setOtpTimer((prev) => prev - 1), 1000);
         }
-        return () => clearInterval(interval);
+        return () => { if (interval) clearInterval(interval); };
     }, [otpTimer]);
 
     const handleSendMOtp = async () => {
@@ -233,10 +233,14 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
 
     const handleMandatorySubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!mandatoryForm.name || !mandatoryForm.phone || !mandatoryForm.email || !mandatoryForm.propertyType || !mandatoryForm.unitType || !mandatoryForm.budgetMin || !mandatoryForm.budgetMax || !mandatoryForm.location) {
-            toast.error("Please fill in all fields");
-            return;
-        }
+        if (!mandatoryForm.name.trim()) { toast.error("Please enter your name"); return; }
+        if (!/^[0-9]{10}$/.test(mandatoryForm.phone)) { toast.error("Please enter a valid 10-digit phone number"); return; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mandatoryForm.email)) { toast.error("Please enter a valid email address"); return; }
+        if (!mandatoryForm.propertyType) { toast.error("Please select a project type"); return; }
+        if (!mandatoryForm.unitType) { toast.error("Please select a configuration"); return; }
+        if (!mandatoryForm.budgetMin) { toast.error("Please select min budget"); return; }
+        if (!mandatoryForm.budgetMax) { toast.error("Please select max budget"); return; }
+        if (!mandatoryForm.location) { toast.error("Please select a location"); return; }
 
         if (!mOtpVerified) {
             toast.error("Please verify your phone number with OTP first");

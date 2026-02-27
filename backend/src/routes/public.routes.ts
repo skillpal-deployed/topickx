@@ -151,17 +151,18 @@ router.get('/project/:slug', async (req, res, next) => {
             return;
         }
 
-        // Increment visits counter
-        await prisma.project.update({
+        // Increment visits counter and get updated value atomically
+        const updatedProject = await prisma.project.update({
             where: { id: project.id },
             data: { visits: { increment: 1 } },
+            select: { visits: true },
         });
 
         const resolvedData = (await resolveProjectsData([project]))[0];
 
         res.json({
             ...resolvedData,
-            visits: project.visits + 1,
+            visits: updatedProject.visits,
             advertiser_contact: project.advertiser ? {
                 company_name: project.advertiser.companyName || '',
                 contact_person: project.advertiser.ownerName || '',

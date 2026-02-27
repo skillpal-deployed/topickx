@@ -83,6 +83,7 @@ export default function EditProjectPage({
     const [activeTab, setActiveTab] = useState("basic");
     const [propertyUnitMappings, setPropertyUnitMappings] = useState<Record<string, string[]>>({});
     const [unitTypes, setUnitTypes] = useState<any[]>([]);
+    const [amenityOptions, setAmenityOptions] = useState<string[]>([]);
 
     const [formData, setFormData] = useState({
         name: "",
@@ -127,6 +128,7 @@ export default function EditProjectPage({
 
                 const data = projectRes.data;
                 setUnitTypes(optionsRes.data?.unit_types || []);
+                setAmenityOptions((optionsRes.data?.amenities || []).map((a: any) => a.name || a).filter(Boolean));
                 setPropertyUnitMappings(mappingsRes.data || UNIT_TYPES_BY_PROPERTY);
                 setProject(data);
                 setFormData({
@@ -430,8 +432,8 @@ export default function EditProjectPage({
         }
     };
 
-    // Determine editability - Advertisers can no longer edit after creation
-    const canEdit = false;
+    // Advertisers can edit projects in DRAFT or NEEDS_CHANGES status
+    const canEdit = project?.status === 'DRAFT' || project?.status === 'NEEDS_CHANGES' || project?.status === 'draft' || project?.status === 'needs_changes';
 
     if (loading) {
         return (
@@ -774,7 +776,7 @@ export default function EditProjectPage({
                         </CardHeader>
                         <CardContent>
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                {AMENITIES.map((amenity) => (
+                                {(amenityOptions.length > 0 ? amenityOptions : AMENITIES).map((amenity) => (
                                     <label
                                         key={amenity}
                                         className="flex items-center gap-2 cursor-pointer"

@@ -202,9 +202,9 @@ export const getServicingLeads = async (advertiserId: string, startDate?: string
         dateFilter.gte = new Date(startDate);
     }
     if (endDate) {
-        // Add 1 day to include the end date fully
+        // Set to end of day in UTC to include full end date
         const end = new Date(endDate);
-        end.setDate(end.getDate() + 1);
+        end.setUTCHours(23, 59, 59, 999);
         dateFilter.lte = end;
     }
 
@@ -254,9 +254,9 @@ export const getAdvertiserCommonLeads = async (advertiserId: string, startDate?:
         dateFilter.gte = new Date(startDate);
     }
     if (endDate) {
-        // Add 1 day to include the end date fully
+        // Set to end of day in UTC to include full end date
         const end = new Date(endDate);
-        end.setDate(end.getDate() + 1);
+        end.setUTCHours(23, 59, 59, 999);
         dateFilter.lte = end;
     }
 

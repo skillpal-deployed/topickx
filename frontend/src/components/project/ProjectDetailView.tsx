@@ -827,7 +827,7 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                                         >
                                             <img
                                                 src={getImageUrl(img)}
-                                                alt={`Gallery ${idx + 1}`}
+                                                alt={`${project.name} - Image ${idx + 1}`}
                                                 className="w-full h-full object-cover"
                                             />
                                         </div>
