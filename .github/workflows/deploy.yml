@@ -1,4 +1,4 @@
-name: Deploy to Digital Ocean
+name: Deploy to Production
 
 on:
   push:
@@ -7,73 +7,49 @@ on:
 
 jobs:
   deploy:
+    name: Deploy to Server
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ── Build frontend on GitHub Actions runner (clean env, 7 GB RAM) ──
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install frontend dependencies
-        working-directory: frontend
-        run: npm ci
-
-      - name: Build Next.js app
-        working-directory: frontend
-        env:
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
-          NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
-        run: npm run build
-
-      # ── Upload built .next to server ──
-      - name: Copy .next build to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.KEY }}
-          passphrase: ${{ secrets.PASSPHRASE }}
-          port: ${{ secrets.PORT || 22 }}
-          source: "frontend/.next"
-          target: "/var/www/skillpal"
-          # NOTE: do NOT set rm: true — it deletes the entire target dir (including git repo + backend)
-
-      # ── Pull code + build backend + restart ──
-      - name: Deploy to Server
+      - name: Deploy to server via SSH
         uses: appleboy/ssh-action@v1.0.3
-        env:
-          GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.KEY }}
-          passphrase: ${{ secrets.PASSPHRASE }}
-          port: ${{ secrets.PORT || 22 }}
-          envs: GITHUB_PAT
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          port: 22
+          script_stop: true
           script: |
+            set -e
+            echo "=== Starting deployment at $(date) ==="
+            
             cd /var/www/skillpal
-
-            # Authenticate git pull with PAT (works for private repos)
-            git remote set-url origin https://$GITHUB_PAT@github.com/designdigistratics-dotcom/listing-hub.git
-            git pull origin main
-
-            # Backend
-            echo "Deploying Backend..."
-            cd backend
+            
+            # Pull latest code
+            echo ">>> Pulling latest code..."
+            git fetch origin main
+            git reset --hard origin/main
+            
+            # Build backend
+            echo ">>> Building backend..."
+            cd /var/www/skillpal/backend
             npm ci
-            npx prisma generate
             npm run build
-
-            # Frontend: install deps only (.next already uploaded by SCP)
-            echo "Installing frontend deps..."
-            cd ../frontend
+            
+            # Build frontend
+            echo ">>> Building frontend..."
+            cd /var/www/skillpal/frontend
             npm ci
-
-            pm2 restart all
-            echo "Deployment Complete!"
+            npm run build
+            
+            # Restart PM2 processes
+            echo ">>> Restarting PM2..."
+            pm2 restart skillpal-backend
+            pm2 restart skillpal-frontend
+            pm2 save
+            
+            echo "=== Deployment complete at $(date) ==="
