@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const FB_PIXEL_ID = '1233312032320484';
+const GTAG_ID = 'AW-862131724';
 
 
 const inter = Inter({
@@ -40,6 +41,25 @@ export default function RootLayout({
       <body
         className={`${inter.variable} font-sans antialiased bg-white text-slate-950 min-h-screen flex flex-col`}
       >
+        {/* Google Tag (gtag.js) */}
+        <Script
+          id="gtag-js"
+          strategy="afterInteractive"
+          src={`https://www.googletagmanager.com/gtag/js?id=${GTAG_ID}`}
+        />
+        <Script
+          id="gtag-init"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${GTAG_ID}');
+            `,
+          }}
+        />
+
         {/* Meta Pixel — global PageView on every page */}
         <Script
           id="fb-pixel-global"
