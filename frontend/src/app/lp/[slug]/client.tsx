@@ -173,8 +173,8 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
             // Ping view counter once client-side (avoids SSR double-count)
             api.post(`/landing-page/${landingPage.slug}/view`).catch(() => { });
 
-            // Check if user has already submitted lead for this LP in this session
-            const hasSubmitted = sessionStorage.getItem(`lp_lead_submitted_${landingPage.id}`);
+            // Check if user has already submitted lead for this LP (persists across reloads)
+            const hasSubmitted = localStorage.getItem(`lp_lead_submitted_${landingPage.id}`);
             if (!hasSubmitted) {
                 setShowMandatoryForm(true);
                 // Pre-fill city if available
@@ -259,7 +259,7 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                 (window as any).fbq('track', 'Lead');
             }
             toast.success("Thank you! You can now browse the projects.");
-            sessionStorage.setItem(`lp_lead_submitted_${landingPage?.id}`, "true");
+            localStorage.setItem(`lp_lead_submitted_${landingPage?.id}`, "true");
             setShowMandatoryForm(false);
         } catch (error) {
             toast.error("Failed to submit. Please try again.");
@@ -919,232 +919,212 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                 </div>
             </section>
 
-            {/* Mandatory Lead Form Dialog */}
-            <Dialog open={showMandatoryForm} onOpenChange={setShowMandatoryForm}>
-                <DialogContent className="sm:max-w-4xl p-0 overflow-hidden bg-white border-0 shadow-2xl rounded-3xl">
-                    <div className="grid grid-cols-1 md:grid-cols-5 h-full">
-                        {/* Left Side - Visual */}
-                        <div className="hidden md:flex md:col-span-2 bg-emerald-900 relative flex-col justify-between p-8 text-white">
-                            <div className="absolute inset-0 z-0">
-                                <img
-                                    src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=1000&auto=format&fit=crop"
-                                    alt="Interior"
-                                    className="w-full h-full object-cover opacity-30"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-emerald-900 via-emerald-900/50 to-emerald-900/30" />
-                            </div>
+            {/* Mandatory Lead Form — Slide-in Sidebar */}
+            {/* Backdrop */}
+            {showMandatoryForm && (
+                <div
+                    className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 transition-opacity duration-300"
+                    onClick={() => setShowMandatoryForm(false)}
+                />
+            )}
 
-                            <div className="relative z-20">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <Home className="w-6 h-6 text-emerald-400" />
-                                    <span className="font-bold text-lg tracking-tight">Topickx</span>
-                                </div>
-                                <h2 className="text-2xl font-bold leading-tight mb-2">
-                                    Find Your Perfect Home in {landingPage?.city}
-                                </h2>
-                                <p className="text-emerald-100 text-sm">Join thousands of happy homeowners.</p>
-                            </div>
+            {/* Sidebar Panel */}
+            <div className={`fixed top-0 right-0 h-full w-full sm:w-[420px] bg-white z-50 shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${showMandatoryForm ? 'translate-x-0' : 'translate-x-full'}`}>
+                {/* Sidebar Header */}
+                <div className="bg-emerald-900 px-6 py-5 flex items-start justify-between shrink-0">
+                    <div>
+                        <div className="flex items-center gap-2 mb-1">
+                            <Home className="w-5 h-5 text-emerald-400" />
+                            <span className="font-bold text-white text-sm tracking-tight">Topickx</span>
+                        </div>
+                        <h2 className="text-xl font-bold text-white leading-tight">Find Your Perfect Home</h2>
+                        <p className="text-emerald-200 text-xs mt-1">in {landingPage?.city} — Tell us what you're looking for</p>
+                    </div>
+                    <button
+                        onClick={() => setShowMandatoryForm(false)}
+                        className="mt-1 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors shrink-0"
+                        aria-label="Close"
+                    >
+                        <X className="w-4 h-4" />
+                    </button>
+                </div>
 
-                            <div className="relative z-20 space-y-4">
-                                <div className="flex items-start gap-3 bg-white/10 p-3 rounded-xl backdrop-blur-sm">
-                                    <Shield className="w-5 h-5 text-emerald-300 shrink-0 mt-0.5" />
-                                    <div>
-                                        <p className="font-medium text-sm">Verified Listings</p>
-                                        <p className="text-xs text-emerald-200">RERA registered projects only</p>
-                                    </div>
-                                </div>
+                {/* Trust Bar */}
+                <div className="bg-emerald-50 border-b border-emerald-100 px-6 py-2.5 flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <p className="text-xs text-emerald-700 font-medium">RERA verified projects only · 100% free</p>
+                </div>
+
+                {/* Scrollable Form */}
+                <div className="flex-1 overflow-y-auto px-6 py-5">
+                    <form onSubmit={handleMandatorySubmit} className="space-y-4">
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">City</Label>
+                                <Input value={landingPage?.city || ''} disabled className="bg-slate-50 border-slate-200 h-10 text-sm" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Location</Label>
+                                {localities.length > 0 ? (
+                                    <Select value={mandatoryForm.location || undefined} onValueChange={(val) => setMandatoryForm({ ...mandatoryForm, location: val })}>
+                                        <SelectTrigger className="h-10 text-sm">
+                                            <SelectValue placeholder="Select Locality" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {localities.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                ) : (
+                                    <Input placeholder="Preferred Location" value={mandatoryForm.location} onChange={(e) => setMandatoryForm({ ...mandatoryForm, location: e.target.value })} className="h-10 text-sm" />
+                                )}
                             </div>
                         </div>
 
-                        {/* Right Side - Form */}
-                        <div className="md:col-span-3 p-6 md:p-8">
-                            <DialogHeader className="mb-6">
-                                <DialogTitle className="text-2xl font-bold text-slate-900">Get Started</DialogTitle>
-                                <DialogDescription className="text-slate-500">
-                                    Tell us what you are looking for to see exclusive inventory.
-                                </DialogDescription>
-                            </DialogHeader>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Project Type *</Label>
+                                <Select value={mandatoryForm.propertyType || undefined} onValueChange={(val) => setMandatoryForm({ ...mandatoryForm, propertyType: val })}>
+                                    <SelectTrigger className="h-10 text-sm">
+                                        <SelectValue placeholder="Select Type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {propertyTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Configuration *</Label>
+                                <Select value={mandatoryForm.unitType || undefined} onValueChange={(val) => setMandatoryForm({ ...mandatoryForm, unitType: val })}>
+                                    <SelectTrigger className="h-10 text-sm">
+                                        <SelectValue placeholder="Select BHK" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {mandatoryFormAvailableUnitTypes.map((t: string) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
 
-                            <form onSubmit={handleMandatorySubmit} className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label>City</Label>
-                                        <Input value={landingPage?.city || ''} disabled className="bg-slate-50 border-slate-200" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Location</Label>
-                                        {localities.length > 0 ? (
-                                            <Select value={mandatoryForm.location || undefined} onValueChange={(val) => setMandatoryForm({ ...mandatoryForm, location: val })}>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select Locality" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {localities.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
-                                                </SelectContent>
-                                            </Select>
-                                        ) : (
-                                            <Input
-                                                placeholder="Preferred Location"
-                                                value={mandatoryForm.location}
-                                                onChange={(e) => setMandatoryForm({ ...mandatoryForm, location: e.target.value })}
-                                            />
-                                        )}
-                                    </div>
-                                </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Min Budget *</Label>
+                                <Select value={mandatoryForm.budgetMin || undefined} onValueChange={(val) => setMandatoryForm({ ...mandatoryForm, budgetMin: val })}>
+                                    <SelectTrigger className="h-10 text-sm">
+                                        <SelectValue placeholder="Min Price" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {BUDGET_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.label}>{opt.label}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Max Budget *</Label>
+                                <Select value={mandatoryForm.budgetMax || undefined} onValueChange={(val) => setMandatoryForm({ ...mandatoryForm, budgetMax: val })}>
+                                    <SelectTrigger className="h-10 text-sm">
+                                        <SelectValue placeholder="Max Price" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {BUDGET_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.label}>{opt.label}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
 
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label>Project Type *</Label>
-                                        <Select value={mandatoryForm.propertyType || undefined} onValueChange={(val) => setMandatoryForm({ ...mandatoryForm, propertyType: val })}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select Type" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {propertyTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Configuration *</Label>
-                                        <Select value={mandatoryForm.unitType || undefined} onValueChange={(val) => setMandatoryForm({ ...mandatoryForm, unitType: val })}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select BHK" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {mandatoryFormAvailableUnitTypes.map((t: string) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
+                        <div className="space-y-3 pt-1">
+                            <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Your Details</Label>
+                            <Input
+                                placeholder="Full Name *"
+                                value={mandatoryForm.name}
+                                onChange={(e) => setMandatoryForm({ ...mandatoryForm, name: e.target.value })}
+                                className="h-10 text-sm"
+                            />
+                            <Input
+                                type="email"
+                                placeholder="Email Address *"
+                                value={mandatoryForm.email}
+                                onChange={(e) => setMandatoryForm({ ...mandatoryForm, email: e.target.value })}
+                                className="h-10 text-sm"
+                            />
+                        </div>
 
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label>Min Budget *</Label>
-                                        <Select value={mandatoryForm.budgetMin || undefined} onValueChange={(val) => setMandatoryForm({ ...mandatoryForm, budgetMin: val })}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Min Price" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {BUDGET_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.label}>{opt.label}</SelectItem>)}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Max Budget *</Label>
-                                        <Select value={mandatoryForm.budgetMax || undefined} onValueChange={(val) => setMandatoryForm({ ...mandatoryForm, budgetMax: val })}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Max Price" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {BUDGET_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.label}>{opt.label}</SelectItem>)}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
+                        <div className="space-y-2">
+                            <div className="flex gap-2">
+                                <Input
+                                    placeholder="Mobile Number *"
+                                    value={mandatoryForm.phone}
+                                    onChange={(e) => {
+                                        setMandatoryForm({ ...mandatoryForm, phone: e.target.value });
+                                        if (mOtpVerified || mOtpSent) {
+                                            setMOtpVerified(false);
+                                            setMOtpSent(false);
+                                            setMOtp("");
+                                        }
+                                    }}
+                                    disabled={mSendingOtp}
+                                    className="flex-1 h-10 text-sm"
+                                />
+                                {(!mOtpSent && !mOtpVerified) && (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={handleSendMOtp}
+                                        disabled={mSendingOtp || !mandatoryForm.phone || mandatoryForm.phone.length !== 10}
+                                        className="shrink-0 h-10 text-sm"
+                                    >
+                                        {mSendingOtp ? "..." : "Get OTP"}
+                                    </Button>
+                                )}
+                            </div>
 
-                                <div className="space-y-2">
-                                    <Label>Your Details</Label>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <Input
-                                            placeholder="Full Name"
-                                            value={mandatoryForm.name}
-                                            onChange={(e) => setMandatoryForm({ ...mandatoryForm, name: e.target.value })}
-                                            className="h-10"
-                                        />
-                                        <Input
-                                            type="email"
-                                            placeholder="Email Address"
-                                            value={mandatoryForm.email}
-                                            onChange={(e) => setMandatoryForm({ ...mandatoryForm, email: e.target.value })}
-                                            className="h-10"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <div className="flex gap-2">
-                                        <Input
-                                            placeholder="Mobile Number"
-                                            value={mandatoryForm.phone}
-                                            onChange={(e) => {
-                                                setMandatoryForm({ ...mandatoryForm, phone: e.target.value });
-                                                if (mOtpVerified || mOtpSent) {
-                                                    setMOtpVerified(false);
-                                                    setMOtpSent(false);
-                                                    setMOtp("");
-                                                }
-                                            }}
-                                            disabled={mSendingOtp}
-                                            className="flex-1 h-10"
-                                        />
-                                        {(!mOtpSent && !mOtpVerified) && (
+                            {mOtpSent && !mOtpVerified && (
+                                <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex-1">
+                                            <Label className="text-xs text-emerald-800 mb-1.5 block">OTP SENT TO {mandatoryForm.phone}</Label>
+                                            <OtpInput value={mOtp} onChange={setMOtp} disabled={mVerifyingOtp} />
+                                        </div>
+                                        <div className="flex flex-col gap-1 shrink-0 pt-5">
                                             <Button
                                                 type="button"
-                                                variant="outline"
-                                                onClick={handleSendMOtp}
-                                                disabled={mSendingOtp || !mandatoryForm.phone || mandatoryForm.phone.length !== 10}
-                                                className="shrink-0 h-10"
+                                                size="sm"
+                                                onClick={handleVerifyMOtp}
+                                                disabled={mVerifyingOtp || mOtp.length !== 6}
+                                                className="bg-emerald-600 hover:bg-emerald-700 text-white"
                                             >
-                                                {mSendingOtp ? "..." : "Get OTP"}
+                                                {mVerifyingOtp ? "..." : "Verify"}
                                             </Button>
+                                        </div>
+                                    </div>
+                                    <div className="text-right mt-1">
+                                        {mOtpTimer > 0 ? (
+                                            <span className="text-xs text-emerald-600">Resend in {mOtpTimer}s</span>
+                                        ) : (
+                                            <button type="button" className="text-xs text-emerald-700 hover:underline font-bold" onClick={handleSendMOtp}>
+                                                Resend OTP
+                                            </button>
                                         )}
                                     </div>
-
-                                    {mOtpSent && !mOtpVerified && (
-                                        <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100">
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex-1">
-                                                    <Label className="text-xs text-emerald-800 mb-1.5 block">OTP SENT TO {mandatoryForm.phone}</Label>
-                                                    <OtpInput
-                                                        value={mOtp}
-                                                        onChange={setMOtp}
-                                                        disabled={mVerifyingOtp}
-                                                    />
-                                                </div>
-                                                <div className="flex flex-col gap-1 shrink-0 pt-5">
-                                                    <Button
-                                                        type="button"
-                                                        size="sm"
-                                                        onClick={handleVerifyMOtp}
-                                                        disabled={mVerifyingOtp || mOtp.length !== 6}
-                                                        className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                                                    >
-                                                        {mVerifyingOtp ? "..." : "Verify"}
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                            <div className="text-right mt-1">
-                                                {mOtpTimer > 0 ? (
-                                                    <span className="text-xs text-emerald-600">Resend in {mOtpTimer}s</span>
-                                                ) : (
-                                                    <button
-                                                        type="button"
-                                                        className="text-xs text-emerald-700 hover:underline font-bold"
-                                                        onClick={handleSendMOtp}
-                                                    >
-                                                        Resend OTP
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {mOtpVerified && (
-                                        <div className="flex items-center gap-2 text-emerald-700 text-sm font-medium bg-emerald-50 p-2 rounded-lg border border-emerald-100">
-                                            <CheckCircle2 className="h-4 w-4" />
-                                            Verified
-                                        </div>
-                                    )}
                                 </div>
+                            )}
 
-                                <Button type="submit" className="w-full h-12 text-lg font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg shadow-emerald-600/20" disabled={submitting}>
-                                    {submitting ? "Submitting..." : "View Projects"}
-                                </Button>
-                            </form>
+                            {mOtpVerified && (
+                                <div className="flex items-center gap-2 text-emerald-700 text-sm font-medium bg-emerald-50 p-2 rounded-lg border border-emerald-100">
+                                    <CheckCircle2 className="h-4 w-4" />
+                                    Phone verified
+                                </div>
+                            )}
                         </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
+
+                        <Button type="submit" className="w-full h-12 text-base font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg shadow-emerald-600/20" disabled={submitting}>
+                            {submitting ? "Submitting..." : "View Exclusive Projects →"}
+                        </Button>
+
+                        <p className="text-center text-xs text-slate-400 pb-2">
+                            By submitting you agree to be contacted by our team.
+                        </p>
+                    </form>
+                </div>
+            </div>
 
             {/* Lead Form Dialog (Enquiry) */}
             <Dialog open={showLeadForm} onOpenChange={(open) => {
