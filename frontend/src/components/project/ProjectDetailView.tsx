@@ -752,8 +752,9 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                             </h2>
                             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
                                 {project.amenities.map((amenity: any, idx: number) => {
-                                    const amenityName = typeof amenity === 'string' ? amenity : amenity.name;
+                                    const amenityName = typeof amenity === 'object' && amenity !== null ? amenity.name : (typeof amenity === 'string' && !amenity.match(/^[0-9a-f]{8}-[0-9a-f]{4}-/i) ? amenity : null);
                                     const iconUrl = typeof amenity === 'object' ? amenity.iconUrl : null;
+                                    if (!amenityName) return null;
                                     const Icon = getAmenityIcon(amenityName);
 
                                     return (

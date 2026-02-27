@@ -118,7 +118,7 @@ export const resolveProjectsData = async (projects: any[]) => {
         });
     }
 
-    const resolve = (id: string | null | undefined) => (id && optionMap.has(id) ? optionMap.get(id)!.name : id || "");
+    const resolve = (id: string | null | undefined) => (id && optionMap.has(id) ? optionMap.get(id)!.name : "");
 
     const resolveArray = (ids: any) => {
         if (!ids) return [];
@@ -284,7 +284,7 @@ const generateSlug = async (
     unitTypeIds?: string[]
 ): Promise<string> => {
     // Get City Name
-    let cityName = cityId;
+    let cityName = "";
 
     // Check if cityId looks like a UUID before querying, otherwise treat it as the name itself
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -299,8 +299,10 @@ const generateSlug = async (
                 cityName = city.name;
             }
         } catch (e) {
-            // Ignore error and use cityId as name if lookup fails
+            // Ignore - cityName stays empty, UUID won't leak into slug
         }
+    } else {
+        cityName = cityId; // Already a name, not a UUID
     }
 
     // Get Locality Name if available
@@ -345,9 +347,10 @@ const generateSlug = async (
             try {
                 const pt = await prisma.option.findUnique({ where: { id: ptId }, select: { name: true } });
                 if (pt) propertyTypeLabel = pt.name;
+                // If not found, propertyTypeLabel stays "" — UUID won't leak into slug
             } catch (e) { /* ignore */ }
         } else {
-            propertyTypeLabel = ptId;
+            propertyTypeLabel = ptId; // Already a name, not a UUID
         }
     }
 

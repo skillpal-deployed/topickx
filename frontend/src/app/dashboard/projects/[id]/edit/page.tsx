@@ -144,7 +144,7 @@ export default function EditProjectPage({
                             ? data.highlights
                             : [""],
                     amenities: data.amenities
-                        ? data.amenities.map((a: any) => (typeof a === 'object' && a !== null && a.name) ? a.name : a)
+                        ? data.amenities.map((a: any) => (typeof a === 'object' && a !== null && a.name) ? a.name : null).filter(Boolean)
                         : [],
                     images: data.images || [],
                     floor_plans: data.floorPlans || data.floor_plans || [],
