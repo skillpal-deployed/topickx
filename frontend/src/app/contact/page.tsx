@@ -1,30 +1,17 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
     Mail,
     Phone,
     MapPin,
-    Send,
     ArrowLeft,
-    Building2,
     MessageSquare
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function ContactPage() {
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsSubmitting(true);
-        // Simulate form submission
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setIsSubmitting(false);
-        alert("Message sent! We'll get back to you soon.");
-    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#f0fdfa] via-[#ccfbf1] to-[#99f6e4] text-emerald-950 flex flex-col">

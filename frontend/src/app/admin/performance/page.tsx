@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { adminAPI } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -47,18 +47,13 @@ export default function AdminPerformancePage() {
             .catch(console.error);
     }, []);
 
-    useEffect(() => {
-        fetchStats();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dateRange, selectedAdvertiser, selectedType, projectNameSearch]);
-
-    // Debounce project name input
+    // Debounce project name input to avoid firing a fetch on every keystroke
     useEffect(() => {
         const t = setTimeout(() => setProjectNameSearch(projectNameFilter), 400);
         return () => clearTimeout(t);
     }, [projectNameFilter]);
 
-    const fetchStats = async () => {
+    const fetchStats = useCallback(async () => {
         setLoading(true);
         try {
             const advertiserId = selectedAdvertiser === "all" ? undefined : selectedAdvertiser;
@@ -78,7 +73,11 @@ export default function AdminPerformancePage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [dateRange, selectedAdvertiser, selectedType, projectNameSearch]);
+
+    useEffect(() => {
+        fetchStats();
+    }, [fetchStats]);
 
     return (
         <div className="space-y-6">

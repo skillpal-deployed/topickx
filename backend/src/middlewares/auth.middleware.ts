@@ -31,6 +31,11 @@ export const authenticate = async (
                 return;
             }
 
+            if (!user.isActive || user.status === 'inactive' || user.status === 'banned') {
+                res.status(401).json({ error: 'Account is deactivated. Please contact support.' });
+                return;
+            }
+
             req.user = user;
             next();
         } catch (error) {

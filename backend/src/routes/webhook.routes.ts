@@ -1,9 +1,64 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
+import crypto from 'crypto';
+import express from 'express';
 import prisma from '../utils/prisma';
 import { distributeLead } from '../services/leadDistribution.service';
 import axios from 'axios';
 
 const router = Router();
+
+// Facebook sends a SHA256 HMAC signature in the X-Hub-Signature-256 header.
+// We MUST verify it before processing any lead data to prevent forgery.
+// This requires the raw (unparsed) request body, so we capture it here
+// before Express's JSON parser runs on this sub-router.
+router.use(express.raw({ type: 'application/json' }));
+
+const verifyFacebookWebhook = (req: Request, res: Response, next: NextFunction): void => {
+    // Only verify POST requests (GET is only the challenge handshake)
+    if (req.method !== 'POST') {
+        return next();
+    }
+
+    const appSecret = process.env.FB_APP_SECRET;
+    if (!appSecret) {
+        console.error('[Webhook] FB_APP_SECRET not configured — rejecting all POST webhook events');
+        res.sendStatus(500);
+        return;
+    }
+
+    const signature = req.headers['x-hub-signature-256'] as string;
+    if (!signature) {
+        console.warn('[Webhook] Missing X-Hub-Signature-256 header — rejected');
+        res.sendStatus(403);
+        return;
+    }
+
+    // Compute expected signature from raw body
+    const rawBody = req.body as Buffer;
+    const expectedSignature = 'sha256=' + crypto
+        .createHmac('sha256', appSecret)
+        .update(rawBody)
+        .digest('hex');
+
+    if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) {
+        console.warn('[Webhook] Invalid X-Hub-Signature-256 — payload rejected');
+        res.sendStatus(403);
+        return;
+    }
+
+    // Parse body as JSON for downstream handlers
+    try {
+        req.body = JSON.parse(rawBody.toString());
+    } catch {
+        console.error('[Webhook] Body is not valid JSON');
+        res.sendStatus(400);
+        return;
+    }
+
+    next();
+};
+
+router.use(verifyFacebookWebhook);
 
 // FACEBOOK WEBHOOK VERIFICATION (GET)
 router.get('/facebook', (req: Request, res: Response) => {
@@ -13,7 +68,6 @@ router.get('/facebook', (req: Request, res: Response) => {
 
     if (mode && token) {
         if (mode === 'subscribe' && token === process.env.FB_VERIFY_TOKEN) {
-            console.log('FB WEBHOOK_VERIFIED');
             res.status(200).send(challenge);
         } else {
             res.sendStatus(403);

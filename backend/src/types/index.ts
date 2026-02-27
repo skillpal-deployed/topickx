@@ -114,6 +114,7 @@ export interface ProjectCreateRequest {
     amenities: string[];
     images: string[];
     possessionStatus: string;
+    estimatedPossessionDate?: string;
     reraId?: string;
     address?: string;
     price?: string;
@@ -128,6 +129,8 @@ export interface ProjectCreateRequest {
     aboutProject?: string;
     disclaimer?: string;
     locationHighlights?: string[];
+    usp1?: string;
+    usp2?: string;
 }
 
 export interface AdminProjectCreateRequest extends ProjectCreateRequest {
@@ -137,13 +140,6 @@ export interface AdminProjectCreateRequest extends ProjectCreateRequest {
     seoDescription?: string;
     featuredImage?: string;
     isVisible?: boolean;
-    floorPlans?: any[];
-    videoUrl?: string;
-    cardImage?: string;
-    builderDescription?: string;
-    aboutProject?: string;
-    disclaimer?: string;
-    locationHighlights?: string[];
 }
 
 export interface ProjectUpdateRequest {
@@ -159,6 +155,7 @@ export interface ProjectUpdateRequest {
     amenities?: string[];
     images?: string[];
     possessionStatus?: string;
+    estimatedPossessionDate?: string | null;
     reraId?: string;
     slug?: string;
     seoTitle?: string;
@@ -178,6 +175,8 @@ export interface ProjectUpdateRequest {
     advertiserLogo?: string;
     disclaimer?: string;
     locationHighlights?: string[];
+    usp1?: string;
+    usp2?: string;
 }
 
 export interface ProjectReviewActionRequest {
@@ -282,11 +281,15 @@ export interface JwtPayload {
 // ==================== Extended Express Request ====================
 
 import { Request } from 'express';
-import { User } from '@prisma/client';
+import { User, Role } from '@prisma/client';
 import { ParamsDictionary } from 'express-serve-static-core';
 
+// Extends the Prisma User type with the `userRole` relation that the
+// authenticate middleware always includes via `include: { userRole: true }`.
+export type AuthenticatedUser = User & { userRole: Role | null };
+
 export interface AuthenticatedRequest<P = ParamsDictionary> extends Request<P> {
-    user?: User;
+    user?: AuthenticatedUser;
 }
 
 // ==================== API Response Types ====================

@@ -171,6 +171,7 @@ router.post('/project', async (req: AuthenticatedRequest, res, next) => {
             amenities,
             images,
             possession_status,
+            estimated_possession_date,
             rera_id,
             address,
             price,
@@ -182,6 +183,11 @@ router.post('/project', async (req: AuthenticatedRequest, res, next) => {
             video_url,
             builder_description,
             about_project,
+            usp_1,
+            usp_2,
+            location_highlights,
+            card_image,
+            disclaimer,
         } = req.body;
 
         const projectData: ProjectCreateRequest = {
@@ -198,6 +204,7 @@ router.post('/project', async (req: AuthenticatedRequest, res, next) => {
             amenities,
             images,
             possessionStatus: possession_status,
+            estimatedPossessionDate: estimated_possession_date || undefined,
             reraId: rera_id,
             address,
             price,
@@ -209,6 +216,11 @@ router.post('/project', async (req: AuthenticatedRequest, res, next) => {
             videoUrl: video_url,
             builderDescription: builder_description,
             aboutProject: about_project,
+            usp1: usp_1,
+            usp2: usp_2,
+            locationHighlights: location_highlights,
+            cardImage: card_image,
+            disclaimer,
         };
 
         const project = await projectService.createProject(req.user!.id, projectData);
@@ -226,7 +238,6 @@ router.post('/project', async (req: AuthenticatedRequest, res, next) => {
 router.put('/projects/:id', async (req: AuthenticatedRequest, res, next) => {
     try {
         const {
-            package_id,
             name,
             builder_name,
             city,
@@ -239,6 +250,7 @@ router.put('/projects/:id', async (req: AuthenticatedRequest, res, next) => {
             amenities,
             images,
             possession_status,
+            estimated_possession_date,
             rera_id,
             address,
             price,
@@ -254,10 +266,12 @@ router.put('/projects/:id', async (req: AuthenticatedRequest, res, next) => {
             seo_title,
             seo_description,
             featured_image,
-
             is_visible,
             usp_1,
             usp_2,
+            location_highlights,
+            card_image,
+            disclaimer,
         } = req.body;
 
         const updateData: any = {
@@ -273,6 +287,7 @@ router.put('/projects/:id', async (req: AuthenticatedRequest, res, next) => {
             amenities,
             images,
             possessionStatus: possession_status,
+            estimatedPossessionDate: estimated_possession_date,
             reraId: rera_id,
             address,
             price,
@@ -288,10 +303,12 @@ router.put('/projects/:id', async (req: AuthenticatedRequest, res, next) => {
             seoTitle: seo_title,
             seoDescription: seo_description,
             featuredImage: featured_image,
-
             isVisible: is_visible,
             usp1: usp_1,
             usp2: usp_2,
+            locationHighlights: location_highlights,
+            cardImage: card_image,
+            disclaimer,
         };
 
         const project = await projectService.updateProject(
@@ -328,33 +345,6 @@ router.post('/project/:id/submit', async (req: AuthenticatedRequest, res, next) 
 // ==================== Leads ====================
 
 // ==================== Billing ====================
-
-router.get('/billing', async (req: AuthenticatedRequest, res, next) => {
-    try {
-        const billing = await packageService.getAdvertiserBilling(req.user!.id);
-        res.json(billing);
-    } catch (error) {
-        next(error);
-    }
-});
-
-router.get('/invoice/:billingId', async (req: AuthenticatedRequest, res, next) => {
-    try {
-        // Verify ownership
-        const billing = await packageService.getInvoice(req.params.billingId as string);
-        if (!billing) {
-            res.status(404).json({ error: 'Invoice not found' });
-            return;
-        }
-
-        // In a real app, we would verify that the billing record belongs to the user
-        // e.g., billing.package.advertiserId === req.user!.id
-
-        res.json(billing);
-    } catch (error) {
-        next(error);
-    }
-});
 
 router.get('/leads', async (req: AuthenticatedRequest, res, next) => {
     try {

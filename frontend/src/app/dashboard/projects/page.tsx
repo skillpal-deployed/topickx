@@ -93,7 +93,6 @@ export default function ProjectsPage() {
         const fetchProjects = async () => {
             try {
                 const response = await advertiserAPI.getProjects();
-                console.log("Fetched Projects:", response.data);
                 setProjects(response.data);
             } catch (error) {
                 console.error("Error fetching projects:", error);
@@ -274,24 +273,18 @@ export default function ProjectsPage() {
                                     by {project.builderName}
                                 </CardDescription>
                                 <div className="flex gap-2 mt-2">
-                                    {/* @ts-ignore */}
                                     {project.usp1 && (
                                         <Badge variant="outline" className="text-xs border-amber-500 text-amber-600 bg-amber-50">
-                                            {/* @ts-ignore */}
                                             {project.usp1}
                                         </Badge>
                                     )}
-                                    {/* @ts-ignore */}
                                     {project.usp2 && (
                                         <Badge variant="outline" className="text-xs border-emerald-500 text-emerald-600 bg-emerald-50">
-                                            {/* @ts-ignore */}
                                             {project.usp2}
                                         </Badge>
                                     )}
-                                    {/* @ts-ignore */}
                                     {project.package?.packageDefinition && (
                                         <Badge variant="secondary" className="text-xs bg-slate-100 text-slate-700 hover:bg-slate-200">
-                                            {/* @ts-ignore */}
                                             {project.package.packageDefinition.name} ({project.package.packageDefinition.durationMonths}mo)
                                         </Badge>
                                     )}

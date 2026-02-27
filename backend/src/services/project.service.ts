@@ -747,6 +747,7 @@ export const createAdminProject = async (
             amenities: data.amenities,
             images: data.images,
             possessionStatus: data.possessionStatus,
+            estimatedPossessionDate: data.estimatedPossessionDate ? new Date(data.estimatedPossessionDate) : null,
             reraId: data.reraId,
             slug: finalSlug,
             seoTitle: data.seoTitle,
@@ -766,6 +767,8 @@ export const createAdminProject = async (
             disclaimer: data.disclaimer,
             locationHighlights: data.locationHighlights || [],
             cardImage: data.cardImage,
+            usp1: data.usp1,
+            usp2: data.usp2,
             status: ProjectStatus.APPROVED_AWAITING_PLACEMENT,
         },
     });

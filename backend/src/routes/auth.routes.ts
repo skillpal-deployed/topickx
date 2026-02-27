@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import * as authService from '../services/auth.service';
+import { authenticate } from '../middlewares/auth.middleware';
+import { AuthenticatedRequest } from '../types';
 
 const router = Router();
 
@@ -55,31 +57,22 @@ router.post('/google', async (req, res, next) => {
 });
 
 // GET /api/auth/me
-router.get('/me', async (req, res, next) => {
+router.get('/me', authenticate, async (req, res, next) => {
     try {
-        // This route requires authentication, handled by middleware
-        const { authenticate } = await import('../middlewares/auth.middleware');
-
-        authenticate(req as any, res, async () => {
-            try {
-                const user = (req as any).user;
-                res.json({
-                    id: user.id,
-                    email: user.email,
-                    companyName: user.companyName || user.name || 'Admin',
-                    name: user.name || user.companyName || '',
-                    phone: user.phone,
-                    role: user.role,
-                    avatar: user.avatar,
-                    userRole: user.userRole ? {
-                        name: user.userRole.name,
-                        permissions: user.userRole.permissions
-                    } : undefined,
-                    permissions: user.userRole?.permissions || [],
-                });
-            } catch (error) {
-                next(error);
-            }
+        const user = (req as AuthenticatedRequest).user!;
+        res.json({
+            id: user.id,
+            email: user.email,
+            companyName: user.companyName || user.name || 'Admin',
+            name: user.name || user.companyName || '',
+            phone: user.phone,
+            role: user.role,
+            avatar: user.avatar,
+            userRole: user.userRole ? {
+                name: user.userRole.name,
+                permissions: user.userRole.permissions
+            } : undefined,
+            permissions: user.userRole?.permissions || [],
         });
     } catch (error) {
         next(error);

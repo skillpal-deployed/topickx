@@ -52,9 +52,7 @@ export const sendOtp = async (phone: string) => {
             const apiKey = process.env.FAST2SMS_API_KEY;
 
             if (!apiKey) {
-                console.error('FAST2SMS_API_KEY is not set in environment variables');
-                // Use console log as fallback in Dev, or if explicitly bypassed
-                console.log(`[FALLBACK] OTP for ${phone}: ${otp}`);
+                console.error('FAST2SMS_API_KEY is not set in environment variables. OTP not sent.');
                 return;
             }
 
@@ -74,21 +72,17 @@ export const sendOtp = async (phone: string) => {
             const data = await response.json() as any;
 
             if (!data.return) {
-                console.error('Fast2SMS Error:', data);
-                // Fallback to console log so user isn't stuck if SMS fails
-                console.log(`[FAIL-SAFE] OTP for ${phone}: ${otp}`);
-            } else {
-                console.log(`OTP sent successfully via Fast2SMS to ${cleanPhone}`);
+                console.error('Fast2SMS Error for phone ending in', cleanPhone.slice(-4), ':', data.message || data);
             }
+            // No success log — avoids any association between phone and OTP in logs
         } catch (error) {
-            console.error('SMS Sending System Error:', error);
-            if (!isProduction) {
-                console.log(`[DEV-SYSTEM-ERROR-FALLBACK] OTP for ${cleanPhone}: ${otp}`);
-            }
+            console.error('SMS Sending System Error:', error instanceof Error ? error.message : 'Unknown error');
         }
     } else {
-        // Development mode: Log to console
-        console.log(`[DEV] OTP for ${cleanPhone}: ${otp}`);
+        // Development mode only: safe to log because no real users are involved
+        if (process.env.NODE_ENV !== 'production') {
+            console.log(`[DEV] OTP for ${cleanPhone}: ${otp}`);
+        }
     }
 
     return { message: 'OTP sent successfully' };

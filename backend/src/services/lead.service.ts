@@ -65,6 +65,8 @@ export const getLeads = async (params: {
     endDate?: Date;
     limit?: number;
     offset?: number;
+    sourceType?: 'direct' | 'common' | 'all';
+    salespersonId?: string;
 }) => {
     const where: any = {};
 
@@ -76,9 +78,9 @@ export const getLeads = async (params: {
         where.landingPageId = params.landingPageId;
     }
 
-    if ((params as any).sourceType === 'direct') {
+    if (params.sourceType === 'direct') {
         where.landingPageId = null;
-    } else if ((params as any).sourceType === 'common') {
+    } else if (params.sourceType === 'common') {
         where.landingPageId = { not: null };
     }
 
@@ -86,12 +88,12 @@ export const getLeads = async (params: {
         where.project = { advertiserId: params.advertiserId };
     }
 
-    if ((params as any).salespersonId) {
+    if (params.salespersonId) {
         where.project = {
             ...where.project,
             advertiser: {
                 ...where.project?.advertiser,
-                assignedSalespersonId: (params as any).salespersonId
+                assignedSalespersonId: params.salespersonId
             }
         };
     }

@@ -700,18 +700,11 @@ router.get('/projects', async (req, res, next) => {
     try {
         const { status, city, advertiser_id } = req.query;
 
-        // Parallel fetch for better performance
-        const [projects, options] = await Promise.all([
-            projectService.getAllProjects({
-                status: status as any,
-                city: city as string,
-                advertiserId: advertiser_id as string,
-            }),
-            optionService.getAllOptions() // Keep fetching options if we need them for other things or remove if unused? 
-            // Actually, we don't need options anymore if projects are resolved.
-            // But let's check if 'options' variable is used elsewhere. It is used to build nameMap.
-            // If we remove nameMap logic, we don't need options.
-        ]);
+        const projects = await projectService.getAllProjects({
+            status: status as any,
+            city: city as string,
+            advertiserId: advertiser_id as string,
+        });
 
         res.json(projects);
     } catch (error) {
@@ -1066,9 +1059,9 @@ router.delete('/landing-pages/:lpId/facebook-forms/:formId', requirePermissions(
 
 // ==================== Leads ====================
 
-router.get('/leads', requirePermissions(['leads', 'all']) as any, async (req, res, next) => {
+router.get('/leads', requirePermissions(['leads', 'all']) as any, async (req: AuthenticatedRequest, res, next) => {
     try {
-        const { project_id, landing_page_id, start_date, end_date, limit, offset } = req.query;
+        const { project_id, landing_page_id, start_date, end_date, limit, offset, sourceType } = req.query;
         const result = await leadService.getLeads({
             projectId: project_id as string,
             landingPageId: landing_page_id as string,
@@ -1076,8 +1069,9 @@ router.get('/leads', requirePermissions(['leads', 'all']) as any, async (req, re
             endDate: end_date ? new Date(end_date as string) : undefined,
             limit: limit ? parseInt(limit as string) : undefined,
             offset: offset ? parseInt(offset as string) : undefined,
-            salespersonId: (req as any).user.role === 'SALES' ? (req as any).user.id : undefined
-        } as any);
+            salespersonId: req.user?.role === 'SALES' ? req.user.id : undefined,
+            sourceType: sourceType as 'direct' | 'common' | 'all' | undefined,
+        });
         res.json(result);
     } catch (error) {
         next(error);
@@ -1193,16 +1187,18 @@ router.get('/options/:category', async (req: AuthenticatedRequest, res, next) =>
 // POST /admin/options - Create option
 router.post('/options', requirePermissions(['all']) as any, async (req: AuthenticatedRequest, res, next) => {
     try {
-        console.log('Create option request body:', req.body);
         const { category, value, label } = req.body;
 
-        // Explicit checks
-        if (!category) return res.status(400).json({ error: 'Category is required' });
-        if (!label) return res.status(400).json({ error: 'Label is required' });
+        if (!category) {
+            res.status(400).json({ error: 'Category is required' });
+            return;
+        }
+        if (!label) {
+            res.status(400).json({ error: 'Label is required' });
+            return;
+        }
 
         const optionTypeString = categoryToOptionType[category];
-
-        console.log(`Mapping category '${category}' to optionType '${optionTypeString}'`);
 
         if (!optionTypeString) {
             res.status(400).json({ error: `Invalid category: ${category}` });
@@ -1215,8 +1211,6 @@ router.post('/options', requirePermissions(['all']) as any, async (req: Authenti
             parentId: req.body.parentId,
             iconUrl: req.body.iconUrl || null,
         };
-
-        console.log('Calling optionService.createOption with:', createData);
 
         const option = await optionService.createOption(
             createData,

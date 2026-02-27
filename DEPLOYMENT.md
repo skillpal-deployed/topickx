@@ -1,371 +1,207 @@
-# Skillpal Real Estate - Deployment Guide
+# Deployment Guide
 
-Deploy the full-stack application to DigitalOcean Droplet with Spaces for image storage.
-
-## Server Details
-
-| Resource | Value |
-|----------|-------|
-| **Droplet IP** | 64.227.139.60 |
-| **Region** | BLR1 (Bangalore) |
-| **Specs** | 1 vCPU, 1GB RAM, 25GB Disk |
-| **Spaces Bucket** | skillpal.sgp1.digitaloceanspaces.com |
+This document explains the full CI/CD setup for the Skillpal / ListingHub
+application (Node.js/Express backend + Next.js 15 frontend) deployed to a
+DigitalOcean Droplet at **143.244.185.51**.
 
 ---
 
-## Step 1: Connect to Your Droplet
+## Architecture Overview
 
-```bash
-ssh root@64.227.139.60
 ```
-
----
-
-## Step 2: Initial Server Setup
-
-### Update System
-```bash
-apt update && apt upgrade -y
-```
-
-### Install Required Packages
-```bash
-# Install Node.js 20.x (LTS)
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-apt install -y nodejs
-
-# Verify installation
-node --version  # Should show v20.x.x
-npm --version
-
-# Install build essentials and git
-apt install -y build-essential git
-
-# Install PM2 globally
-npm install -g pm2
-
-# Install Nginx
-apt install -y nginx
+Push to main
+     │
+     ▼
+GitHub Actions
+  ├─ Job 1: build-frontend  (runs on GitHub runner – 7 GB RAM)
+  │    └─ npm ci + next build → uploads .next artifact
+  │
+  └─ Job 2: deploy  (runs after build-frontend succeeds)
+       ├─ Downloads .next artifact
+       ├─ SCP: copies .next to /var/www/skillpal/frontend/.next
+       └─ SSH:
+            ├─ git pull origin main
+            ├─ backend: npm ci + prisma generate + tsc
+            ├─ frontend: npm ci --omit=dev  (build already done above)
+            └─ pm2 restart skillpal-backend + skillpal-frontend
 ```
 
 ---
 
-## Step 3: Install PostgreSQL
+## GitHub Secrets Required
 
-```bash
-# Install PostgreSQL
-apt install -y postgresql postgresql-contrib
+Go to your repository on GitHub:
+**Settings → Secrets and variables → Actions → New repository secret**
 
-# Start and enable PostgreSQL
-systemctl start postgresql
-systemctl enable postgresql
-
-# Switch to postgres user and create database
-sudo -u postgres psql
-```
-
-Inside PostgreSQL shell:
-```sql
--- Create database user (change the password!)
-CREATE USER skillpal_user WITH PASSWORD 'YOUR_SECURE_PASSWORD_HERE';
-
--- Create database
-CREATE DATABASE skillpal_db OWNER skillpal_user;
-
--- Grant privileges
-GRANT ALL PRIVILEGES ON DATABASE skillpal_db TO skillpal_user;
-
--- Exit
-\q
-```
+| Secret name                  | Value                                                      |
+|------------------------------|------------------------------------------------------------|
+| `HOST`                       | `143.244.185.51`                                           |
+| `USERNAME`                   | `root`                                                     |
+| `PORT`                       | `22`                                                       |
+| `KEY`                        | Full content of the **private** SSH key (see below)        |
+| `PASSPHRASE`                 | Passphrase for the SSH key, or leave blank if none         |
+| `GITHUB_PAT`                 | GitHub Personal Access Token with `repo` scope             |
+| `NEXT_PUBLIC_API_URL`        | e.g. `https://api.yourdomain.com`                          |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Your Google OAuth client ID                              |
 
 ---
 
-## Step 4: Clone Repository
+## Step-by-Step: Add the SSH Private Key Secret
 
-```bash
-# Create web directory
-mkdir -p /var/www/skillpal
-cd /var/www/skillpal
+### On Windows (your machine)
 
-# Clone your repository
-git clone https://github.com/YOUR_USERNAME/skillpal-real-estate.git .
+1. Open **PowerShell** (or Git Bash) and run:
 
-# Or if private repo, use SSH:
-# git clone git@github.com:YOUR_USERNAME/skillpal-real-estate.git .
-```
-
----
-
-## Step 5: Setup Backend
-
-```bash
-cd /var/www/skillpal/backend
-
-# Install dependencies
-npm install
-
-# Copy production environment file
-cp .env.production .env
-
-# IMPORTANT: Edit .env and update:
-# 1. DATABASE_URL with your PostgreSQL password
-# 2. JWT_SECRET with a secure random string
-nano .env
-```
-
-Generate a secure JWT secret:
-```bash
-node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
-```
-
-```bash
-# Generate Prisma client
-npx prisma generate
-
-# Push database schema
-npx prisma db push
-
-# Build TypeScript
-npm run build
-```
-
----
-
-## Step 6: Setup Frontend
-
-```bash
-cd /var/www/skillpal/frontend
-
-# Install dependencies
-npm install
-
-# Copy production environment
-cp .env.production .env.local
-
-# Build Next.js
-npm run build
-```
-
----
-
-## Step 7: Configure PM2
-
-```bash
-cd /var/www/skillpal
-
-# Create PM2 logs directory
-mkdir -p /var/log/pm2
-
-# Start applications with ecosystem file
-pm2 start backend/ecosystem.config.js
-
-# Save PM2 configuration
-pm2 save
-
-# Setup PM2 to start on boot
-pm2 startup
-# Copy and run the command it outputs
-```
-
-Check status:
-```bash
-pm2 status
-pm2 logs
-```
-
----
-
-## Step 8: Configure Nginx
-
-```bash
-# Copy nginx configuration
-cp /var/www/skillpal/deploy/nginx.conf /etc/nginx/sites-available/skillpal
-
-# Enable the site
-ln -s /etc/nginx/sites-available/skillpal /etc/nginx/sites-enabled/
-
-# Remove default site
-rm /etc/nginx/sites-enabled/default
-
-# Test nginx configuration
-nginx -t
-
-# Restart nginx
-systemctl restart nginx
-systemctl enable nginx
-```
-
----
-
-## Step 9: Configure Firewall
-
-```bash
-# Allow SSH, HTTP, and HTTPS
-ufw allow OpenSSH
-ufw allow 'Nginx Full'
-
-# Enable firewall
-ufw enable
-
-# Check status
-ufw status
-```
-
----
-
-## Step 10: Verify Deployment
-
-### Test Backend
-```bash
-curl http://localhost:5000/api/health
-```
-
-### Test Frontend
-```bash
-curl http://localhost:3000
-```
-
-### Test from Browser
-Visit: `http://64.227.139.60`
-
----
-
-## SSL Certificate (When You Have a Domain)
-
-Once you have a domain pointing to your droplet:
-
-```bash
-# Install Certbot
-apt install -y certbot python3-certbot-nginx
-
-# Get SSL certificate
-certbot --nginx -d yourdomain.com -d www.yourdomain.com
-
-# Test auto-renewal
-certbot renew --dry-run
-```
-
-Update nginx.conf to use your domain instead of the IP address:
-```nginx
-server_name yourdomain.com www.yourdomain.com;
-```
-
-### Important: Update Environment Variables
-After adding a domain, you MUST update your `.env` files on the server:
-
-1. **Backend** (`/var/www/skillpal/backend/.env`):
-   ```bash
-   SERVER_URL=https://yourdomain.com
+   ```powershell
+   Get-Content "C:\Users\Nitin\Desktop\skillpal_ssh_key" | Set-Clipboard
    ```
 
-2. **Frontend** (`/var/www/skillpal/frontend/.env.local`):
-   ```bash
-   NEXT_PUBLIC_API_URL=https://yourdomain.com/api
-   NEXT_PUBLIC_SITE_URL=https://yourdomain.com
-   ```
+   This copies the entire private key to your clipboard.
 
-3. **Google OAuth**:
-   Update "Authorized Redirect URIs" in Google Cloud Console to:
-   `https://yourdomain.com/api/auth/google/callback`
+2. Go to GitHub → your repo → **Settings → Secrets and variables → Actions**.
 
-4. **Restart Apps**:
-   ```bash
-   pm2 restart all
+3. Click **New repository secret**.
+
+4. Name: `KEY`
+
+5. Value: paste from clipboard (Ctrl+V).
+
+   The value should look like:
    ```
+   -----BEGIN OPENSSH PRIVATE KEY-----
+   b3BlbnNzaC1rZXktdjEAAAAA...
+   -----END OPENSSH PRIVATE KEY-----
+   ```
+   Make sure the entire key including the `-----BEGIN` and `-----END` lines
+   is included, with no trailing spaces.
+
+6. Click **Add secret**.
+
+> **Security note:** Never commit the private key file to git.
+> Never share it in Slack, email, or any other channel.
 
 ---
 
-## Updating the Application
+## Step-by-Step: Create a GitHub Personal Access Token (PAT)
 
-When you push new code to GitHub:
+The PAT is needed because the repo is **private**. The SSH action on the
+server uses the PAT to authenticate `git pull`.
+
+1. Go to **GitHub → Settings (your account, not the repo) →
+   Developer settings → Personal access tokens → Tokens (classic)**.
+
+2. Click **Generate new token (classic)**.
+
+3. Note / name: `skillpal-deploy`
+
+4. Expiration: set a reasonable expiry (e.g. 1 year) and calendar a reminder
+   to rotate it before it expires.
+
+5. Scopes: tick **repo** (full control of private repositories).
+
+6. Click **Generate token** and immediately copy the token value.
+
+7. Add it as a GitHub secret named `GITHUB_PAT` (see table above).
+
+---
+
+## Step-by-Step: Add All Secrets to GitHub
+
+1. Navigate to: `https://github.com/designdigistratics-dotcom/listing-hub/settings/secrets/actions`
+
+2. For each row in the table at the top of this file, click
+   **New repository secret**, fill in the name and value, and save.
+
+3. Verify the secrets list shows all 8 secrets before triggering a deploy.
+
+---
+
+## How the Server-Side Deploy Script Works
+
+`deploy/deploy.sh` is a standalone script you can run manually on the server
+when you need to re-deploy without going through GitHub Actions (e.g. after
+an emergency hotfix applied directly on the server).
 
 ```bash
-cd /var/www/skillpal
-
-# Pull latest changes
-git pull origin main
-
-# Backend updates
-cd backend
-npm install
-npm run build
-npx prisma generate
-npx prisma db push
-
-# Frontend updates
-cd ../frontend
-npm install
-npm run build
-
-# Restart applications
-pm2 restart all
+# On the server, as root:
+source /etc/skillpal/secrets    # loads GITHUB_PAT into the environment (optional)
+bash /var/www/skillpal/deploy/deploy.sh
 ```
+
+Logs are appended to `/var/log/skillpal-deploy.log`.
 
 ---
 
-## Useful Commands
+## PM2 Process Names
 
-| Command | Description |
-|---------|-------------|
-| `pm2 status` | Check app status |
-| `pm2 logs` | View all logs |
-| `pm2 logs skillpal-backend` | Backend logs only |
-| `pm2 restart all` | Restart all apps |
-| `pm2 stop all` | Stop all apps |
-| `systemctl status nginx` | Check Nginx status |
-| `nginx -t` | Test Nginx config |
-| `sudo -u postgres psql` | Access PostgreSQL |
+The workflow targets these exact PM2 process names (defined in
+`backend/ecosystem.config.js`):
+
+| PM2 name            | Directory                        | Port |
+|---------------------|----------------------------------|------|
+| `skillpal-backend`  | `/var/www/skillpal/backend`      | 5000 |
+| `skillpal-frontend` | `/var/www/skillpal/frontend`     | 3000 |
+
+---
+
+## Verifying a Deployment
+
+### 1. Watch the GitHub Actions run
+
+- Go to the **Actions** tab of the repo.
+- Click the most recent **"Deploy to Production"** workflow run.
+- Expand each step to see its output.
+- Both jobs must show a green checkmark.
+
+### 2. Check PM2 on the server
+
+```bash
+ssh root@143.244.185.51
+pm2 list
+pm2 logs skillpal-backend --lines 50
+pm2 logs skillpal-frontend --lines 50
+```
+
+### 3. Hit the health endpoints
+
+```bash
+# Backend health check
+curl -s https://api.yourdomain.com/health
+
+# Frontend (should return the HTML of the home page)
+curl -sI https://yourdomain.com
+```
+
+### 4. Check the deployment log
+
+```bash
+tail -f /var/log/skillpal-deploy.log
+```
 
 ---
 
 ## Troubleshooting
 
-### Backend not starting
-```bash
-cd /var/www/skillpal/backend
-node dist/index.js  # Run directly to see errors
-```
+| Symptom                                        | Likely cause & fix                                                     |
+|------------------------------------------------|------------------------------------------------------------------------|
+| "Permission denied (publickey)"                | Wrong SSH key in `KEY` secret. Re-paste the entire private key.        |
+| "Host key verification failed"                 | First connection; run `ssh-keyscan 143.244.185.51` and add the result to the workflow's `known_hosts` (handled automatically by appleboy/ssh-action). |
+| `npm ci` fails with peer-dep errors            | Lock file out of sync. Run `npm install` locally, commit `package-lock.json`, and push. |
+| `next build` fails with "out of memory"        | Build runs on GitHub runner (7 GB) – should not happen. If it does, add `NODE_OPTIONS=--max-old-space-size=4096` to the build step env. |
+| PM2 process not found                          | PM2 name mismatch. Run `pm2 list` on the server and update `ecosystem.config.js` if the names differ. |
+| Frontend shows stale content after deploy      | The `.next` artifact upload (SCP step) failed. Check the "Upload .next build to server" step in the Actions log. |
+| `prisma generate` fails                        | Prisma CLI not in `node_modules`. Ensure `prisma` is in `devDependencies` in `backend/package.json` (it is). |
 
-### Database connection issues
-```bash
-# Check PostgreSQL status
-systemctl status postgresql
+---
 
-# Test connection
-sudo -u postgres psql -d skillpal_db -c "SELECT 1;"
-```
+## Secret Rotation Checklist
 
-### Nginx 502 Bad Gateway
-```bash
-# Check if apps are running
-pm2 status
+When rotating credentials (recommended every 90 days or when a team member
+leaves):
 
-# Check Nginx logs
-tail -f /var/log/nginx/error.log
-```
-
-### Permission issues
-```bash
-chown -R www-data:www-data /var/www/skillpal
-chmod -R 755 /var/www/skillpal
-```
-cd /var/www/skillpal
-
-# Pull latest code
-git pull origin main
-
-# If backend changed:
-cd backend
-npm install
-npm run build
-cd ..
-
-# If frontend changed:
-cd frontend
-npm install          # Only if new dependencies
-npm run build
-cd ..
-
-# Restart apps
-pm2 restart all
+- [ ] Generate a new SSH key pair, add the public key to the server's
+      `~/.ssh/authorized_keys`, update `KEY` (and `PASSPHRASE`) in GitHub
+      Secrets, then remove the old public key from the server.
+- [ ] Generate a new GitHub PAT, update `GITHUB_PAT` in GitHub Secrets,
+      then revoke the old PAT.
+- [ ] Update `NEXT_PUBLIC_*` secrets if API URLs or OAuth credentials change.

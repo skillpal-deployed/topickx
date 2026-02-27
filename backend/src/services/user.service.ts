@@ -175,7 +175,6 @@ export const updateAdminUser = async (
     if (data.phone !== undefined) updateData.phone = data.phone;
     if (data.role !== undefined) updateData.role = data.role;
     if (data.roleId !== undefined) updateData.roleId = data.roleId;
-    if (data.roleId !== undefined) updateData.roleId = data.roleId;
     if (data.isActive !== undefined) updateData.isActive = data.isActive;
     if (data.maxLeadsPerDay !== undefined) updateData.maxLeadsPerDay = data.maxLeadsPerDay;
     if (data.leadFilters !== undefined) updateData.leadFilters = data.leadFilters;
@@ -310,6 +309,8 @@ export const getAdvertisers = async (params: {
             gst: true,
             status: true,
             assignedSalespersonId: true,
+            leadFilters: true,
+            maxLeadsPerDay: true,
             createdAt: true,
             updatedAt: true,
         },
@@ -474,7 +475,7 @@ export const updateAdvertiser = async (
     if (data.phone !== undefined) updateData.phone = data.phone;
     if (data.address !== undefined) updateData.address = data.address;
     if (data.gst !== undefined) updateData.gst = data.gst;
-    if (data.notes !== undefined) updateData.notes = data.notes;
+    // NOTE: `notes` is intentionally NOT saved to User — use InternalNote for notes instead.
     if (data.assignedSalespersonId !== undefined)
         updateData.assignedSalespersonId = (data.assignedSalespersonId && data.assignedSalespersonId !== 'none') ? data.assignedSalespersonId : null;
     if (data.status !== undefined) updateData.status = data.status;

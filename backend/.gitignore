@@ -1,5 +1,41 @@
 node_modules
-# Keep environment variables out of version control
-.env
 
+# ============ ENVIRONMENT FILES (NEVER commit these) ============
+.env
+.env.local
+.env.production
+.env.staging
+.env.*.local
+*.env
+
+# ============ BUILD OUTPUT ============
+dist/
+build/
+
+# ============ PRISMA GENERATED ============
 /generated/prisma
+
+# ============ UPLOADS (local dev only) ============
+uploads/
+
+# ============ DEBUG & TEMP FILES ============
+debug*.ts
+debug*.js
+debug*.txt
+check-*.js
+check-*.ts
+check_*.ts
+check_*.js
+verify-*.js
+verify-*.ts
+*.debug.ts
+*.debug.js
+
+# ============ LOGS ============
+*.log
+npm-debug.log*
+logs/
+
+# ============ OS FILES ============
+.DS_Store
+Thumbs.db

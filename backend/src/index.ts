@@ -18,7 +18,7 @@ async function main() {
 
         // Start server — bind to localhost only (nginx proxies externally)
         app.listen(Number(PORT), '127.0.0.1', () => {
-            console.log(`🚀 Server running on http://127.0.0.1:${PORT} [FIXED VERSION 1.1]`);
+            console.log(`🚀 Server running on http://127.0.0.1:${PORT}`);
             console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
         });
     } catch (error) {

@@ -29,29 +29,42 @@ app.set('trust proxy', 1);
 
 // ==================== Middleware ====================
 
-// Security headers - disable CSP as Next.js frontend handles its own
+// Security headers
 app.use(helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
-    contentSecurityPolicy: false, // Next.js manages its own CSP
+    contentSecurityPolicy: false, // Next.js frontend manages its own CSP
+    xContentTypeOptions: true,
+    xFrameOptions: { action: 'deny' },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
 }));
 
 // GZIP Compression for better performance (reduces payload by 60-70%)
 app.use(compression());
 
-// CORS configuration
+// CORS configuration - use environment variables for production domains
 const allowedOrigins = [
-    process.env.CLIENT_URL || 'http://localhost:3000',
+    process.env.CLIENT_URL,
+    process.env.ADDITIONAL_ORIGIN,
     'http://localhost:3000',
     'http://127.0.0.1:3000',
-    'https://topickx.com',
-    'https://www.topickx.com',
-];
+].filter(Boolean) as string[];
+
+// Only add production domains if not already covered by env vars
+if (process.env.NODE_ENV === 'production' && process.env.PRODUCTION_DOMAIN) {
+    allowedOrigins.push(`https://${process.env.PRODUCTION_DOMAIN}`);
+    allowedOrigins.push(`https://www.${process.env.PRODUCTION_DOMAIN}`);
+}
 
 app.use(cors({
     origin: (origin, callback) => {
-        // Allow requests with no origin (mobile apps, curl, etc.)
-        if (!origin) return callback(null, true);
-
+        // In production, block requests with no Origin header (CSRF protection)
+        if (!origin) {
+            if (process.env.NODE_ENV === 'production') {
+                return callback(new Error('Not allowed by CORS'));
+            }
+            // Allow no-origin requests in development (Postman, curl, etc.)
+            return callback(null, true);
+        }
         if (allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
@@ -70,9 +83,20 @@ if (process.env.NODE_ENV !== 'production') {
     app.use(morgan('combined'));
 }
 
-// Body parsing
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// Body parsing — exclude /api/webhooks so the raw body is preserved for HMAC verification
+// The webhook router applies its own express.raw() middleware for signature checking.
+const jsonParser = express.json({ limit: '2mb' });
+const urlencodedParser = express.urlencoded({ extended: true, limit: '2mb' });
+
+app.use((req, res, next) => {
+    if (req.path.startsWith('/api/webhooks')) {
+        return next(); // Skip JSON parsing for webhooks — handled in webhook.routes.ts
+    }
+    jsonParser(req, res, (err) => {
+        if (err) return next(err);
+        urlencodedParser(req, res, next);
+    });
+});
 
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
@@ -89,19 +113,37 @@ app.get('/health', (req, res) => {
 // Rate limiting for auth endpoints (prevent brute force)
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // 100 requests per window (increased from 10)
+    max: 30, // Reduced to 30 requests per window
+    message: { error: 'Too many requests, please try again later' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// Rate limiting for OTP endpoints (prevent OTP spam/brute-force)
+const otpLimiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 3, // 3 OTP requests per minute per IP
+    message: { error: 'Too many OTP requests, please wait before trying again' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// General API rate limit (prevent DDoS)
+const generalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 500,
     message: { error: 'Too many requests, please try again later' },
     standardHeaders: true,
     legacyHeaders: false,
 });
 
 app.use('/api/auth', authLimiter, authRoutes);
-app.use('/api/advertiser', advertiserRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/upload', uploadRoutes);
-app.use('/api/analytics', analyticsRoutes);
+app.use('/api/advertiser', generalLimiter, advertiserRoutes);
+app.use('/api/admin', generalLimiter, adminRoutes);
+app.use('/api/upload', generalLimiter, uploadRoutes);
+app.use('/api/analytics', generalLimiter, analyticsRoutes);
 app.use('/api/webhooks', webhookRoutes);
-app.use('/api', publicRoutes);
+app.use('/api', generalLimiter, publicRoutes);
 
 // ==================== Error Handling ====================
 

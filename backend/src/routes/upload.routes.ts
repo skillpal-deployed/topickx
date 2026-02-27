@@ -32,9 +32,10 @@ if (useSpaces) {
         api_key: process.env.CLOUDINARY_API_KEY,
         api_secret: process.env.CLOUDINARY_API_SECRET,
     });
-    console.log('Using Cloudinary for file storage');
 } else {
-    console.log('Using Local Disk for file storage (no cloud credentials)');
+    if (process.env.NODE_ENV !== 'production') {
+        console.warn('No cloud storage credentials found. Using local disk storage.');
+    }
 }
 
 // Configure storage based on provider
@@ -78,13 +79,11 @@ if (useSpaces && s3Client) {
 }
 
 const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-    console.log(`[Upload Debug] Processing file: ${file.originalname}, Mimetype: ${file.mimetype}`);
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf', 'image/svg+xml'];
 
     if (allowedTypes.includes(file.mimetype)) {
         cb(null, true);
     } else {
-        console.log(`[Upload Debug] Rejected file: ${file.originalname}, Mimetype: ${file.mimetype}`);
         cb(new Error('Invalid file type. Only JPEG, PNG, WebP, GIF, SVG, and PDF are allowed.'));
     }
 };
@@ -93,7 +92,8 @@ const upload = multer({
     storage,
     fileFilter,
     limits: {
-        fileSize: 10 * 1024 * 1024, // 10MB limit
+        fileSize: 5 * 1024 * 1024, // 5MB limit (reduced from 10MB to prevent DoS)
+        files: 10,                  // Max 10 files per request
     },
 });
 

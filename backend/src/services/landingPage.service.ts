@@ -180,11 +180,11 @@ export const getLandingPageBySlug = async (slug: string) => {
                                     companyName: true,
                                 },
                             },
-                            cardImage: true, // Ensure cardImage is selected
+                            cardImage: true,
                             usp1: true,
                             usp2: true,
                             estimatedPossessionDate: true,
-                        } as any,
+                        },
                     },
                 },
                 orderBy: { position: 'asc' },

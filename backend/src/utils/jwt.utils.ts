@@ -1,12 +1,12 @@
 import jwt from 'jsonwebtoken';
 import { JwtPayload } from '../types';
 
-// SECURITY: In production, JWT_SECRET MUST be set
+// SECURITY: JWT_SECRET MUST always be set — no fallback allowed
 const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
-    throw new Error('FATAL: JWT_SECRET environment variable is required in production');
+if (!JWT_SECRET) {
+    throw new Error('FATAL: JWT_SECRET environment variable is required. Generate one with: node -e "console.log(require(\'crypto\').randomBytes(64).toString(\'hex\'))"');
 }
-const SECRET = JWT_SECRET || 'default-secret-change-in-production';
+const SECRET = JWT_SECRET;
 const JWT_EXPIRATION_HOURS = parseInt(process.env.JWT_EXPIRATION_HOURS || '24', 10);
 
 export const createToken = (userId: string, role: string): string => {

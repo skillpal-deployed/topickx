@@ -1,4 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
+import { Prisma } from '@prisma/client';
+import { ZodError } from 'zod';
 
 export const errorHandler = (
     err: Error,
@@ -6,46 +8,39 @@ export const errorHandler = (
     res: Response,
     next: NextFunction
 ): void => {
-    console.error('Error:', err);
-
-    // Prisma errors
-    if (err.name === 'PrismaClientKnownRequestError') {
-        const prismaError = err as any;
-
-        if (prismaError.code === 'P2002') {
+    // Prisma known request errors (typed — no cast needed)
+    if (err instanceof Prisma.PrismaClientKnownRequestError) {
+        if (err.code === 'P2002') {
+            const target = (err.meta?.target as string[])?.[0];
             res.status(400).json({
                 error: 'A record with this value already exists',
-                field: prismaError.meta?.target?.[0],
+                field: target,
             });
             return;
         }
 
-        if (prismaError.code === 'P2025') {
-            res.status(404).json({
-                error: 'Record not found',
-            });
+        if (err.code === 'P2025') {
+            res.status(404).json({ error: 'Record not found' });
             return;
         }
     }
 
     // Validation errors (Zod)
-    if (err.name === 'ZodError') {
+    if (err instanceof ZodError) {
         res.status(400).json({
             error: 'Validation error',
-            details: (err as any).errors,
+            details: err.issues,
         });
         return;
     }
 
     // JWT errors
     if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
-        res.status(401).json({
-            error: err.message,
-        });
+        res.status(401).json({ error: err.message });
         return;
     }
 
-    // Default error
+    // Default error — never expose internals in production
     res.status(500).json({
         error: process.env.NODE_ENV === 'production'
             ? 'Internal server error'

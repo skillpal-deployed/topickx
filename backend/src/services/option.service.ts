@@ -101,7 +101,6 @@ export const createOption = async (
     currentUserId: string,
     currentUserRole: AdminRole
 ) => {
-    console.log('DEBUG SERVICE: createOption called with', data);
     // Check for duplicates
     const existing = await prisma.option.findFirst({
         where: {

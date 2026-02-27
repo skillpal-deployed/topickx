@@ -1,9 +1,9 @@
 import { OAuth2Client } from 'google-auth-library';
+import crypto from 'crypto';
 import prisma from '../utils/prisma';
 import { hashPassword, verifyPassword } from '../utils/password.utils';
 import { createToken } from '../utils/jwt.utils';
 import { UserCreateRequest, UserLoginRequest, AdminRole } from '../types';
-import { v4 as uuidv4 } from 'uuid';
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -200,7 +200,8 @@ export const requestPasswordReset = async (email: string) => {
     });
 
     if (user) {
-        const resetToken = uuidv4();
+        // Use cryptographically secure random bytes instead of UUID
+        const resetToken = crypto.randomBytes(32).toString('hex');
         const resetExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
         await prisma.user.update({
@@ -211,8 +212,11 @@ export const requestPasswordReset = async (email: string) => {
             },
         });
 
-        // In production, send email here (DO NOT log tokens!)
-        console.log(`Password reset requested for ${email}`);
+        // In production, send reset link via email (NEVER log the token)
+        // TODO: Implement email sending here
+        if (process.env.NODE_ENV !== 'production') {
+            console.log(`[DEV ONLY] Password reset requested for ${email}`);
+        }
     }
 
     // Always return success to prevent email enumeration
@@ -224,8 +228,14 @@ export const resetPassword = async (token: string, newPassword: string) => {
         throw new Error('Token and new password are required');
     }
 
-    if (newPassword.length < 6) {
-        throw new Error('Password must be at least 6 characters');
+    if (newPassword.length < 8) {
+        throw new Error('Password must be at least 8 characters');
+    }
+    if (!/[A-Z]/.test(newPassword)) {
+        throw new Error('Password must contain at least one uppercase letter');
+    }
+    if (!/[0-9]/.test(newPassword)) {
+        throw new Error('Password must contain at least one number');
     }
 
     const user = await prisma.user.findFirst({
