@@ -122,8 +122,8 @@ export const resolveProjectsData = async (projects: any[]) => {
 
     const resolveArray = (ids: any) => {
         if (!ids) return [];
-        if (Array.isArray(ids)) return ids.map(id => optionMap.get(id)?.name || id);
-        return [optionMap.get(ids)?.name || ids];
+        if (Array.isArray(ids)) return ids.map(id => optionMap.get(id)?.name || null).filter(Boolean);
+        return optionMap.get(ids)?.name ? [optionMap.get(ids)!.name] : [];
     };
 
     // Special resolver for amenities that keeps iconUrl
