@@ -40,6 +40,9 @@ export const errorHandler = (
         return;
     }
 
+    // IMPORTANT: Actually log exactly why the 500 happened in production so pm2 can see it
+    console.error(`[INTERNAL_SERVER_ERROR] ${err.name}: ${err.message}`, err.stack);
+
     // Default error — never expose internals in production
     res.status(500).json({
         error: process.env.NODE_ENV === 'production'

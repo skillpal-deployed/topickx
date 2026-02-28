@@ -127,25 +127,25 @@ export const loginWithGoogle = async (accessToken: string) => {
         user = await prisma.user.create({
             data: {
                 email: payload.email.toLowerCase(),
-                googleId: payload.googleId,
+                googleId: payload.googleId || null,
                 role: AdminRole.ADVERTISER,
-                name: payload.name,
-                ownerName: payload.name,
-                companyName: payload.name, // Default to name
+                name: payload.name || payload.email.split('@')[0],
+                ownerName: payload.name || payload.email.split('@')[0],
+                companyName: payload.name || payload.email.split('@')[0], // Default to name
                 status: 'active',
                 isActive: true, // Auto-activate for now
-                avatar: payload.picture
-            } as any
+                avatar: payload.picture || null
+            }
         });
     } else {
         // Link existing user if not linked
-        if (!(user as any).googleId) {
+        if (!user.googleId) {
             user = await prisma.user.update({
                 where: { id: user.id },
                 data: {
-                    googleId: payload.googleId,
-                    avatar: payload.picture || (user as any).avatar
-                } as any
+                    googleId: payload.googleId || null,
+                    avatar: payload.picture || user.avatar
+                }
             });
         }
     }
