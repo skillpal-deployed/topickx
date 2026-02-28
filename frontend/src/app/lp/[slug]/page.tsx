@@ -3,7 +3,9 @@ import PublicLandingPage, { LandingPageData } from "./client";
 
 async function getLandingPageData(slug: string): Promise<LandingPageData | null> {
     try {
-        const apiUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+        // This runs on the Next.js server (SSR), so we MUST use an absolute URL to loopback to the backend directly,
+        // otherwise `fetch()` crashes with ERR_INVALID_URL.
+        const apiUrl = process.env.NEXT_INTERNAL_BACKEND_URL || "http://127.0.0.1:5000/api";
         const res = await fetch(`${apiUrl}/landing-page/${slug}`, {
             next: { revalidate: 60 }, // Revalidate every minute for testing, maybe longer in prod
         });
