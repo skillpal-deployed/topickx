@@ -1,9 +1,19 @@
 import axios from "axios";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+// In the browser, use the env var (which is now /api on production to bypass CORS)
+// On the server (Next.js SSR), relative URLs crash Node's fetch, so we MUST use an absolute URL hitting the backend directly
+const IS_SERVER = typeof window === "undefined";
+const getBaseUrl = () => {
+    if (IS_SERVER) {
+        // When Next.js is rendering on the server, hit the local backend port directly
+        return process.env.NEXT_INTERNAL_BACKEND_URL || "http://127.0.0.1:5000/api";
+    }
+    // In browser, use the public URL
+    return process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+};
 
 export const api = axios.create({
-    baseURL: API_URL,
+    baseURL: getBaseUrl(),
     headers: {
         "Content-Type": "application/json",
     },
