@@ -32,6 +32,7 @@ app.set('trust proxy', 1);
 // Security headers
 app.use(helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
+    crossOriginOpenerPolicy: false, // Must be disabled for Google OAuth popup window.opener to work
     contentSecurityPolicy: false, // Next.js frontend manages its own CSP
     xContentTypeOptions: true,
     xFrameOptions: { action: 'deny' },
@@ -60,15 +61,22 @@ app.use(cors({
         // In production, block requests with no Origin header (CSRF protection)
         if (!origin) {
             if (process.env.NODE_ENV === 'production') {
-                return callback(new Error('Not allowed by CORS'));
+                return callback(null, false); // Graceful reject instead of Error throw (prevents 500)
             }
             // Allow no-origin requests in development (Postman, curl, etc.)
             return callback(null, true);
         }
-        if (allowedOrigins.includes(origin)) {
+
+        // Always securely allow topickx.com domains to prevent auth-popup CORS failures
+        if (
+            allowedOrigins.includes(origin) ||
+            origin.endsWith('.topickx.com') ||
+            origin === 'https://topickx.com'
+        ) {
             callback(null, true);
         } else {
-            callback(new Error('Not allowed by CORS'));
+            console.warn(`CORS blocked origin: ${origin}`);
+            callback(null, false); // Graceful reject instead of Error throw
         }
     },
     credentials: true,
