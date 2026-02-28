@@ -26,6 +26,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { slug } = await params;
     const reconstructedSlug = reconstructSlug(slug);
 
+    // Bail out early if this looks like a static file request (e.g. awsconfig.js, robots.txt)
+    // to prevent spurious backend API calls and SSR crashes.
+    if (reconstructedSlug.includes('.')) {
+        return {
+            title: 'Not Found',
+            description: 'Page not found.',
+        };
+    }
+
     try {
         const response = await publicAPI.getProjectBySlug(reconstructedSlug);
         const project = response.data;
@@ -45,6 +54,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProjectCatchAllPage({ params }: Props) {
     const { slug } = await params;
     const reconstructedSlug = reconstructSlug(slug);
+
+    // Bail out early on static file extensions to prevent API invalid URL crashes
+    if (reconstructedSlug.includes('.')) {
+        import("next/navigation").then(nav => nav.notFound());
+        return null;
+    }
+
     let project = null;
 
     try {
@@ -62,5 +78,6 @@ export default async function ProjectCatchAllPage({ params }: Props) {
 
     // Pass the project data (or null) to the client component
     // We pass the composite slug as the ID if project is missing, so it can try client-side or show error
+
     return <ProjectDetailView projectIdOrSlug={reconstructedSlug} initialProject={project} />;
 }
