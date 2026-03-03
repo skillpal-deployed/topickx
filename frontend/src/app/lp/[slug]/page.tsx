@@ -1,20 +1,18 @@
 import { Metadata } from "next";
 import PublicLandingPage, { LandingPageData } from "./client";
 
+import { publicAPI } from "@/lib/api";
+
 async function getLandingPageData(slug: string): Promise<LandingPageData | null> {
     try {
-        // This runs on the Next.js server (SSR), so we MUST use an absolute URL to loopback to the backend directly,
-        // otherwise `fetch()` crashes with ERR_INVALID_URL.
-        const apiUrl = process.env.NEXT_INTERNAL_BACKEND_URL || "http://127.0.0.1:5000/api";
-        const res = await fetch(`${apiUrl}/landing-page/${slug}`, {
-            next: { revalidate: 60 }, // Revalidate every minute for testing, maybe longer in prod
-        });
+        // Use the shared Axios instance which automatically resolves to an absolute loopback URL during SSR
+        const res = await publicAPI.getLandingPage(slug);
 
-        if (!res.ok) {
+        if (!res.data) {
             return null;
         }
 
-        return res.json();
+        return res.data;
     } catch (error) {
         console.error("Error fetching landing page data:", error);
         return null;

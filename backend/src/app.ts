@@ -67,12 +67,14 @@ app.use(cors({
             return callback(null, true);
         }
 
-        // Always securely allow topickx.com domains to prevent auth-popup CORS failures
-        if (
-            allowedOrigins.includes(origin) ||
-            origin.endsWith('.topickx.com') ||
-            origin === 'https://topickx.com'
-        ) {
+        // Explicitly allow only trusted origins - no wildcard subdomains
+        const trustedOrigins = [
+            'https://topickx.com',
+            'https://www.topickx.com',
+            ...allowedOrigins,
+        ];
+
+        if (trustedOrigins.includes(origin)) {
             callback(null, true);
         } else {
             console.warn(`CORS blocked origin: ${origin}`);
