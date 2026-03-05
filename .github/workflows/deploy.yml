@@ -37,14 +37,9 @@ jobs:
             npm ci
             npm run build
 
-            echo "=== Running DB migrations ==="
+            echo "=== Generating Prisma client ==="
             cd /var/www/skillpal/topickx/backend
-            if [ -d "prisma/migrations" ] && [ "$(ls -A prisma/migrations)" ]; then
-              npx prisma migrate deploy
-            else
-              echo "No migrations found, generating Prisma client only..."
-              npx prisma generate
-            fi
+            npx prisma generate --schema=prisma/schema.prisma
 
             echo "=== Installing frontend dependencies ==="
             cd /var/www/skillpal/topickx/frontend
