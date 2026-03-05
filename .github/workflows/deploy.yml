@@ -1,0 +1,53 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to DigitalOcean
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -e
+
+            echo "=== Pulling latest code ==="
+            cd /var/www/skillpal/topickx
+            git pull origin main
+
+            echo "=== Installing backend dependencies ==="
+            cd /var/www/skillpal/topickx/backend
+            npm ci --omit=dev
+            npm run build
+
+            echo "=== Running DB migrations ==="
+            npx prisma migrate deploy
+
+            echo "=== Installing frontend dependencies ==="
+            cd /var/www/skillpal/topickx/frontend
+            npm ci
+
+            echo "=== Building frontend ==="
+            NODE_ENV=production npm run build
+
+            echo "=== Restarting services ==="
+            pm2 restart skillpal-backend
+            pm2 restart skillpal-frontend
+            pm2 save
+
+            echo "=== Deploy complete ==="
