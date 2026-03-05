@@ -28,7 +28,9 @@ jobs:
 
             echo "=== Pulling latest code ==="
             cd /var/www/skillpal/topickx
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fd
 
             echo "=== Installing backend dependencies ==="
             cd /var/www/skillpal/topickx/backend
