@@ -32,7 +32,7 @@ jobs:
 
             echo "=== Installing backend dependencies ==="
             cd /var/www/skillpal/topickx/backend
-            npm ci --omit=dev
+            npm ci
             npm run build
 
             echo "=== Running DB migrations ==="
