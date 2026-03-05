@@ -21,7 +21,12 @@
       "Bash(git push:*)",
       "Bash(ssh:*)",
       "WebFetch(domain:www.virustotal.com)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(curl:*)",
+      "Bash(node -e:*)",
+      "WebFetch(domain:www.wiz.io)",
+      "WebFetch(domain:nvd.nist.gov)",
+      "Bash(ssh -i topickx_secure root@168.144.28.70 \"cd /var/www/skillpal/topickx/frontend && node_modules/.bin/next --version\")"
     ]
   }
 }
