@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const FB_PIXEL_ID = '1233312032320484';
+// AW-XXXXXXXXX = Google Ads conversion tracking. For GA4 page-view analytics use a G-XXXXXXXXX ID instead.
 const GTAG_ID = 'AW-862131724';
 
 
@@ -53,9 +54,9 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', '${GTAG_ID}');
+              window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
+              window.gtag('js', new Date());
+              window.gtag('config', '${GTAG_ID}');
             `,
           }}
         />

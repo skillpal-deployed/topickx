@@ -258,9 +258,10 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                 utmMedium: searchParams.get("utm_medium") || undefined,
                 utmCampaign: searchParams.get("utm_campaign") || undefined,
             });
-            // Fire Meta Pixel Lead event for conversion tracking
-            if (typeof window !== 'undefined' && (window as any).fbq) {
-                (window as any).fbq('track', 'Lead');
+            // Fire conversion events for Meta Pixel and Google Analytics
+            if (typeof window !== 'undefined') {
+                if (window.fbq) window.fbq('track', 'Lead');
+                if (window.gtag) window.gtag('event', 'generate_lead', { currency: 'INR' });
             }
             toast.success("Thank you! You can now browse the projects.");
             localStorage.setItem(`lp_lead_submitted_${landingPage?.id}`, "true");
@@ -333,12 +334,10 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                 utmCampaign: searchParams.get("utm_campaign") || undefined,
             });
             setLeadSubmitted(true);
-            // Fire Meta Pixel Lead event for conversion tracking
-            if (typeof window !== 'undefined' && (window as any).fbq) {
-                (window as any).fbq('track', 'Lead', {
-                    content_name: selectedProject?.name,
-                    currency: 'INR',
-                });
+            // Fire conversion events for Meta Pixel and Google Analytics
+            if (typeof window !== 'undefined') {
+                if (window.fbq) window.fbq('track', 'Lead', { content_name: selectedProject?.name, currency: 'INR' });
+                if (window.gtag) window.gtag('event', 'generate_lead', { content_name: selectedProject?.name, currency: 'INR' });
             }
             // Use actual advertiser contact returned by the backend
             setAdvertiserContact(
@@ -511,24 +510,38 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
 
     return (
         <div className="min-h-screen bg-brand-bg" data-testid="public-landing-page">
-            {/* Meta Pixel — fires only when a pixelId is configured for this landing page */}
+            {/* Meta Pixel — fires only when a pixelId is configured for this landing page.
+                NOTE: The global layout.tsx already loaded fbevents.js and called fbq('init', globalPixelId).
+                Because the FB snippet has `if(f.fbq)return`, re-running the full snippet would be a no-op.
+                Instead we call fbq('init', landingPagePixelId) directly — FB supports multiple pixel IDs
+                on one page this way, and each subsequent fbq('track', ...) fires for all registered pixels. */}
             {landingPage.fbPixelId && (
                 <>
                     <Script
-                        id={`fb-pixel-${landingPage.fbPixelId}`}
+                        id={`fb-pixel-lp-${landingPage.fbPixelId}`}
                         strategy="afterInteractive"
                         dangerouslySetInnerHTML={{
                             __html: `
-                                !function(f,b,e,v,n,t,s)
-                                {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-                                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-                                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-                                n.queue=[];t=b.createElement(e);t.async=!0;
-                                t.src=v;s=b.getElementsByTagName(e)[0];
-                                s.parentNode.insertBefore(t,s)}(window,document,'script',
-                                'https://connect.facebook.net/en_US/fbevents.js');
-                                fbq('init', '${landingPage.fbPixelId.replace(/[^0-9]/g, '')}');
-                                fbq('track', 'PageView');
+                                (function() {
+                                    var pixelId = '${landingPage.fbPixelId.replace(/[^0-9]/g, '')}';
+                                    if (typeof window.fbq === 'function') {
+                                        // fbevents.js already loaded by global layout — just register this pixel
+                                        window.fbq('init', pixelId);
+                                        window.fbq('track', 'PageView');
+                                    } else {
+                                        // Fallback: load fbevents.js fresh (e.g. if layout script failed)
+                                        !function(f,b,e,v,n,t,s)
+                                        {n=f.fbq=function(){n.callMethod?
+                                        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                                        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                                        n.queue=[];t=b.createElement(e);t.async=!0;
+                                        t.src=v;s=b.getElementsByTagName(e)[0];
+                                        s.parentNode.insertBefore(t,s)}(window,document,'script',
+                                        'https://connect.facebook.net/en_US/fbevents.js');
+                                        window.fbq('init', pixelId);
+                                        window.fbq('track', 'PageView');
+                                    }
+                                })();
                             `,
                         }}
                     />
@@ -537,10 +550,32 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                             height="1"
                             width="1"
                             style={{ display: 'none' }}
-                            src={`https://www.facebook.com/tr?id=${landingPage.fbPixelId}&ev=PageView&noscript=1`}
+                            src={`https://www.facebook.com/tr?id=${landingPage.fbPixelId.replace(/[^0-9]/g, '')}&ev=PageView&noscript=1`}
                             alt=""
                         />
                     </noscript>
+                </>
+            )}
+            {/* Google Analytics — fires only when a GA4/Google Ads ID is configured for this landing page */}
+            {landingPage.googleAnalyticsId && (
+                <>
+                    <Script
+                        id={`gtag-lp-${landingPage.googleAnalyticsId}`}
+                        strategy="afterInteractive"
+                        src={`https://www.googletagmanager.com/gtag/js?id=${landingPage.googleAnalyticsId}`}
+                    />
+                    <Script
+                        id={`gtag-lp-init-${landingPage.googleAnalyticsId}`}
+                        strategy="afterInteractive"
+                        dangerouslySetInnerHTML={{
+                            __html: `
+                                window.dataLayer = window.dataLayer || [];
+                                window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
+                                window.gtag('js', new Date());
+                                window.gtag('config', '${landingPage.googleAnalyticsId}');
+                            `,
+                        }}
+                    />
                 </>
             )}
             {/* Header */}
