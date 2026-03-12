@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { publicAPI } from "@/lib/api";
 import ProjectDetailView from "@/components/project/ProjectDetailView";
 import { Metadata } from "next";
@@ -55,10 +56,11 @@ export default async function ProjectCatchAllPage({ params }: Props) {
     const { slug } = await params;
     const reconstructedSlug = reconstructSlug(slug);
 
-    // Bail out early on static file extensions to prevent API invalid URL crashes
+    // Bail out early on static file extensions to prevent API invalid URL crashes.
+    // notFound() must be called synchronously — wrapping it in an unawaited .then()
+    // caused it to throw inside a detached Promise, producing unhandledRejection logs.
     if (reconstructedSlug.includes('.')) {
-        import("next/navigation").then(nav => nav.notFound());
-        return null;
+        notFound();
     }
 
     let project = null;

@@ -71,6 +71,9 @@ app.use(cors({
         const trustedOrigins = [
             'https://topickx.com',
             'https://www.topickx.com',
+            // Server's own DigitalOcean IP (internal health checks / server-to-server calls)
+            'https://165.232.181.226',
+            'http://165.232.181.226',
             ...allowedOrigins,
         ];
 
