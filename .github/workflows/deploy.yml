@@ -10,7 +10,7 @@ jobs:
   deploy:
     name: Deploy to DigitalOcean
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
 
     steps:
       - name: Checkout code
@@ -34,16 +34,13 @@ jobs:
 
             echo "=== Installing backend dependencies ==="
             cd /var/www/skillpal/topickx/backend
-            npm ci
+            npm install --prefer-offline
             npm run build
-
-            echo "=== Generating Prisma client ==="
-            cd /var/www/skillpal/topickx/backend
             npx prisma generate --schema=prisma/schema.prisma
 
             echo "=== Installing frontend dependencies ==="
             cd /var/www/skillpal/topickx/frontend
-            npm ci
+            npm install --prefer-offline
 
             echo "=== Building frontend ==="
             NODE_ENV=production npm run build

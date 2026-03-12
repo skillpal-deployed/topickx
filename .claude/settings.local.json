@@ -31,7 +31,8 @@
       "Bash(Get-Content \"C:\\\\Users\\\\Nitin\\\\.claude\\\\projects\\\\F--skillpal-real-estate\\\\68810c19-4262-4d4c-8f81-ae19853169e4.jsonl\")",
       "Bash(Select-String -Pattern \"postgres|backup|dump|pg_dump|restore\")",
       "Bash(Select-Object -First 50)",
-      "Bash(ssh -i /c/Users/Nitin/Desktop/topickx_ssh_key root@165.232.181.226:*)"
+      "Bash(ssh -i /c/Users/Nitin/Desktop/topickx_ssh_key root@165.232.181.226:*)",
+      "Bash(ls -la \"F:\\\\skillpal real estate\\\\deploy\"\" 2>/dev/null || echo \"Directory not found or inaccessible \")"
     ]
   }
 }
