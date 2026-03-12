@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import Script from "next/script";
 import Image from "next/image";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -184,6 +183,67 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
             }
         }
     }, [landingPage]);
+
+    // Initialize per-landing-page tracking pixels via useEffect.
+    // This is the only reliable approach — <Script> tags inside SSR-rendered components
+    // can be skipped by Next.js hydration if the script id was already seen. useEffect
+    // always runs client-side after hydration, guaranteeing pixel initialization.
+    useEffect(() => {
+        if (!landingPage) return;
+
+        // ── Facebook Pixel ──────────────────────────────────────────────
+        if (landingPage.fbPixelId) {
+            const pixelId = landingPage.fbPixelId.replace(/[^0-9]/g, '');
+            if (pixelId) {
+                const initFbPixel = () => {
+                    if (typeof window.fbq === 'function') {
+                        window.fbq('init', pixelId);
+                        window.fbq('track', 'PageView');
+                    }
+                };
+
+                if (typeof window.fbq === 'function') {
+                    // fbevents.js already loaded — init immediately
+                    initFbPixel();
+                } else {
+                    // Wait for fbevents.js to finish loading (it's async from layout.tsx)
+                    const interval = setInterval(() => {
+                        if (typeof window.fbq === 'function') {
+                            clearInterval(interval);
+                            initFbPixel();
+                        }
+                    }, 50);
+                    // Stop polling after 5 seconds to avoid memory leak
+                    setTimeout(() => clearInterval(interval), 5000);
+                }
+            }
+        }
+
+        // ── Google Analytics ────────────────────────────────────────────
+        if (landingPage.googleAnalyticsId) {
+            const gaId = landingPage.googleAnalyticsId.trim();
+            if (gaId) {
+                const initGtag = () => {
+                    window.dataLayer = window.dataLayer || [];
+                    window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+                    window.gtag('config', gaId);
+                };
+
+                // Load gtag.js for this property if not already loaded
+                const scriptId = `gtag-lp-js-${gaId}`;
+                if (!document.getElementById(scriptId)) {
+                    const script = document.createElement('script');
+                    script.id = scriptId;
+                    script.async = true;
+                    script.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
+                    script.onload = initGtag;
+                    document.head.appendChild(script);
+                } else {
+                    initGtag();
+                }
+            }
+        }
+    }, [landingPage?.id, landingPage?.fbPixelId, landingPage?.googleAnalyticsId]);
 
     // OTP Timers
     useEffect(() => {
@@ -510,74 +570,6 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
 
     return (
         <div className="min-h-screen bg-brand-bg" data-testid="public-landing-page">
-            {/* Meta Pixel — fires only when a pixelId is configured for this landing page.
-                NOTE: The global layout.tsx already loaded fbevents.js and called fbq('init', globalPixelId).
-                Because the FB snippet has `if(f.fbq)return`, re-running the full snippet would be a no-op.
-                Instead we call fbq('init', landingPagePixelId) directly — FB supports multiple pixel IDs
-                on one page this way, and each subsequent fbq('track', ...) fires for all registered pixels. */}
-            {landingPage.fbPixelId && (
-                <>
-                    <Script
-                        id={`fb-pixel-lp-${landingPage.fbPixelId}`}
-                        strategy="afterInteractive"
-                        dangerouslySetInnerHTML={{
-                            __html: `
-                                (function() {
-                                    var pixelId = '${landingPage.fbPixelId.replace(/[^0-9]/g, '')}';
-                                    if (typeof window.fbq === 'function') {
-                                        // fbevents.js already loaded by global layout — just register this pixel
-                                        window.fbq('init', pixelId);
-                                        window.fbq('track', 'PageView');
-                                    } else {
-                                        // Fallback: load fbevents.js fresh (e.g. if layout script failed)
-                                        !function(f,b,e,v,n,t,s)
-                                        {n=f.fbq=function(){n.callMethod?
-                                        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-                                        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-                                        n.queue=[];t=b.createElement(e);t.async=!0;
-                                        t.src=v;s=b.getElementsByTagName(e)[0];
-                                        s.parentNode.insertBefore(t,s)}(window,document,'script',
-                                        'https://connect.facebook.net/en_US/fbevents.js');
-                                        window.fbq('init', pixelId);
-                                        window.fbq('track', 'PageView');
-                                    }
-                                })();
-                            `,
-                        }}
-                    />
-                    <noscript>
-                        <img
-                            height="1"
-                            width="1"
-                            style={{ display: 'none' }}
-                            src={`https://www.facebook.com/tr?id=${landingPage.fbPixelId.replace(/[^0-9]/g, '')}&ev=PageView&noscript=1`}
-                            alt=""
-                        />
-                    </noscript>
-                </>
-            )}
-            {/* Google Analytics — fires only when a GA4/Google Ads ID is configured for this landing page */}
-            {landingPage.googleAnalyticsId && (
-                <>
-                    <Script
-                        id={`gtag-lp-${landingPage.googleAnalyticsId}`}
-                        strategy="afterInteractive"
-                        src={`https://www.googletagmanager.com/gtag/js?id=${landingPage.googleAnalyticsId}`}
-                    />
-                    <Script
-                        id={`gtag-lp-init-${landingPage.googleAnalyticsId}`}
-                        strategy="afterInteractive"
-                        dangerouslySetInnerHTML={{
-                            __html: `
-                                window.dataLayer = window.dataLayer || [];
-                                window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
-                                window.gtag('js', new Date());
-                                window.gtag('config', '${landingPage.googleAnalyticsId}');
-                            `,
-                        }}
-                    />
-                </>
-            )}
             {/* Header */}
             <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-emerald-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-24 flex items-center justify-between">
