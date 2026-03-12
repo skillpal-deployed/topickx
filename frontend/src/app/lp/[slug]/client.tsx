@@ -193,8 +193,10 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
 
         // ── Facebook Pixel ──────────────────────────────────────────────
         if (landingPage.fbPixelId) {
+            // Strip all non-numeric characters and validate — must be at least 10 digits.
+            // Guards against DB values like "", "null", "undefined", or accidental text.
             const pixelId = landingPage.fbPixelId.replace(/[^0-9]/g, '');
-            if (pixelId) {
+            if (pixelId && pixelId.length >= 10) {
                 const initFbPixel = () => {
                     if (typeof window.fbq === 'function') {
                         window.fbq('init', pixelId);
@@ -216,6 +218,8 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                     // Stop polling after 5 seconds to avoid memory leak
                     setTimeout(() => clearInterval(interval), 5000);
                 }
+            } else {
+                console.warn('[FB Pixel] Skipped init — invalid pixel ID in DB:', landingPage.fbPixelId);
             }
         }
 
@@ -571,7 +575,7 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
     return (
         <div className="min-h-screen bg-brand-bg" data-testid="public-landing-page">
             {/* Header */}
-            <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-emerald-100">
+            <header className="bg-white shadow-sm sticky top-0 z-50 border-b border-emerald-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-24 flex items-center justify-between">
                     <div className="flex items-center">
                         <div className="relative h-12 w-12 overflow-visible">
@@ -933,10 +937,11 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
             {/* Trust Indicators */}
             <section className="bg-white border-t border-slate-100 py-16">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-3 gap-8">
                         {[
                             { icon: CheckCircle, title: 'Top Projects', desc: 'Curated Developers' },
-                            { icon: TrendingUp, title: 'Best Deals', desc: 'Exclusive Offers' }
+                            { icon: TrendingUp, title: 'Best Deals', desc: 'Exclusive Offers' },
+                            { icon: Phone, title: 'Free Expert Help', desc: 'Talk to an Advisor' },
                         ].map((item, idx) => (
                             <div key={idx} className="text-center group">
                                 <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -969,7 +974,7 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                             <span className="font-bold text-white text-sm tracking-tight">Topickx</span>
                         </div>
                         <h2 className="text-xl font-bold text-white leading-tight">Find Your Perfect Home</h2>
-                        <p className="text-emerald-200 text-xs mt-1">in {landingPage?.city} — Tell us what you're looking for</p>
+                        <p className="text-emerald-200 text-xs mt-1">in {landingPage?.city} · Tell us what you're looking for</p>
                     </div>
                     <button
                         onClick={() => setShowMandatoryForm(false)}
@@ -980,11 +985,6 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                     </button>
                 </div>
 
-                {/* Trust Bar */}
-                <div className="bg-emerald-50 border-b border-emerald-100 px-6 py-2.5 flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <p className="text-xs text-emerald-700 font-medium">RERA verified projects only · 100% free</p>
-                </div>
 
                 {/* Scrollable Form */}
                 <div className="flex-1 overflow-y-auto px-6 py-5">
