@@ -247,9 +247,9 @@ export default function LandingPageDetailPage() {
                                 className="w-16 h-7 px-2 text-center"
                                 min={1}
                                 max={50}
-                                defaultValue={landingPage.maxProjects || 15}
+                                defaultValue={landingPage.maxProjects || 30}
                                 onBlur={(e) => {
-                                    const newValue = parseInt(e.target.value) || 15;
+                                    const newValue = parseInt(e.target.value) || 30;
                                     if (newValue !== landingPage.maxProjects) {
                                         adminAPI.updateLandingPage(landingPage.id, { maxProjects: newValue })
                                             .then(() => {
@@ -264,9 +264,9 @@ export default function LandingPageDetailPage() {
                         </div>
                         <div className="w-full h-2 bg-slate-100 rounded-full mt-2">
                             <div
-                                className={`h-full rounded-full transition-all ${projectCount >= (landingPage.maxProjects || 15) ? "bg-red-500" : projectCount >= (landingPage.maxProjects || 15) * 0.7 ? "bg-amber-500" : "bg-primary"
+                                className={`h-full rounded-full transition-all ${projectCount >= (landingPage.maxProjects || 30) ? "bg-red-500" : projectCount >= (landingPage.maxProjects || 30) * 0.7 ? "bg-amber-500" : "bg-primary"
                                     }`}
-                                style={{ width: `${(projectCount / (landingPage.maxProjects || 15)) * 100}%` }}
+                                style={{ width: `${(projectCount / (landingPage.maxProjects || 30)) * 100}%` }}
                             />
                         </div>
                     </CardContent>

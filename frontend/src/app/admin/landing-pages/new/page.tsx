@@ -46,7 +46,7 @@ export default function CreateLandingPage() {
         seoTitle: "",
         seoDescription: "",
         pageType: "CITY_LOCALITY",
-        maxProjects: 15,
+        maxProjects: 30,
         fbPixelId: "",
         googleAnalyticsId: "",
     });

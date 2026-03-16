@@ -279,7 +279,7 @@ export const updateLandingPage = async (
     const fields = [
         'name', 'slug', 'pageType', 'city', 'locality', 'description',
         'seoTitle', 'seoDescription', 'heroImage', 'isActive',
-        'fbPixelId', 'googleAnalyticsId',
+        'fbPixelId', 'googleAnalyticsId', 'maxProjects',
     ];
 
     fields.forEach((field) => {

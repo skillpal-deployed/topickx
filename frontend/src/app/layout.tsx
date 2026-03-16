@@ -61,31 +61,25 @@ export default function RootLayout({
           }}
         />
 
-        {/* Meta Pixel — initialize global pixel ID + fire PageView once SDK is loaded.
-            strategy="afterInteractive" runs this after hydration, so fbevents.js is
-            already loaded when this inline script executes — no queue race condition. */}
-        <Script
-          id="fb-pixel-global"
-          strategy="afterInteractive"
-          src="https://connect.facebook.net/en_US/fbevents.js"
-        />
+        {/* Meta Pixel — load fbevents.js and init inline using onload callback to
+            guarantee the SDK is ready before calling fbq('init'). Separating the
+            script src from the init inline script causes a race condition because
+            both run afterInteractive in parallel. */}
         <Script
           id="fb-pixel-init"
           strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
-              window._fbq = window._fbq || [];
-              window.fbq = window.fbq || function(){
-                window.fbq.callMethod
-                  ? window.fbq.callMethod.apply(window.fbq, arguments)
-                  : window.fbq.queue.push(arguments);
-              };
-              window.fbq.push = window.fbq;
-              window.fbq.loaded = true;
-              window.fbq.version = '2.0';
-              window.fbq.queue = window.fbq.queue || [];
-              window.fbq('init', '${FB_PIXEL_ID}');
-              window.fbq('track', 'PageView');
+              !function(f,b,e,v,n,t,s){
+                if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                n.queue=[];t=b.createElement(e);t.async=!0;
+                t.src=v;s=b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t,s)}(window,document,'script',
+                'https://connect.facebook.net/en_US/fbevents.js');
+              fbq('init', '${FB_PIXEL_ID}');
+              fbq('track', 'PageView');
             `,
           }}
         />

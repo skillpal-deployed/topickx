@@ -180,7 +180,7 @@ export default function LandingPagesPage() {
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredPages.map((page) => {
                         const projectCount = page.listings?.length || 0;
-                        const maxProjects = page.maxProjects || 15;
+                        const maxProjects = page.maxProjects || 30;
 
                         return (
                             <Card key={page.id} className={`card-hover ${!page.isActive ? "opacity-60" : ""}`}>
