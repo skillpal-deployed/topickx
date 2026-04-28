@@ -6,7 +6,6 @@ import Image from "next/image";
 import { publicAPI } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { formatBudgetRange, getImageUrl } from "@/lib/utils";
 import {
@@ -41,7 +40,6 @@ import {
     Activity,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { OtpInput } from "@/components/ui/otp-input";
 import { toast } from "sonner";
 
 interface FloorPlan {
@@ -138,14 +136,6 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
     const [submitted, setSubmitted] = useState(false);
     const [showFullAbout, setShowFullAbout] = useState(false);
 
-    // OTP State
-    const [otpSent, setOtpSent] = useState(false);
-    const [otpVerified, setOtpVerified] = useState(false);
-    const [otp, setOtp] = useState("");
-    const [sendingOtp, setSendingOtp] = useState(false);
-    const [verifyingOtp, setVerifyingOtp] = useState(false);
-    const [otpTimer, setOtpTimer] = useState(0);
-
     useEffect(() => {
         if (initialProject) {
             setProject(initialProject);
@@ -188,14 +178,6 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
         }
     }, [projectIdOrSlug, landingPageId, initialProject]);
 
-    // OTP Timer
-    useEffect(() => {
-        if (otpTimer > 0) {
-            const timer = setTimeout(() => setOtpTimer(otpTimer - 1), 1000);
-            return () => clearTimeout(timer);
-        }
-    }, [otpTimer]);
-
     // Lightbox Keyboard Navigation
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -215,48 +197,11 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [lightboxIndex, lightboxImages]);
 
-    const handleSendOtp = async () => {
-        if (!formData.phone || formData.phone.length !== 10) {
-            toast.error("Please enter a valid 10-digit phone number");
-            return;
-        }
-
-        setSendingOtp(true);
-        try {
-            await publicAPI.sendOtp(formData.phone);
-            setOtpSent(true);
-            setOtpTimer(60);
-            toast.success("OTP sent to your phone");
-        } catch (error: any) {
-            toast.error(error.response?.data?.error || "Failed to send OTP");
-        } finally {
-            setSendingOtp(false);
-        }
-    };
-
-    const handleVerifyOtp = async () => {
-        if (!otp || otp.length !== 6) {
-            toast.error("Please enter the 6-digit OTP");
-            return;
-        }
-
-        setVerifyingOtp(true);
-        try {
-            await publicAPI.verifyOtp(formData.phone, otp);
-            setOtpVerified(true);
-            toast.success("Phone verified successfully!");
-        } catch (error: any) {
-            toast.error(error.response?.data?.error || "Invalid OTP");
-        } finally {
-            setVerifyingOtp(false);
-        }
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!otpVerified) {
-            toast.error("Please verify your phone number with OTP first");
+        if (!formData.phone || !/^\d{10}$/.test(formData.phone)) {
+            toast.error("Please enter a valid 10-digit phone number");
             return;
         }
 
@@ -265,12 +210,8 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
         try {
             await publicAPI.submitLead({
                 ...formData,
-                projectId: project?.id || projectIdOrSlug, // Use ID if available, else likely failure if slug is passed but backend expects ID. 
-                // Wait, submitLead usually expects ID. if we only have slug, we might need the ID from the fetched project.
-                // Fortunately, we fetch 'project' which contains the ID.
-                // So project?.id is the safe bet.
+                projectId: project?.id || projectIdOrSlug,
                 landingPageId: landingPageId || "direct",
-                otpVerified: true,
             });
             setSubmitted(true);
             toast.success("Inquiry submitted successfully!");
@@ -521,6 +462,24 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
 
                                 </div>
 
+                                {project.advertiser?.phone && (
+                                    <a
+                                        href={`tel:${project.advertiser.phone}`}
+                                        className="flex items-center justify-center gap-2 w-full h-14 mb-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg shadow-md shadow-emerald-600/20 transition-all active:scale-[0.99]"
+                                    >
+                                        <Phone className="h-5 w-5" />
+                                        Call Now: {project.advertiser.phone}
+                                    </a>
+                                )}
+
+                                {project.advertiser?.phone && (
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="flex-1 h-px bg-slate-200" />
+                                        <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">or enquire</span>
+                                        <div className="flex-1 h-px bg-slate-200" />
+                                    </div>
+                                )}
+
                                 {submitted ? (
                                     <div className="text-center py-8">
                                         <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
@@ -533,7 +492,7 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                                         {project.advertiser?.phone && (
                                             <a
                                                 href={`tel:${project.advertiser.phone}`}
-                                                className="inline-flex items-center gap-2 text-teal-600 font-medium hover:underline"
+                                                className="inline-flex items-center gap-2 text-emerald-600 font-medium hover:underline"
                                             >
                                                 <Phone className="h-4 w-4" />
                                                 Call Now: {project.advertiser.phone}
@@ -559,62 +518,8 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                                                 value={formData.phone}
                                                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                                 required
-                                                disabled={otpSent || otpVerified}
                                                 className="h-12 bg-slate-50 border-slate-200"
                                             />
-
-                                            {otpVerified ? (
-                                                <div className="flex items-center gap-2 text-green-600 text-sm mt-2 font-medium">
-                                                    <CheckCircle2 className="h-4 w-4" />
-                                                    Phone verified
-                                                </div>
-                                            ) : !otpSent ? (
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="mt-2 w-full"
-                                                    onClick={handleSendOtp}
-                                                    disabled={sendingOtp || !formData.phone || formData.phone.length !== 10}
-                                                >
-                                                    {sendingOtp ? "Sending..." : "Verify with OTP"}
-                                                </Button>
-                                            ) : (
-                                                <div className="space-y-3 mt-3 p-4 bg-slate-50 rounded-xl border">
-                                                    <div className="text-center space-y-2">
-                                                        <Label className="text-xs text-slate-500 uppercase font-bold">Enter OTP</Label>
-                                                        <OtpInput
-                                                            value={otp}
-                                                            onChange={setOtp}
-                                                            disabled={verifyingOtp}
-                                                        />
-                                                    </div>
-                                                    <Button
-                                                        type="button"
-                                                        className="w-full"
-                                                        onClick={handleVerifyOtp}
-                                                        disabled={verifyingOtp || otp.length !== 6}
-                                                    >
-                                                        {verifyingOtp ? "Verifying..." : "Verify"}
-                                                    </Button>
-                                                    <div className="text-center">
-                                                        {otpTimer > 0 ? (
-                                                            <p className="text-xs text-slate-500 flex items-center justify-center gap-1">
-                                                                <Timer className="h-3 w-3" />
-                                                                Resend in {otpTimer}s
-                                                            </p>
-                                                        ) : (
-                                                            <button
-                                                                type="button"
-                                                                onClick={handleSendOtp}
-                                                                className="text-xs text-primary hover:underline font-medium"
-                                                            >
-                                                                Resend OTP
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            )}
                                         </div>
 
                                         <div>
@@ -632,7 +537,7 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                                             type="submit"
                                             className="w-full h-14 text-lg font-bold bg-emerald-950 hover:bg-emerald-900 text-amber-50 shadow-md rounded-xl border border-white/10"
                                             size="lg"
-                                            disabled={submitting || !otpVerified}
+                                            disabled={submitting}
                                         >
                                             {submitting ? "Submitting..." : "Get Exclusive Deals"}
                                         </Button>
@@ -1052,16 +957,24 @@ export default function ProjectDetailView({ projectIdOrSlug, initialProject }: P
                 )
             }
             {/* Sticky Bottom Action Bar (Mobile Only) */}
-            <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 p-3 flex gap-3 items-center md:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.1)] pb-safe-area">
-                {/* Starting Price */}
-                <div className="flex-1 flex flex-col">
-                    <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">Price Range</span>
-                    <div className="text-lg font-bold text-emerald-950 flex items-center gap-1">
-                        <IndianRupee className="h-4 w-4" />
-                        {formatBudgetRange(project.budgetMin, project.budgetMax)}
+            <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 p-3 flex gap-2 items-center md:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.1)] pb-safe-area">
+                {project.advertiser?.phone ? (
+                    <a
+                        href={`tel:${project.advertiser.phone}`}
+                        className="flex-1 h-12 rounded-xl bg-emerald-600 text-white font-bold shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+                    >
+                        <Phone className="h-4 w-4" />
+                        Call Now
+                    </a>
+                ) : (
+                    <div className="flex-1 flex flex-col">
+                        <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">Price Range</span>
+                        <div className="text-lg font-bold text-emerald-950 flex items-center gap-1">
+                            <IndianRupee className="h-4 w-4" />
+                            {formatBudgetRange(project.budgetMin, project.budgetMax)}
+                        </div>
                     </div>
-                </div>
-                {/* Enquire Button */}
+                )}
                 <Button
                     onClick={scrollToEnquiry}
                     className="flex-1 h-12 rounded-xl bg-emerald-950 text-white font-bold shadow-lg shadow-emerald-900/20"

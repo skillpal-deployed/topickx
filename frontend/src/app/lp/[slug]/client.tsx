@@ -36,7 +36,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { toast } from "sonner";
 import { publicAPI, api } from "@/lib/api";
 import { getImageUrl, formatBudgetRange } from "@/lib/utils";
-import { OtpInput } from "@/components/ui/otp-input";
 import { UNIT_TYPES_BY_PROPERTY } from "@/lib/constants";
 
 const BUDGET_OPTIONS = [
@@ -115,14 +114,6 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
     const [budgetMaxFilter, setBudgetMaxFilter] = useState("any");
     const [leadForm, setLeadForm] = useState({ name: "", phone: "", email: "" });
 
-    // OTP State
-    const [otpSent, setOtpSent] = useState(false);
-    const [otpVerified, setOtpVerified] = useState(false);
-    const [otp, setOtp] = useState("");
-    const [sendingOtp, setSendingOtp] = useState(false);
-    const [verifyingOtp, setVerifyingOtp] = useState(false);
-    const [otpTimer, setOtpTimer] = useState(0);
-
     // Mandatory Lead Form State
     const [showMandatoryForm, setShowMandatoryForm] = useState(false);
     const [mandatoryForm, setMandatoryForm] = useState({
@@ -135,20 +126,6 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
         budgetMax: "",
         location: ""
     });
-    const [mOtpSent, setMOtpSent] = useState(false);
-    const [mOtpVerified, setMOtpVerified] = useState(false);
-    const [mOtp, setMOtp] = useState("");
-    const [mSendingOtp, setMSendingOtp] = useState(false);
-    const [mVerifyingOtp, setMVerifyingOtp] = useState(false);
-    const [mOtpTimer, setMOtpTimer] = useState(0);
-
-    useEffect(() => {
-        let interval: NodeJS.Timeout | undefined;
-        if (mOtpTimer > 0) {
-            interval = setInterval(() => setMOtpTimer((prev) => prev - 1), 1000);
-        }
-        return () => { if (interval) clearInterval(interval); };
-    }, [mOtpTimer]);
 
     useEffect(() => {
         if (!initialData) {
@@ -249,52 +226,6 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
         }
     }, [landingPage?.id, landingPage?.fbPixelId, landingPage?.googleAnalyticsId]);
 
-    // OTP Timers
-    useEffect(() => {
-        let interval: NodeJS.Timeout | undefined;
-        if (otpTimer > 0) {
-            interval = setInterval(() => setOtpTimer((prev) => prev - 1), 1000);
-        }
-        return () => { if (interval) clearInterval(interval); };
-    }, [otpTimer]);
-
-    const handleSendMOtp = async () => {
-        if (!mandatoryForm.phone || mandatoryForm.phone.length !== 10) {
-            toast.error("Please enter a valid 10-digit phone number");
-            return;
-        }
-
-        setMSendingOtp(true);
-        try {
-            await publicAPI.sendOtp(mandatoryForm.phone);
-            setMOtpSent(true);
-            setMOtpTimer(60);
-            toast.success("OTP sent to your phone");
-        } catch (error: any) {
-            toast.error(error.response?.data?.error || "Failed to send OTP");
-        } finally {
-            setMSendingOtp(false);
-        }
-    };
-
-    const handleVerifyMOtp = async () => {
-        if (!mOtp || mOtp.length !== 6) {
-            toast.error("Please enter the 6-digit OTP");
-            return;
-        }
-
-        setMVerifyingOtp(true);
-        try {
-            await publicAPI.verifyOtp(mandatoryForm.phone, mOtp);
-            setMOtpVerified(true);
-            toast.success("Phone verified successfully!");
-        } catch (error: any) {
-            toast.error(error.response?.data?.error || "Invalid OTP");
-        } finally {
-            setMVerifyingOtp(false);
-        }
-    };
-
     const handleMandatorySubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!mandatoryForm.name.trim()) { toast.error("Please enter your name"); return; }
@@ -305,11 +236,6 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
         if (!mandatoryForm.budgetMin) { toast.error("Please select min budget"); return; }
         if (!mandatoryForm.budgetMax) { toast.error("Please select max budget"); return; }
         if (!mandatoryForm.location) { toast.error("Please select a location"); return; }
-
-        if (!mOtpVerified) {
-            toast.error("Please verify your phone number with OTP first");
-            return;
-        }
 
         setSubmitting(true);
         try {
@@ -337,52 +263,14 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
         }
     };
 
-    const handleSendOtp = async () => {
-        if (!leadForm.phone || leadForm.phone.length !== 10) {
-            toast.error("Please enter a valid 10-digit phone number");
-            return;
-        }
-
-        setSendingOtp(true);
-        try {
-            await publicAPI.sendOtp(leadForm.phone);
-            setOtpSent(true);
-            setOtpTimer(60);
-            toast.success("OTP sent to your phone");
-        } catch (error: any) {
-            toast.error(error.response?.data?.error || "Failed to send OTP");
-        } finally {
-            setSendingOtp(false);
-        }
-    };
-
-    const handleVerifyOtp = async () => {
-        if (!otp || otp.length !== 6) {
-            toast.error("Please enter the 6-digit OTP");
-            return;
-        }
-
-        setVerifyingOtp(true);
-        try {
-            await publicAPI.verifyOtp(leadForm.phone, otp);
-            setOtpVerified(true);
-            toast.success("Phone verified successfully!");
-        } catch (error: any) {
-            toast.error(error.response?.data?.error || "Invalid OTP");
-        } finally {
-            setVerifyingOtp(false);
-        }
-    };
-
     const handleLeadSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!leadForm.name || !leadForm.phone || !leadForm.email) {
             toast.error("Please fill in all details");
             return;
         }
-
-        if (!otpVerified) {
-            toast.error("Please verify your phone number first");
+        if (!/^[0-9]{10}$/.test(leadForm.phone)) {
+            toast.error("Please enter a valid 10-digit phone number");
             return;
         }
 
@@ -392,7 +280,6 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                 ...leadForm,
                 projectId: selectedProject?.id,
                 landingPageId: landingPage?.id,
-                otpVerified: true,
                 utmSource: searchParams.get("utm_source") || undefined,
                 utmMedium: searchParams.get("utm_medium") || undefined,
                 utmCampaign: searchParams.get("utm_campaign") || undefined,
@@ -1079,71 +966,12 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                         </div>
 
                         <div className="space-y-2">
-                            <div className="flex gap-2">
-                                <Input
-                                    placeholder="Mobile Number *"
-                                    value={mandatoryForm.phone}
-                                    onChange={(e) => {
-                                        setMandatoryForm({ ...mandatoryForm, phone: e.target.value });
-                                        if (mOtpVerified || mOtpSent) {
-                                            setMOtpVerified(false);
-                                            setMOtpSent(false);
-                                            setMOtp("");
-                                        }
-                                    }}
-                                    disabled={mSendingOtp}
-                                    className="flex-1 h-10 text-sm"
-                                />
-                                {(!mOtpSent && !mOtpVerified) && (
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={handleSendMOtp}
-                                        disabled={mSendingOtp || !mandatoryForm.phone || mandatoryForm.phone.length !== 10}
-                                        className="shrink-0 h-10 text-sm"
-                                    >
-                                        {mSendingOtp ? "..." : "Get OTP"}
-                                    </Button>
-                                )}
-                            </div>
-
-                            {mOtpSent && !mOtpVerified && (
-                                <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100">
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex-1">
-                                            <Label className="text-xs text-emerald-800 mb-1.5 block">OTP SENT TO {mandatoryForm.phone}</Label>
-                                            <OtpInput value={mOtp} onChange={setMOtp} disabled={mVerifyingOtp} />
-                                        </div>
-                                        <div className="flex flex-col gap-1 shrink-0 pt-5">
-                                            <Button
-                                                type="button"
-                                                size="sm"
-                                                onClick={handleVerifyMOtp}
-                                                disabled={mVerifyingOtp || mOtp.length !== 6}
-                                                className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                                            >
-                                                {mVerifyingOtp ? "..." : "Verify"}
-                                            </Button>
-                                        </div>
-                                    </div>
-                                    <div className="text-right mt-1">
-                                        {mOtpTimer > 0 ? (
-                                            <span className="text-xs text-emerald-600">Resend in {mOtpTimer}s</span>
-                                        ) : (
-                                            <button type="button" className="text-xs text-emerald-700 hover:underline font-bold" onClick={handleSendMOtp}>
-                                                Resend OTP
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-
-                            {mOtpVerified && (
-                                <div className="flex items-center gap-2 text-emerald-700 text-sm font-medium bg-emerald-50 p-2 rounded-lg border border-emerald-100">
-                                    <CheckCircle2 className="h-4 w-4" />
-                                    Phone verified
-                                </div>
-                            )}
+                            <Input
+                                placeholder="Mobile Number *"
+                                value={mandatoryForm.phone}
+                                onChange={(e) => setMandatoryForm({ ...mandatoryForm, phone: e.target.value })}
+                                className="h-10 text-sm"
+                            />
                         </div>
 
                         <Button type="submit" className="w-full h-12 text-base font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg shadow-emerald-600/20" disabled={submitting}>
@@ -1163,9 +991,6 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                 if (!open) {
                     setLeadSubmitted(false);
                     setAdvertiserContact(null);
-                    setOtpSent(false);
-                    setOtpVerified(false);
-                    setOtp("");
                 }
             }}>
                 <DialogContent className="sm:max-w-md bg-white rounded-3xl">
@@ -1196,44 +1021,7 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                                         value={leadForm.phone}
                                         onChange={(e) => setLeadForm({ ...leadForm, phone: e.target.value })}
                                         className="h-12 rounded-xl"
-                                        disabled={otpSent || otpVerified}
                                     />
-                                    {otpVerified ? (
-                                        <div className="flex items-center gap-2 text-emerald-600 text-sm mt-1 font-medium">
-                                            <CheckCircle2 className="h-4 w-4" />
-                                            Phone verified
-                                        </div>
-                                    ) : !otpSent ? (
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            className="mt-2 w-full h-10 rounded-xl"
-                                            onClick={handleSendOtp}
-                                            disabled={sendingOtp || !leadForm.phone || leadForm.phone.length !== 10}
-                                        >
-                                            {sendingOtp ? "Sending..." : "Send Verification Code"}
-                                        </Button>
-                                    ) : (
-                                        <div className="space-y-4 mt-4 p-4 bg-emerald-50 rounded-xl border border-emerald-100">
-                                            <div className="text-center space-y-2">
-                                                <Label className="text-xs text-emerald-800 uppercase font-bold">Enter 6-digit Code</Label>
-                                                <OtpInput
-                                                    value={otp}
-                                                    onChange={setOtp}
-                                                    disabled={verifyingOtp}
-                                                />
-                                            </div>
-                                            <Button
-                                                type="button"
-                                                className="w-full h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white"
-                                                onClick={handleVerifyOtp}
-                                                disabled={verifyingOtp || otp.length !== 6}
-                                            >
-                                                {verifyingOtp ? "Verifying..." : "Verify Code"}
-                                            </Button>
-                                        </div>
-                                    )}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="email">Email Address *</Label>
@@ -1249,7 +1037,7 @@ export default function PublicLandingPage({ initialData }: { initialData: Landin
                                 <Button
                                     type="submit"
                                     className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base shadow-lg shadow-emerald-600/20"
-                                    disabled={submitting || !otpVerified}
+                                    disabled={submitting}
                                 >
                                     {submitting ? "Submitting..." : "Get Callback Now"}
                                 </Button>

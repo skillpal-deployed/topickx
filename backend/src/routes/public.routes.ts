@@ -3,10 +3,9 @@ import prisma from '../utils/prisma';
 import * as landingPageService from '../services/landingPage.service';
 import * as leadService from '../services/lead.service';
 import * as optionService from '../services/option.service';
-import * as otpService from '../services/otp.service';
 import { resolveProjectsData } from '../services/project.service';
 import { distributeLead } from '../services/leadDistribution.service';
-import { ProjectStatus, OtpSendRequest, OtpVerifyRequest } from '../types';
+import { ProjectStatus } from '../types';
 
 const router = Router();
 
@@ -264,38 +263,6 @@ router.get('/stats', async (req, res, next) => {
             advertisers: advertisersCount,
         });
     } catch (error) {
-        next(error);
-    }
-});
-
-// ==================== OTP Verification ====================
-
-// POST /api/send-otp - Send OTP to phone number
-router.post('/send-otp', async (req, res, next) => {
-    try {
-        const { phone } = req.body as OtpSendRequest;
-        const result = await otpService.sendOtp(phone);
-        res.json(result);
-    } catch (error) {
-        if (error instanceof Error) {
-            res.status(400).json({ error: error.message });
-            return;
-        }
-        next(error);
-    }
-});
-
-// POST /api/verify-otp - Verify OTP
-router.post('/verify-otp', async (req, res, next) => {
-    try {
-        const { phone, otp } = req.body as OtpVerifyRequest;
-        const result = await otpService.verifyOtp(phone, otp);
-        res.json(result);
-    } catch (error) {
-        if (error instanceof Error) {
-            res.status(400).json({ error: error.message });
-            return;
-        }
         next(error);
     }
 });

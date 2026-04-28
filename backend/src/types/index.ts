@@ -235,7 +235,6 @@ export interface LeadCreateRequest {
     email: string;
     projectId?: string; // Optional now
     landingPageId?: string;
-    otpVerified?: boolean;
     utmSource?: string;
     utmMedium?: string;
     utmCampaign?: string;
@@ -258,15 +257,6 @@ export interface OptionUpdateRequest {
     name?: string;
     isActive?: boolean;
     iconUrl?: string | null;
-}
-
-export interface OtpSendRequest {
-    phone: string;
-}
-
-export interface OtpVerifyRequest {
-    phone: string;
-    otp: string;
 }
 
 // ==================== JWT Payload ====================

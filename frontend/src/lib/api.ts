@@ -361,7 +361,6 @@ export const publicAPI = {
         email: string;
         projectId?: string;
         landingPageId?: string;
-        otpVerified?: boolean;
         utmSource?: string;
         utmMedium?: string;
         utmCampaign?: string;
@@ -371,10 +370,6 @@ export const publicAPI = {
         unitType?: string;
         budget?: string;
     }) => api.post("/leads", data),
-
-    sendOtp: (phone: string) => api.post("/send-otp", { phone }),
-
-    verifyOtp: (phone: string, otp: string) => api.post("/verify-otp", { phone, otp }),
 
     recordVisit: (data: { landingPageId?: string; projectId?: string }) =>
         api.post("/analytics/visit", data),

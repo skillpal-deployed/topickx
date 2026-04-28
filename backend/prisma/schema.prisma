@@ -242,7 +242,6 @@ model Lead {
   email         String
   projectId     String?
   landingPageId String?
-  otpVerified   Boolean      @default(false)
   utmSource     String?
   utmMedium     String?
   utmCampaign   String?
@@ -328,17 +327,6 @@ model Option {
 
   @@unique([optionType, name, parentId])
   @@map("options")
-}
-
-model OtpRecord {
-  id        String   @id @default(uuid())
-  phone     String   @unique
-  otp       String
-  expiresAt DateTime
-  verified  Boolean  @default(false)
-  createdAt DateTime @default(now())
-
-  @@map("otp_records")
 }
 
 model AuditLog {

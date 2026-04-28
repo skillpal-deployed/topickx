@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 // Checking admin/projects/new/page.tsx showed Select usage. 
 // Let's assume Popover exists or check import. 
 // Actually, looking at the previous list_dir, I DID NOT see popover.tsx.
-// I saw: alert-dialog, alert, badge, button, card, checkbox, dialog, dropdown-menu, input, label, otp-input, select, separator, sonner, table, tabs, textarea.
+// I saw: alert-dialog, alert, badge, button, card, checkbox, dialog, dropdown-menu, input, label, select, separator, sonner, table, tabs, textarea.
 // NO popover.tsx. 
 // So I should use DropdownMenu for this.
 

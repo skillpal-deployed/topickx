@@ -132,15 +132,6 @@ const authLimiter = rateLimit({
     legacyHeaders: false,
 });
 
-// Rate limiting for OTP endpoints (prevent OTP spam/brute-force)
-const otpLimiter = rateLimit({
-    windowMs: 60 * 1000, // 1 minute
-    max: 3, // 3 OTP requests per minute per IP
-    message: { error: 'Too many OTP requests, please wait before trying again' },
-    standardHeaders: true,
-    legacyHeaders: false,
-});
-
 // General API rate limit (prevent DDoS)
 const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes

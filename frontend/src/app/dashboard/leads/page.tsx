@@ -28,7 +28,6 @@ interface Lead {
     phone: string;
     email: string;
     createdAt: string;
-    otpVerified: boolean;
     source?: string;
     utmSource?: string;
     utmMedium?: string;
