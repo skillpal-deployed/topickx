@@ -44,11 +44,15 @@ api.interceptors.response.use(
             console.error("API Error Status:", error.response.status);
         }
         if (error.response?.status === 401) {
-            // Clear auth data and redirect to login
+            // Stale/invalid token — wipe it so future requests don't keep failing.
+            // Do NOT force-redirect here: public pages (landing pages, project pages,
+            // ad destinations) must keep loading even when a stale token from a prior
+            // session is present. Protected routes handle their own redirect via
+            // dashboard/layout.tsx and admin/layout.tsx (they push to /login when
+            // !user after AuthContext finishes loading).
             if (typeof window !== "undefined") {
                 localStorage.removeItem("token");
                 localStorage.removeItem("user");
-                window.location.href = "/login";
             }
         }
         return Promise.reject(error);
