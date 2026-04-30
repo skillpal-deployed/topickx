@@ -43,16 +43,22 @@ api.interceptors.response.use(
             console.error("API Error Response:", error.response.data);
             console.error("API Error Status:", error.response.status);
         }
-        if (error.response?.status === 401) {
+        if (error.response?.status === 401 && typeof window !== "undefined") {
             // Stale/invalid token — wipe it so future requests don't keep failing.
-            // Do NOT force-redirect here: public pages (landing pages, project pages,
-            // ad destinations) must keep loading even when a stale token from a prior
-            // session is present. Protected routes handle their own redirect via
-            // dashboard/layout.tsx and admin/layout.tsx (they push to /login when
-            // !user after AuthContext finishes loading).
-            if (typeof window !== "undefined") {
-                localStorage.removeItem("token");
-                localStorage.removeItem("user");
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+
+            // Only force-redirect if we're currently on a protected route. Public
+            // pages (landing pages, project pages, ad destinations) must keep
+            // loading even when a prior session's token is still in localStorage —
+            // otherwise paid traffic gets bounced to /login on first click.
+            // Mid-session token expiry on /dashboard or /admin still redirects so
+            // the user re-authenticates instead of seeing a broken UI.
+            const path = window.location.pathname;
+            const isProtectedRoute =
+                path.startsWith("/dashboard") || path.startsWith("/admin");
+            if (isProtectedRoute && path !== "/login") {
+                window.location.href = "/login";
             }
         }
         return Promise.reject(error);
